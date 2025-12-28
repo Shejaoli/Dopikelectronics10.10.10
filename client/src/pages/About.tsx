@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { CheckCircle2 } from "lucide-react";
-import aboutImg from "/images/569057804_1496300854828703_4965950891284723221_n_1766945239895.jpg"; // Using uploaded asset structure
+import aboutImg from "/images/soundcore-liberty-4.jpg"; // Using uploaded asset structure
 
 export default function About() {
   const stats = [
