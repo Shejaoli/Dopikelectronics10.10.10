@@ -1,0 +1,247 @@
+Project Name:
+DOPIK ELECTRONICS – Premium Electronics E-Commerce Website
+
+🎯 Objective
+
+Design and develop a modern, high-converting, professional e-commerce website for DOPIK ELECTRONICS, the leading electronics shop in Kigali, Rwanda. The website must build trust, showcase premium gadgets, support online sales, and drive WhatsApp & phone inquiries.
+
+The brand should feel:
+
+Premium
+
+Trustworthy
+
+Modern
+
+Tech-focused
+
+Clean & professional
+
+🏷️ Brand Information
+
+Business Name: DOPIK ELECTRONICS
+Location: KN 48 St, Kigali, Rwanda
+Google Maps Code: 3335+6Q Kigali
+Phone: +250 783 562 143 / +250 789 527 746
+Email: dopikelectronics@gmail.com
+
+Instagram: https://www.instagram.com/dopik.electronics/
+
+Slogan: Where Gadgets Meet Great Deals
+
+Services:
+
+In-store shopping
+
+In-store pickup
+
+Delivery available
+
+🧠 Target Audience
+
+Tech lovers in Rwanda
+
+iPhone buyers (premium & latest models)
+
+Content creators
+
+Business professionals
+
+Students
+
+Gadget resellers
+
+Customers who prefer WhatsApp ordering
+
+🎨 Visual & UI Design Requirements
+
+Color Palette:
+
+Black / Dark Charcoal (premium tech feel)
+
+Yellow & Blue (from logo)
+
+White backgrounds for clarity
+
+Typography:
+
+Modern sans-serif fonts (e.g. Inter, Poppins, Montserrat)
+
+Bold headings, clean body text
+
+Design Style:
+
+Apple-like minimalism
+
+Clean product cards
+
+Strong contrast
+
+Smooth animations
+
+Mobile-first design
+
+🧩 Website Structure (Required Pages)
+🏠 Homepage
+
+Hero section with latest gadgets (iPhone series, AirPods, Beats, Soundcore, DJI mics)
+
+Clear CTA buttons:
+
+“Shop Now”
+
+“Chat on WhatsApp”
+
+Trust badges:
+
+⭐ 4.0 Google Rating
+
+15.2K Instagram Followers
+
+Featured categories
+
+Best sellers
+
+Customer reviews
+
+Instagram feed preview
+
+Delivery & pickup info
+
+🛒 Shop Page
+
+Product categories:
+
+Smartphones (iPhone series)
+
+Audio (AirPods, Beats, Soundcore)
+
+Accessories (USB-C hubs, stands)
+
+Creator gear (DJI / Saramonic microphones)
+
+Filters:
+
+Price
+
+Brand
+
+Availability
+
+Product cards with:
+
+High-quality images
+
+Price
+
+WhatsApp “Order Now” button
+
+📱 Product Detail Page
+
+Large product images (from provided photos)
+
+Full specifications
+
+Price
+
+Stock availability
+
+Delivery & pickup info
+
+WhatsApp “Buy Now” CTA
+
+Related products
+
+🏬 About Us Page
+
+Story of DOPIK ELECTRONICS
+
+Mission & vision
+
+Brand ambassador mention: @sankara_dapri
+
+Why customers trust DOPIK ELECTRONICS
+
+Store photos
+
+📍 Contact Us Page
+
+Google Map integration (KN 48 St, Kigali)
+
+Click-to-call buttons
+
+WhatsApp chat button
+
+Email contact form
+
+Store hours
+
+📲 WhatsApp Integration (VERY IMPORTANT)
+
+Floating WhatsApp button on all pages
+
+Auto-filled product inquiry message:
+
+“Hello DOPIK ELECTRONICS, I’m interested in [Product Name].”
+
+⭐ Trust & Social Proof
+
+Google Reviews section (4.0 ⭐ from 5 reviews)
+
+Instagram follower count display
+
+Real product photos (use provided images)
+
+“Trusted Electronics Store in Rwanda 🇷🇼”
+
+🚀 Performance & SEO
+
+Fast loading speed
+
+SEO-optimized titles:
+
+“Best Electronics Shop in Kigali | DOPIK ELECTRONICS”
+
+Mobile responsive
+
+Optimized for Google search & Instagram traffic
+
+🛠️ Technical Requirements
+
+E-commerce ready (prices, products, inventory)
+
+WhatsApp checkout (primary)
+
+Optional future online payment integration
+
+CMS for easy product updates
+
+Secure & scalable
+
+📦 Products to Highlight
+
+iPhone Pro & Pro Max series
+
+AirPods
+
+Beats Pill Speaker
+
+Soundcore Liberty 4 NC
+
+USB-C 6-in-1 Adapters (UGREEN)
+
+DJI / Saramonic wireless microphones
+
+Laptop stands & accessories
+
+🧾 Final Outcome
+
+The final website must look like:
+
+A top-tier electronics brand
+
+Competitive with international e-commerce stores
+
+Built to convert visitors into buyers
+
+Perfect for Rwanda’s tech market
