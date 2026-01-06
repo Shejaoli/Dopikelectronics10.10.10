@@ -1,0 +1,145 @@
+You are working on a live React + Express + Tailwind e-commerce app.
+
+DO NOT explain.
+DO NOT summarize.
+DO NOT create checkpoints without changes.
+
+MAKE REAL CODE CHANGES.
+
+GOAL:
+Restyle the entire website to visually and structurally match reebelo.com.
+
+RULES:
+- Modify existing files
+- Create new components if missing
+- Use Tailwind CSS only
+- Use Inter font
+- Desktop-first, responsive
+- Clean, premium, Apple-like spacing
+
+====================================
+HEADER (REPLACE CURRENT HEADER)
+====================================
+Update Header.tsx:
+
+- White background
+- Left: Dopik logo
+- Center: large rounded search bar (like Reebelo)
+- Right: Help | About | Sign in | Cart icons
+- Sticky header
+- Bottom nav row:
+  All Items | Deals 🔥 | iPhones | Samsung Phones | Laptops | Electronics | Home | Gaming | Tools | Baby | Fashion
+
+====================================
+HOME PAGE (Reebelo Layout)
+====================================
+Update Home.tsx:
+
+1. HERO SECTION
+- Full-width dark background (#111827)
+- Left:
+  Title: "Refurbished Electronics You Can Trust"
+  Subtitle: "Premium devices. Better prices. Kigali pickup available."
+  CTA button: "Shop Now"
+- Right:
+  Floating product images
+- Under hero:
+  Trust badges row:
+   ✔ 12-Month Warranty
+   ✔ Free Delivery
+   ✔ 30-Day Returns
+   ✔ Kigali Store Pickup
+
+2. POPULAR CATEGORIES
+- Circular category icons
+- Grid layout
+- Categories:
+  Smartphones
+  Laptops
+  Tablets
+  Smartwatches
+  Gaming
+  Home & Kitchen
+  Accessories
+  Tools & DIY
+  Baby
+
+3. CUSTOMER FAVORITES
+- Horizontal product cards
+- Hover lift animation
+- Price + rating
+
+====================================
+SHOP / PRODUCTS PAGE
+====================================
+Update Shop.tsx:
+
+Layout:
+- Left: Sticky filter sidebar
+- Right: Product grid
+
+FILTER SIDEBAR:
+- Price range slider
+- Brand
+- Condition
+- Storage
+- Availability
+
+PRODUCT GRID:
+- 4 columns desktop
+- Clean card
+- Product image
+- Name
+- Price
+- “View Details”
+
+====================================
+PRODUCT DETAILS PAGE (MOST IMPORTANT)
+====================================
+Update ProductDetails.tsx:
+
+Two-column layout:
+
+LEFT:
+- Vertical image thumbnails
+- Large main image
+- Zoom on hover
+
+RIGHT:
+- Product title
+- Star rating
+- Price (large, bold)
+- Variant selectors:
+  Carrier
+  Storage
+  Color
+- BLACK primary button:
+  “Add to Cart”
+- GREEN secondary button:
+  “Buy on WhatsApp”
+- Delivery info box:
+  ✔ 12-Month Warranty
+  ✔ Free Shipping
+  ✔ 30-Day Returns
+- Stock status badge
+
+====================================
+GLOBAL UI
+====================================
+- Font: Inter
+- Primary color: #0B63C6
+- Accent color: #FFC700
+- Buttons: rounded-lg
+- Cards: subtle shadow
+- Hover transitions
+- Lazy-load images
+
+====================================
+EXTRAS
+====================================
+- Floating WhatsApp button (bottom-right)
+- WhatsApp opens with product name prefilled
+- Use images from /public/images
+- DO NOT break backend or routes
+
+START MAKING THE CHANGES NOW.
