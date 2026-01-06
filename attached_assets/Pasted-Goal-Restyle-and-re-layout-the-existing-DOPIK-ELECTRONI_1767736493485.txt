@@ -1,0 +1,194 @@
+Goal: Restyle and re-layout the existing DOPIK ELECTRONICS e-commerce site so it matches the clean, minimal, high-conversion layout and interaction patterns used on reebelo.com (hero carousel, large centered search, category circles, two-column product page with left image gallery and right buying panel, left filter sidebar for listing pages, product grid, trust badges, floating WhatsApp CTA). Keep brand colors (blue & yellow) and logo, but adopt Reebelo’s spacing, typography and component layout.
+
+Implementation instructions (copy-paste)
+
+1) Tech / tools
+
+Framework suggestion: React + Next.js (or existing React app). Use Tailwind CSS for fast styling (or convert to CSS variables / SCSS if not possible).
+
+Add dependencies (if not present): tailwindcss, swiper (carousel), react-icons, react-responsive, rc-slider (price range), react-hook-form (forms), optional algoliasearch for search.
+
+Optimize images with next/image (or lazy-load img).
+
+2) Global styles & design tokens
+
+Add CSS variables or Tailwind config with brand palette:
+
+--brand-blue: #0B63C6; (nav / CTAs)
+
+--brand-yellow: #FFC700; (accent badges)
+
+--neutral-900: #0F1724; (dark text)
+
+--muted: #F6F7F8; (section backgrounds)
+
+--card: #ffffff
+
+Typography: use Inter or Poppins. Headings: semibold/800, body 400–500.
+
+Global container: max-width 1200px centered, generous whitespace and 16–24px base spacing.
+
+3) Header
+
+Full-width white header with:
+
+Left: compact brand logo (use /public/images/Dopik logo.png or imported asset).
+
+Center: large search bar (placeholder: “Search by model, color, brand...”), with subtle shadow and magnifier icon. Search should occupy ~45–60% width on desktop and collapse to full width on mobile.
+
+Right: icons for Help / About / Sign in / Cart. Show phone & WhatsApp icon small under cart on mobile.
+
+Below header: a slim horizontal nav with categories (All Items, Deals 🔥, iPhones, Samsung Phones, Laptops, Electronics…), sticky when scrolling (or sticky only when scrolled past hero).
+
+4) Homepage layout (Reebelo-like)
+
+Hero Carousel: full-width dark/charcoal background card with product image on the right, text left: title (bold, large), short description, primary CTA (rounded pill, --brand-blue background with white text) and secondary CTA (outline).
+
+Add three small feature icons under hero (12-month warranty / free delivery / 30-day returns).
+
+“Popular categories” section: circular category icons on pale mint background (use circular mask). Show 8–10 categories in a responsive grid. Each circle: icon/image + label below. (Matches Reebelo’s airy category grid.)
+
+“Customer Favorites” / “Best sellers” carousel beneath categories.
+
+Instagram feed block: show image tiles and follower count (15.2K followers) + follow CTA.
+
+5) Collection / Listing page
+
+Two-column layout on desktop:
+
+Left column (260–300px): filter sidebar with collapsible filter groups (Price range slider, Brand, Storage, Condition, Color, Carrier). Make filters sticky while scrolling.
+
+Right column: product grid (3–4 columns depending on viewport). Each product card:
+
+Clean white card, rounded corners, small drop shadow.
+
+Top-left optional badge (e.g., “Best Offer”, “New”).
+
+Medium product image, product title below, small price text: bold for current price and muted smaller text for “from $X”.
+
+Small icons for shipping / warranty below.
+
+Hover effect: elevate card and show quick actions (Wishlist / Quick view).
+
+Sorting dropdown top-right (“Best selling / Price low->high / Newest”).
+
+6) Product Detail Page — EXACT Reebelo STYLE
+
+Use a two-column layout:
+
+Left (60%) — Large image gallery with vertical thumbnail column on left of main image (or small thumbnails below on mobile). Thumbnails should be clickable to update main image. Zoom on hover (desktop).
+
+Right (40%) — Buying panel:
+
+Product title (big + bold).
+
+Small rating stars & review count.
+
+Prominent price block ($459.99). If discount, show old price struck-through and discount label (top-right).
+
+Big black “Add to cart” button (full width of panel). Below it: secondary CTA “Buy on WhatsApp” (green WhatsApp icon) that opens https://wa.me/250783562143?text=Hello%20I%20want%20to%20buy%20[Product%20Name].
+
+Important badges under CTA: shipping estimate, 12 months warranty, free shipping icon, 30-day returns (use small icons).
+
+Variant selectors as boxes (Carrier: Unlocked/AT&T/Verizon; Storage: 128GB / 256GB / 512GB) with active state border.
+
+Small merchant/seller info and “3,739+ Sold” style microcopy.
+
+Below: tabs for Description / Specs / Reviews / Shipping & Returns.
+
+Right column or sticky bottom: micro cart summary (on mobile make the Buy CTA sticky to bottom).
+
+7) Micro-interactions & components
+
+Use Swiper for hero & product carousels with smooth autoplay and pagination.
+
+Buttons: primary uses --brand-blue, secondary outline using --neutral-900.
+
+Product card hover: scale to 1.02, box-shadow and a quick “Quick view” overlay.
+
+Filters: animated collapse with chevrons.
+
+8) Trust & conversion features
+
+Floating trust bar or small trust badges under hero (4.0 ★ Google rating | 15.2K followers | “In-store pickup”).
+
+Floating WhatsApp CTA: circular 56px button bottom-right; open wa.me with prefilled message.
+
+Sticky header cart and small toast when item added (animated slide-in from right).
+
+9) Mobile-first adjustments
+
+Mobile header: hamburger left, small logo centered, cart right. Search bar becomes collapsible with full-width overlay.
+
+Product grid: 2 columns mobile, 3 tablet.
+
+Product page: keep gallery on top and buying panel below; sticky bottom buy bar with price and CTA.
+
+10) Accessibility & SEO
+
+Add semantic HTML (header, nav, main, aside, footer).
+
+Add alt text for all images (use product name).
+
+Structured data: Product schema (JSON-LD) for each product page with price, availability, rating.
+
+Meta titles & descriptions per page. Example: “Buy iPhone 15 Pro Max in Kigali | DOPIK ELECTRONICS — New & Refurbished”.
+
+11) Assets & images
+
+Use the provided images from the project (logo and product photos). Suggested paths: /public/assets/logo.png, /public/assets/product1.jpg etc. Replace placeholder images with real photo box shots you uploaded.
+
+Use compressed JPG/WebP for faster load. Implement loading="lazy" for non-visible images.
+
+12) Example Tailwind config snippet (if using Tailwind)
+
+// tailwind.config.js
+module.exports = {
+  content: ['./pages/**/*.{js,jsx,ts,tsx}','./components/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          DEFAULT: '#0B63C6',
+          yellow: '#FFC700'
+        },
+        neutral900: '#0F1724',
+      },
+      maxWidth: { 'container': '1200px' }
+    },
+  },
+  plugins: [],
+}
+
+
+13) Concrete file & component changes to ask Replit to make
+
+components/Header.jsx — Replace with new layout (logo, big search, nav).
+
+components/HeroCarousel.jsx — Add Swiper hero with feature icons.
+
+pages/index.jsx — Rework to Hero / categories circles / best-sellers / instagram feed.
+
+pages/collections/[slug].jsx — Implement left filter sidebar + product grid as described.
+
+pages/products/[id].jsx — Reebelo-style product detail layout (left gallery / right buy panel).
+
+styles/globals.css — Add brand variables, spacing utilities, and small utility classes for badges & product cards.
+
+components/WhatsAppFloating.jsx — Floating CTA for WhatsApp with prefilled message for product pages.
+
+14) Testing & QA
+
+Test on desktop (1200px), tablet (768px) and mobile (375px).
+
+Check search experience and category navigation.
+
+Confirm WhatsApp link opens with prefilled text and phone number uses +250 country code.
+
+Confirm product page structured data is correct and price updates when variants change.
+
+15) Deployment
+
+If using Next.js, deploy on Vercel or Replit static site. Ensure environment variables (e.g., analytics) are set.
+
+Run Lighthouse audit: performance > 70, accessibility > 90, best practices > 90 (aim higher).
