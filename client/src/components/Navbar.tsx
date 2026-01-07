@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { Menu, X, ShoppingBag, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,9 +26,9 @@ export function Navbar() {
            {/* Fallback to text if image fails, but instructions say use /images/logo.png */}
           <div className="relative h-8 w-auto overflow-hidden">
              <img src="/images/logo.png" alt="DOPIK" className="h-8 object-contain" onError={(e) => e.currentTarget.style.display = 'none'} />
-             <span className="text-xl font-bold tracking-tighter text-white sm:hidden md:hidden lg:hidden">DOPIK</span>
+             <span className="text-xl font-bold tracking-tighter text-foreground sm:hidden md:hidden lg:hidden">DOPIK</span>
           </div>
-          <span className="hidden text-xl font-bold tracking-tighter text-white sm:block">
+          <span className="hidden text-xl font-bold tracking-tighter text-foreground sm:block">
             DOPIK <span className="text-primary">ELECTRONICS</span>
           </span>
         </Link>
@@ -49,6 +50,7 @@ export function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <Link href="/shop">
              <button className="text-muted-foreground hover:text-primary transition-colors">
                 <Search className="h-5 w-5" />
@@ -62,7 +64,7 @@ export function Navbar() {
           
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden text-white"
+            className="md:hidden text-foreground"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -86,7 +88,7 @@ export function Navbar() {
                     className={`block rounded-lg px-3 py-2 text-base font-medium ${
                       isActive(link.href) 
                         ? "bg-primary/10 text-primary" 
-                        : "text-muted-foreground hover:bg-white/5 hover:text-white"
+                        : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
