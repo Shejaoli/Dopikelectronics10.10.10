@@ -5,6 +5,12 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { hashPassword, verifyPassword } from "./auth";
 
+declare module "express-session" {
+  interface SessionData {
+    adminId: number;
+  }
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -28,12 +34,27 @@ export async function registerRoutes(
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
+      req.session.adminId = admin.id;
       const { passwordHash: _, ...adminInfo } = admin;
       res.json(adminInfo);
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
+  });
+
+  app.get("/api/admin/me", async (req, res) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    const admin = await storage.getAdminById(req.session.adminId);
+    if (!admin) {
+      return res.status(401).json({ message: "Admin not found" });
+    }
+
+    const { passwordHash: _, ...adminInfo } = admin;
+    res.json(adminInfo);
   });
 
   app.get(api.products.list.path, async (req, res) => {

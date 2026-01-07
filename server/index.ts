@@ -2,9 +2,25 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import session from "express-session";
+import MemoryStore from "memorystore";
 
 const app = express();
 const httpServer = createServer(app);
+
+const SessionStore = MemoryStore(session);
+
+app.use(
+  session({
+    cookie: { maxAge: 86400000 },
+    store: new SessionStore({
+      checkPeriod: 86400000, // prune expired entries every 24h
+    }),
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.SESSION_SECRET || "dopik-secret-key",
+  })
+);
 
 declare module "http" {
   interface IncomingMessage {
