@@ -3,6 +3,7 @@ import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
+import { hashPassword } from "./auth";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -112,9 +113,10 @@ async function seedDatabase() {
   const adminEmail = "admin@dopik.com";
   const existingAdmin = await storage.getAdminByEmail(adminEmail);
   if (!existingAdmin) {
+    const hashedPassword = await hashPassword("admin123");
     await storage.createAdmin({
       email: adminEmail,
-      passwordHash: "placeholder_hash", // To be updated when auth is implemented
+      passwordHash: hashedPassword,
       role: "admin"
     });
   }
