@@ -1,0 +1,124 @@
+You are working on a live React + Vite + Tailwind + Express + Database e-commerce application.
+
+DO NOT explain.
+DO NOT summarize.
+DO NOT ask questions.
+DO NOT create checkpoints without real functionality.
+MAKE REAL, WORKING CODE CHANGES.
+
+GOAL:
+Add a secure Admin Dashboard so admins can log in, add products, manage products, and view orders.
+
+================================
+1) AUTHENTICATION (ADMIN ONLY)
+================================
+- Implement admin authentication (email + password)
+- Store admins in the database
+- Hash passwords securely
+- Create login page at /admin/login
+- Protect all admin routes (redirect if not logged in)
+- Persist login session (JWT or server session)
+
+Only authenticated admins can access the dashboard.
+
+================================
+2) ADMIN DASHBOARD LAYOUT
+================================
+Create a new route: /admin
+
+Dashboard layout must include:
+- Sidebar navigation (Reebelo-style clean UI)
+- Top bar with admin name + logout button
+
+Sidebar items:
+- Dashboard Overview
+- Products
+- Add Product
+- Orders
+- Logout
+
+Use Tailwind and support dark/light mode.
+
+================================
+3) ADD PRODUCT (CRUD)
+================================
+Create an “Add Product” page:
+
+Admin must be able to:
+- Upload product images
+- Enter product name
+- Description
+- Price
+- Category
+- Brand
+- Stock status
+- Featured toggle
+- Specifications (key-value)
+
+Save products to the database.
+Images must be saved and displayed correctly on the store.
+
+================================
+4) MANAGE PRODUCTS
+================================
+Create “Manage Products” page:
+
+- List all products in a table
+- Show image, name, price, stock status
+- Actions:
+  - Edit product
+  - Delete product
+  - Toggle featured
+- Changes must update the live store immediately
+
+================================
+5) ORDERS MANAGEMENT
+================================
+Create “Orders” page:
+
+- Show all orders placed on the website
+- Display:
+  - Order ID
+  - Customer name
+  - Phone / WhatsApp
+  - Products ordered
+  - Total price
+  - Order status (Pending / Processing / Completed)
+- Allow admin to update order status
+- Orders must be saved in database
+
+================================
+6) FRONTEND ORDER CREATION
+================================
+When a customer:
+- Adds to cart
+- Clicks “Buy” or “Checkout”
+
+Create an order record in the database with:
+- Products
+- Quantity
+- Total
+- Customer contact
+- Date
+- Status = Pending
+
+================================
+7) SECURITY RULES
+================================
+- Admin routes must NOT be accessible publicly
+- API routes must check admin authentication
+- Prevent unauthorized access
+
+================================
+8) FINAL VALIDATION
+================================
+After implementation:
+- Admin can log in
+- Admin can add products
+- Admin can edit/delete products
+- Admin can see orders
+- Admin can update order status
+- Store reflects changes instantly
+- No runtime or console errors
+
+START IMPLEMENTING NOW.
