@@ -1,0 +1,87 @@
+You are editing a React + Vite + Tailwind project.
+
+The dark/light theme toggle icon exists, but clicking it does NOTHING.
+Fix this properly so the theme actually switches between DARK and LIGHT.
+
+DO NOT explain.
+DO NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+1) Tailwind Configuration
+========================
+Open tailwind.config.js and ensure:
+
+- darkMode is set to "class"
+- content includes "./client/src/**/*.{js,ts,jsx,tsx}"
+
+Example:
+
+export default {
+  darkMode: "class",
+  content: ["./index.html", "./client/src/**/*.{js,ts,jsx,tsx}"],
+  theme: { extend: {} },
+  plugins: []
+};
+
+========================
+2) Global Theme Logic
+========================
+Create or update a hook at:
+
+client/src/hooks/useTheme.ts
+
+This hook must:
+- Read theme from localStorage
+- Default to light
+- Toggle the "dark" class on document.documentElement
+- Persist theme changes
+
+Use React state and useEffect.
+
+========================
+3) Header Theme Toggle
+========================
+Update Header.tsx:
+
+- Import the theme hook
+- When the sun/moon icon is clicked, call toggleTheme()
+- The icon must switch based on current theme
+- The click must update the HTML class immediately
+
+========================
+4) Fix Styles So They Respond
+========================
+Replace all hardcoded colors like:
+- bg-black
+- bg-white
+- text-white
+
+With theme-aware classes like:
+- bg-white dark:bg-neutral-900
+- text-neutral-900 dark:text-white
+
+Ensure the BODY, HEADER, HERO, PRODUCT CARDS, and NAV all respond to theme changes.
+
+========================
+5) REQUIRED BEHAVIOR
+========================
+When LIGHT mode is active:
+- Background is white
+- Text is dark
+- Reebelo-style clean layout
+
+When DARK mode is active:
+- Background is charcoal / dark
+- Text is white
+- Premium tech look
+
+========================
+6) FINAL CHECK
+========================
+After implementing:
+- Clicking the icon MUST visually switch the entire site
+- Theme must persist after page refresh
+- No runtime errors allowed
+
+START APPLYING THESE CHANGES NOW.

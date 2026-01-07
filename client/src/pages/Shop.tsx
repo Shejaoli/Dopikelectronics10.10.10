@@ -25,9 +25,9 @@ export default function Shop() {
       <WhatsAppFloat />
 
       {/* Header */}
-      <div className="bg-card border-b border-white/5 py-12">
+      <div className="bg-card border-b border-border py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-white">Our Shop</h1>
+          <h1 className="text-4xl font-bold text-foreground">Our Shop</h1>
           <p className="mt-2 text-muted-foreground">Discover premium electronics at unbeatable prices.</p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export default function Shop() {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
@@ -60,8 +60,8 @@ export default function Shop() {
                     onClick={() => setCategory(cat)}
                     className={`flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm font-medium transition-colors ${
                       (category === cat || (cat === "All" && !category))
-                        ? "bg-primary text-black"
-                        : "text-muted-foreground hover:bg-white/5 hover:text-white"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
                     }`}
                   >
                     {cat}
@@ -76,13 +76,13 @@ export default function Shop() {
             {isLoading ? (
                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {[1, 2, 3, 4, 5, 6].map((n) => (
-                  <div key={n} className="aspect-[4/5] rounded-2xl bg-white/5 animate-pulse" />
+                  <div key={n} className="aspect-[4/5] rounded-2xl bg-accent animate-pulse" />
                 ))}
               </div>
             ) : products?.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <Filter className="mb-4 h-12 w-12 text-muted-foreground" />
-                <h3 className="text-xl font-semibold text-white">No products found</h3>
+                <h3 className="text-xl font-semibold text-foreground">No products found</h3>
                 <p className="text-muted-foreground">Try adjusting your search or filters.</p>
                 <button 
                   onClick={() => { setSearchTerm(""); setCategory(undefined); }}

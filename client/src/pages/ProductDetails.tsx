@@ -13,7 +13,7 @@ export default function ProductDetails() {
 
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-background text-primary">Loading...</div>;
   if (error || !product) return (
-    <div className="flex h-screen flex-col items-center justify-center bg-background text-white">
+    <div className="flex h-screen flex-col items-center justify-center bg-background text-foreground">
        <p>Product not found.</p>
        <Link href="/shop" className="text-primary hover:underline mt-4">Back to Shop</Link>
     </div>
@@ -36,7 +36,7 @@ export default function ProductDetails() {
 
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <Link href="/shop">
-          <span className="mb-8 inline-flex cursor-pointer items-center text-sm text-muted-foreground hover:text-white">
+          <span className="mb-8 inline-flex cursor-pointer items-center text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Shop
           </span>
         </Link>
@@ -48,7 +48,7 @@ export default function ProductDetails() {
             animate={{ opacity: 1, x: 0 }}
             className="space-y-4"
           >
-            <div className="aspect-square overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8">
+            <div className="aspect-square overflow-hidden rounded-3xl border border-border bg-card p-8">
               <img 
                 src={product.imageUrl} 
                 alt={product.name} 
@@ -71,7 +71,7 @@ export default function ProductDetails() {
                )}
             </div>
             
-            <h1 className="mb-4 text-3xl font-bold text-white sm:text-4xl">{product.name}</h1>
+            <h1 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">{product.name}</h1>
             
             <div className="mb-8 text-3xl font-bold text-primary">
               {formatPrice(product.price)}
@@ -82,13 +82,13 @@ export default function ProductDetails() {
             </p>
 
             {/* Specs */}
-            <div className="mb-8 rounded-2xl border border-white/10 bg-card p-6">
-              <h3 className="mb-4 text-sm font-bold uppercase text-white">Technical Specifications</h3>
+            <div className="mb-8 rounded-2xl border border-border bg-card p-6">
+              <h3 className="mb-4 text-sm font-bold uppercase text-foreground">Technical Specifications</h3>
               <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
                 {Object.entries(specs).map(([key, value]) => (
-                  <div key={key} className="border-b border-white/5 pb-2">
+                  <div key={key} className="border-b border-border pb-2">
                     <dt className="text-xs text-muted-foreground">{key}</dt>
-                    <dd className="text-sm font-medium text-white">{value}</dd>
+                    <dd className="text-sm font-medium text-foreground">{value}</dd>
                   </div>
                 ))}
               </dl>
@@ -110,18 +110,18 @@ export default function ProductDetails() {
             </div>
 
             {/* Trust Indicators */}
-            <div className="mt-8 grid grid-cols-3 gap-4 border-t border-white/10 pt-8">
+            <div className="mt-8 grid grid-cols-3 gap-4 border-t border-border pt-8">
               <div className="flex flex-col items-center text-center">
                 <Shield className="mb-2 h-6 w-6 text-primary" />
-                <span className="text-xs font-medium text-white">1 Year Warranty</span>
+                <span className="text-xs font-medium text-foreground">1 Year Warranty</span>
               </div>
               <div className="flex flex-col items-center text-center">
                 <Truck className="mb-2 h-6 w-6 text-primary" />
-                <span className="text-xs font-medium text-white">Fast Delivery</span>
+                <span className="text-xs font-medium text-foreground">Fast Delivery</span>
               </div>
               <div className="flex flex-col items-center text-center">
                 <Check className="mb-2 h-6 w-6 text-primary" />
-                <span className="text-xs font-medium text-white">Genuine Product</span>
+                <span className="text-xs font-medium text-foreground">Genuine Product</span>
               </div>
             </div>
           </motion.div>

@@ -3,26 +3,26 @@ import { Link } from "wouter";
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-[#0E0F12] pt-16 pb-8">
+    <footer className="border-t border-border bg-card pt-16 pb-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           
           {/* Brand */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-white">
+            <h3 className="text-2xl font-bold text-foreground">
               DOPIK <span className="text-primary">ELECTRONICS</span>
             </h3>
             <p className="text-muted-foreground">
               Where Gadgets Meet Great Deals. Your premium destination for the latest electronics in Kigali.
             </p>
             <div className="flex gap-4">
-              <a href="https://instagram.com/dopik.electronics" target="_blank" className="rounded-full bg-white/5 p-2 text-white hover:bg-primary hover:text-black transition-colors">
+              <a href="https://instagram.com/dopik.electronics" target="_blank" className="rounded-full bg-accent p-2 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="rounded-full bg-white/5 p-2 text-white hover:bg-primary hover:text-black transition-colors">
+              <a href="#" className="rounded-full bg-accent p-2 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="rounded-full bg-white/5 p-2 text-white hover:bg-primary hover:text-black transition-colors">
+              <a href="#" className="rounded-full bg-accent p-2 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
                 <Twitter className="h-5 w-5" />
               </a>
             </div>
@@ -30,7 +30,7 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="mb-4 text-lg font-semibold text-white">Quick Links</h4>
+            <h4 className="mb-4 text-lg font-semibold text-foreground">Quick Links</h4>
             <ul className="space-y-2">
               <li><Link href="/"><span className="cursor-pointer text-muted-foreground hover:text-primary">Home</span></Link></li>
               <li><Link href="/shop"><span className="cursor-pointer text-muted-foreground hover:text-primary">Shop Now</span></Link></li>
@@ -41,7 +41,7 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="mb-4 text-lg font-semibold text-white">Contact Us</h4>
+            <h4 className="mb-4 text-lg font-semibold text-foreground">Contact Us</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-muted-foreground">
                 <MapPin className="h-5 w-5 shrink-0 text-primary" />
@@ -60,25 +60,25 @@ export function Footer() {
 
           {/* Business Hours */}
           <div>
-            <h4 className="mb-4 text-lg font-semibold text-white">Business Hours</h4>
+            <h4 className="mb-4 text-lg font-semibold text-foreground">Business Hours</h4>
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex justify-between">
                 <span>Mon - Fri:</span>
-                <span className="text-white">8:00 AM - 8:00 PM</span>
+                <span className="text-foreground">8:00 AM - 8:00 PM</span>
               </li>
               <li className="flex justify-between">
                 <span>Saturday:</span>
-                <span className="text-white">9:00 AM - 6:00 PM</span>
+                <span className="text-foreground">9:00 AM - 6:00 PM</span>
               </li>
               <li className="flex justify-between">
                 <span>Sunday:</span>
-                <span className="text-white">Closed</span>
+                <span className="text-foreground">Closed</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-16 border-t border-white/10 pt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-16 border-t border-border pt-8 text-center text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} DOPIK ELECTRONICS. All rights reserved.</p>
         </div>
       </div>

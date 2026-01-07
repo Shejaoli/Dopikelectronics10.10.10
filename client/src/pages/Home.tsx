@@ -40,7 +40,7 @@ export default function Home() {
                 <span className="mr-2 inline-block h-2 w-2 rounded-full bg-primary animate-pulse"></span>
                 New Arrivals Available
               </div>
-              <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
+              <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
                 Where Gadgets Meet <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Great Deals</span>
               </h1>
@@ -49,13 +49,13 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/shop">
-                  <span className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-8 py-4 text-base font-semibold text-black transition-transform hover:scale-105 hover:bg-yellow-400">
+                  <span className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-transform hover:scale-105 hover:bg-yellow-400">
                     Shop Now
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
                 </Link>
                 <a href="https://wa.me/250783562143" target="_blank" rel="noreferrer">
-                  <span className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl border border-white/20 bg-white/5 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/10 sm:w-auto">
+                  <span className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl border border-border bg-card px-8 py-4 text-base font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-accent sm:w-auto">
                     Chat on WhatsApp
                   </span>
                 </a>
@@ -84,7 +84,7 @@ export default function Home() {
       </section>
 
       {/* Features Grid */}
-      <section className="border-y border-white/5 bg-card/50 py-12 backdrop-blur-sm">
+      <section className="border-y border-border bg-card/50 py-12 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {features.map((feature, idx) => (
@@ -96,10 +96,10 @@ export default function Home() {
                 transition={{ delay: idx * 0.1 }}
                 className="flex flex-col items-center text-center"
               >
-                <div className="mb-4 rounded-full bg-white/5 p-4 text-primary ring-1 ring-white/10">
+                <div className="mb-4 rounded-full bg-accent p-4 text-primary ring-1 ring-border">
                   <feature.icon className="h-6 w-6" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
+                <h3 className="text-lg font-semibold text-foreground">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground">{feature.desc}</p>
               </motion.div>
             ))}
@@ -112,7 +112,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 flex items-end justify-between">
             <div>
-              <h2 className="text-3xl font-bold text-white sm:text-4xl">Featured Collections</h2>
+              <h2 className="text-3xl font-bold text-foreground sm:text-4xl">Featured Collections</h2>
               <p className="mt-2 text-muted-foreground">Hand-picked premium electronics just for you.</p>
             </div>
             <Link href="/shop">
@@ -125,7 +125,7 @@ export default function Home() {
           {isLoading ? (
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {[1, 2, 3, 4].map((n) => (
-                <div key={n} className="aspect-[4/5] rounded-2xl bg-white/5 animate-pulse" />
+                <div key={n} className="aspect-[4/5] rounded-2xl bg-accent animate-pulse" />
               ))}
             </div>
           ) : (

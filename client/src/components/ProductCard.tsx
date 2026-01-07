@@ -21,7 +21,7 @@ export function ProductCard({ product }: ProductCardProps) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10"
     >
       {/* Badge */}
       {product.stockStatus === 'out_of_stock' && (
@@ -30,14 +30,14 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       )}
       {product.isFeatured && product.stockStatus !== 'out_of_stock' && (
-        <div className="absolute left-4 top-4 z-10 rounded-full bg-primary/90 px-3 py-1 text-xs font-bold text-black backdrop-blur-md">
+        <div className="absolute left-4 top-4 z-10 rounded-full bg-primary/90 px-3 py-1 text-xs font-bold text-primary-foreground backdrop-blur-md">
           Featured
         </div>
       )}
 
       {/* Image Container */}
       <Link href={`/product/${product.id}`}>
-        <div className="relative aspect-square cursor-pointer overflow-hidden bg-white/5 p-6">
+        <div className="relative aspect-square cursor-pointer overflow-hidden bg-accent/5 p-6">
           <img 
             src={product.imageUrl} 
             alt={product.name}
@@ -57,7 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
           {product.brand}
         </div>
         <Link href={`/product/${product.id}`}>
-          <h3 className="mb-2 cursor-pointer text-lg font-bold leading-tight text-white transition-colors hover:text-primary">
+          <h3 className="mb-2 cursor-pointer text-lg font-bold leading-tight text-foreground transition-colors hover:text-primary">
             {product.name}
           </h3>
         </Link>
@@ -71,7 +71,7 @@ export function ProductCard({ product }: ProductCardProps) {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-all hover:bg-primary hover:text-black group-hover:scale-110"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-foreground transition-all hover:bg-primary hover:text-primary-foreground group-hover:scale-110"
             title="Order on WhatsApp"
           >
             <ShoppingCart className="h-5 w-5" />
