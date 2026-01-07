@@ -1,5 +1,6 @@
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
+import type { Request, Response, NextFunction } from "express";
 
 const scryptAsync = promisify(scrypt);
 
@@ -14,4 +15,11 @@ export async function verifyPassword(password: string, hashed: string) {
   const hashBuf = Buffer.from(hash, "hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return timingSafeEqual(hashBuf, buf);
+}
+
+export function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
+  if (!req.session.adminId) {
+    return res.status(401).json({ message: "Unauthorized: Admin access required" });
+  }
+  next();
 }

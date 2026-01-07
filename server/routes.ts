@@ -3,7 +3,7 @@ import type { Server } from "http";
 import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
-import { hashPassword, verifyPassword } from "./auth";
+import { hashPassword, verifyPassword, requireAdminAuth } from "./auth";
 
 declare module "express-session" {
   interface SessionData {
@@ -16,6 +16,10 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
+  app.get("/api/admin/protected", requireAdminAuth, (req, res) => {
+    res.json({ message: "Access granted: You are an authenticated admin", adminId: req.session.adminId });
+  });
+
   app.post("/api/admin/login", async (req, res) => {
     try {
       const { email, password } = req.body;
