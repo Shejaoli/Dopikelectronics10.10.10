@@ -33,78 +33,89 @@ export async function registerRoutes(
 
 async function seedDatabase() {
   const existing = await storage.getProducts();
-  if (existing.length > 0) return;
+  if (existing.length === 0) {
+    const seedProducts = [
+      {
+        name: "iPhone 17 Pro Max",
+        description: "The ultimate iPhone. Titanium design, A19 Pro chip, and the most advanced camera system ever in an iPhone.",
+        price: 1800000,
+        category: "Smartphones",
+        brand: "Apple",
+        imageUrl: "/images/iphone-17-pro-max-1.png",
+        stockStatus: "pre_order",
+        isFeatured: true,
+        specs: { "Storage": "256GB/512GB/1TB", "Chip": "A19 Pro", "Display": "6.9-inch Super Retina XDR" }
+      },
+      {
+        name: "Soundcore Liberty 4 NC",
+        description: "Reduce noise by up to 98.5% with our advanced noise cancelling system. Crisp sound and long battery life.",
+        price: 120000,
+        category: "Audio",
+        brand: "Soundcore",
+        imageUrl: "/images/soundcore-liberty-4.jpg",
+        stockStatus: "in_stock",
+        isFeatured: true,
+        specs: { "Battery": "10H/50H", "ANC": "Adaptive ANC 2.0", "Codec": "LDAC" }
+      },
+      {
+        name: "Beats Pill",
+        description: "Portable wireless speaker with room-filling sound. Designed for life on the go.",
+        price: 250000,
+        category: "Audio",
+        brand: "Beats",
+        imageUrl: "/images/beats-pill.jpg",
+        stockStatus: "in_stock",
+        isFeatured: true,
+        specs: { "Battery": "Up to 24 hours", "Connectivity": "Bluetooth & USB-C", "Water Resistance": "IP67" }
+      },
+      {
+        name: "UGREEN 6-in-1 USB-C Hub",
+        description: "Expand your connectivity with HDMI 4K, USB 3.0, SD Card reader and PD charging.",
+        price: 65000,
+        category: "Accessories",
+        brand: "UGREEN",
+        imageUrl: "/images/ugreen-adapter.jpg",
+        stockStatus: "in_stock",
+        isFeatured: false,
+        specs: { "Ports": "HDMI, 3x USB 3.0, SD/TF", "Power": "100W PD" }
+      },
+      {
+        name: "Saramonic Blink 500",
+        description: "Ultracompact 2.4GHz Dual-Channel Wireless Microphone System for Cameras and Mobile Devices.",
+        price: 280000,
+        category: "Creator Gear",
+        brand: "Saramonic",
+        imageUrl: "/images/saramonic-mic.jpg",
+        stockStatus: "in_stock",
+        isFeatured: true,
+        specs: { "Range": "100m", "Channels": "Dual", "Battery": "Built-in" }
+      },
+      {
+        name: "iPhone 16",
+        description: "Dynamic Island, 48MP Main camera, and USB-C. A total powerhouse.",
+        price: 1200000,
+        category: "Smartphones",
+        brand: "Apple",
+        imageUrl: "/images/iphone-16.png",
+        stockStatus: "in_stock",
+        isFeatured: true,
+        specs: { "Storage": "128GB/256GB", "Chip": "A18", "Display": "6.1-inch Super Retina XDR" }
+      }
+    ];
 
-  const seedProducts = [
-    {
-      name: "iPhone 17 Pro Max",
-      description: "The ultimate iPhone. Titanium design, A19 Pro chip, and the most advanced camera system ever in an iPhone.",
-      price: 1800000,
-      category: "Smartphones",
-      brand: "Apple",
-      imageUrl: "/images/iphone-17-pro-max-1.png",
-      stockStatus: "pre_order",
-      isFeatured: true,
-      specs: { "Storage": "256GB/512GB/1TB", "Chip": "A19 Pro", "Display": "6.9-inch Super Retina XDR" }
-    },
-    {
-      name: "Soundcore Liberty 4 NC",
-      description: "Reduce noise by up to 98.5% with our advanced noise cancelling system. Crisp sound and long battery life.",
-      price: 120000,
-      category: "Audio",
-      brand: "Soundcore",
-      imageUrl: "/images/soundcore-liberty-4.jpg",
-      stockStatus: "in_stock",
-      isFeatured: true,
-      specs: { "Battery": "10H/50H", "ANC": "Adaptive ANC 2.0", "Codec": "LDAC" }
-    },
-    {
-      name: "Beats Pill",
-      description: "Portable wireless speaker with room-filling sound. Designed for life on the go.",
-      price: 250000,
-      category: "Audio",
-      brand: "Beats",
-      imageUrl: "/images/beats-pill.jpg",
-      stockStatus: "in_stock",
-      isFeatured: true,
-      specs: { "Battery": "Up to 24 hours", "Connectivity": "Bluetooth & USB-C", "Water Resistance": "IP67" }
-    },
-    {
-      name: "UGREEN 6-in-1 USB-C Hub",
-      description: "Expand your connectivity with HDMI 4K, USB 3.0, SD Card reader and PD charging.",
-      price: 65000,
-      category: "Accessories",
-      brand: "UGREEN",
-      imageUrl: "/images/ugreen-adapter.jpg",
-      stockStatus: "in_stock",
-      isFeatured: false,
-      specs: { "Ports": "HDMI, 3x USB 3.0, SD/TF", "Power": "100W PD" }
-    },
-    {
-      name: "Saramonic Blink 500",
-      description: "Ultracompact 2.4GHz Dual-Channel Wireless Microphone System for Cameras and Mobile Devices.",
-      price: 280000,
-      category: "Creator Gear",
-      brand: "Saramonic",
-      imageUrl: "/images/saramonic-mic.jpg",
-      stockStatus: "in_stock",
-      isFeatured: true,
-      specs: { "Range": "100m", "Channels": "Dual", "Battery": "Built-in" }
-    },
-    {
-      name: "iPhone 16",
-      description: "Dynamic Island, 48MP Main camera, and USB-C. A total powerhouse.",
-      price: 1200000,
-      category: "Smartphones",
-      brand: "Apple",
-      imageUrl: "/images/iphone-16.png",
-      stockStatus: "in_stock",
-      isFeatured: true,
-      specs: { "Storage": "128GB/256GB", "Chip": "A18", "Display": "6.1-inch Super Retina XDR" }
+    for (const product of seedProducts) {
+      await storage.createProduct(product);
     }
-  ];
+  }
 
-  for (const product of seedProducts) {
-    await storage.createProduct(product);
+  // Seed Admin
+  const adminEmail = "admin@dopik.com";
+  const existingAdmin = await storage.getAdminByEmail(adminEmail);
+  if (!existingAdmin) {
+    await storage.createAdmin({
+      email: adminEmail,
+      passwordHash: "placeholder_hash", // To be updated when auth is implemented
+      role: "admin"
+    });
   }
 }

@@ -21,10 +21,11 @@ export const admins = pgTable("admins", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   role: text("role").notNull().default("admin"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({ id: true });
-export const insertAdminSchema = createInsertSchema(admins).omit({ id: true });
+export const insertAdminSchema = createInsertSchema(admins).omit({ id: true, createdAt: true });
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
