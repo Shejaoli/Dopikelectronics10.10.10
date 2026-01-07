@@ -16,10 +16,20 @@ export const products = pgTable("products", {
   specs: jsonb("specs").$type<Record<string, string>>(), // Key-value pairs for specs
 });
 
+export const admins = pgTable("admins", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull().default("admin"),
+});
+
 export const insertProductSchema = createInsertSchema(products).omit({ id: true });
+export const insertAdminSchema = createInsertSchema(admins).omit({ id: true });
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Admin = typeof admins.$inferSelect;
+export type InsertAdmin = z.infer<typeof insertAdminSchema>;
 
 // Types for API
 export type ProductResponse = Product;
