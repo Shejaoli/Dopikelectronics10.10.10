@@ -9,7 +9,7 @@ export function ThemeToggle() {
     <Button 
       variant="outline" 
       size="icon" 
-      className="h-9 w-9 bg-transparent border-border hover:bg-accent transition-all duration-300"
+      className="h-9 w-9 bg-transparent border-border hover:bg-accent transition-all duration-300 rounded-full"
       onClick={toggleTheme}
       data-testid="button-theme-toggle"
     >

@@ -24,8 +24,8 @@ export default function Home() {
       <WhatsAppFloat />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-24 lg:pb-32">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-900/20 via-background to-background"></div>
+      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-24 lg:pb-32 transition-colors duration-300">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-background to-background"></div>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
             
@@ -38,14 +38,14 @@ export default function Home() {
             >
               <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
                 <span className="mr-2 inline-block h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-                New Arrivals Available
+                Premium Refurbished Electronics
               </div>
               <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-                Where Gadgets Meet <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Great Deals</span>
+                Refurbished Electronics <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">You Can Trust</span>
               </h1>
               <p className="max-w-xl text-lg text-muted-foreground">
-                Experience the future with our premium collection of smartphones, audio gear, and accessories. Best prices in Kigali guaranteed.
+                Premium devices. Better prices. Kigali pickup available. Experience high-end tech without the high-end price tag.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/shop">

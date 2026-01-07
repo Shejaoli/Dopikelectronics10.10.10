@@ -1,0 +1,72 @@
+You are working on a live React + Vite + Tailwind e-commerce website.
+
+DO NOT explain.
+DO NOT summarize.
+DO NOT create checkpoints without visible changes.
+MAKE REAL CODE CHANGES ONLY.
+
+GOAL:
+Lock in the dark/light theme system so it never breaks again and add premium Reebelo-level polish.
+
+========================
+1) LOCK THEME SYSTEM (CRITICAL)
+========================
+- Ensure ALL layout components (body, header, footer, pages, cards, modals) use theme-aware Tailwind classes.
+- Remove any remaining hardcoded colors like bg-black, bg-gray-900, text-white.
+- Replace them with:
+  bg-white dark:bg-neutral-900
+  text-neutral-900 dark:text-white
+  border-neutral-200 dark:border-neutral-800
+
+The theme must apply consistently across:
+- Home
+- Shop
+- Product details
+- Header
+- Footer
+
+========================
+2) SMOOTH PREMIUM TRANSITIONS
+========================
+Add smooth transitions when switching themes:
+- Use transition-colors and duration-300
+- Apply to body, header, cards, buttons, navigation, and product sections
+Theme switching should feel smooth and premium, not instant.
+
+========================
+3) SYSTEM PREFERENCE FALLBACK
+========================
+If no theme is stored in localStorage:
+- Automatically detect the user’s system preference (prefers-color-scheme)
+- Default to dark or light accordingly
+- Still allow manual toggle override
+
+========================
+4) REEBELO-STYLE LIGHT MODE POLISH
+========================
+When LIGHT mode is active:
+- Background must be clean white
+- Borders must be soft gray
+- Product cards must feel airy with more spacing
+- Shadows should be subtle and minimal
+- Overall look must feel clean, modern, and high-end
+
+========================
+5) REEBELO-STYLE DARK MODE POLISH
+========================
+When DARK mode is active:
+- Background must be charcoal / near-black
+- Cards slightly lighter than background
+- Text high contrast
+- Maintain premium tech aesthetic
+
+========================
+6) FINAL VALIDATION
+========================
+After changes:
+- Clicking the theme icon must visually switch the entire site
+- Theme must persist after refresh
+- Theme must remain consistent when navigating pages
+- No runtime or console errors allowed
+
+START APPLYING THESE CHANGES NOW.
