@@ -57,6 +57,16 @@ export async function registerRoutes(
     res.json(adminInfo);
   });
 
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Could not log out" });
+      }
+      res.clearCookie("connect.sid");
+      res.sendStatus(200);
+    });
+  });
+
   app.get(api.products.list.path, async (req, res) => {
     const category = req.query.category as string;
     const featured = req.query.featured === 'true';
