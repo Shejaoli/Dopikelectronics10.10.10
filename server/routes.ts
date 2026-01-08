@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { hashPassword, verifyPassword, requireAdminAuth } from "./auth";
+import { insertProductSchema, insertOrderSchema } from "@shared/schema";
 
 declare module "express-session" {
   interface SessionData {
