@@ -10,6 +10,7 @@ import type { Admin } from "@shared/schema";
 import AdminProducts from "./AdminProducts";
 import AdminAddProduct from "./AdminAddProduct";
 import AdminEditProduct from "./AdminEditProduct";
+import AdminOrders from "./AdminOrders";
 
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
@@ -114,6 +115,8 @@ export default function AdminDashboard() {
                   onEditClick={(id) => setEditingProductId(id)}
                 />
               )
+            ) : activeTab === "Orders" ? (
+              <AdminOrders />
             ) : (
               <div className="grid gap-6">
                 <div className="p-8 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground bg-muted/30">

@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { products, admins, type Product, type InsertProduct, type Admin, type InsertAdmin } from "@shared/schema";
-import { eq, like, and } from "drizzle-orm";
+import { products, admins, orders, type Product, type InsertProduct, type Admin, type InsertAdmin, type Order, type InsertOrder } from "@shared/schema";
+import { eq, like, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(filters?: { category?: string; featured?: boolean; search?: string }): Promise<Product[]>;
@@ -13,6 +13,10 @@ export interface IStorage {
   getAdminByEmail(email: string): Promise<Admin | undefined>;
   getAdminById(id: number): Promise<Admin | undefined>;
   createAdmin(admin: InsertAdmin): Promise<Admin>;
+
+  // Order methods
+  getOrders(): Promise<Order[]>;
+  createOrder(order: InsertOrder): Promise<Order>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -77,6 +81,15 @@ export class DatabaseStorage implements IStorage {
   async createAdmin(admin: InsertAdmin): Promise<Admin> {
     const [newAdmin] = await db.insert(admins).values(admin).returning();
     return newAdmin;
+  }
+
+  async getOrders(): Promise<Order[]> {
+    return await db.select().from(orders).orderBy(desc(orders.createdAt));
+  }
+
+  async createOrder(order: InsertOrder): Promise<Order> {
+    const [newOrder] = await db.insert(orders).values(order).returning();
+    return newOrder;
   }
 }
 

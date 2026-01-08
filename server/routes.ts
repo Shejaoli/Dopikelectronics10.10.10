@@ -108,6 +108,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/orders", requireAdminAuth, async (req, res) => {
+    try {
+      const orders = await storage.getOrders();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
   // Seed data endpoint (internal use or auto-run)
   await seedDatabase();
 
@@ -201,5 +210,27 @@ async function seedDatabase() {
       passwordHash: hashedPassword,
       role: "admin"
     });
+  }
+
+  // Seed Orders if none exist
+  const existingOrders = await storage.getOrders();
+  if (existingOrders.length === 0) {
+    const seedOrders = [
+      {
+        customerName: "Jean Paul",
+        customerPhone: "0788123456",
+        totalAmount: 1800000,
+        status: "pending",
+      },
+      {
+        customerName: "Marie Claire",
+        customerPhone: "0788654321",
+        totalAmount: 120000,
+        status: "paid",
+      },
+    ];
+    for (const order of seedOrders) {
+      await storage.createOrder(order);
+    }
   }
 }

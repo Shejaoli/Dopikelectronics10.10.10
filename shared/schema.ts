@@ -24,13 +24,25 @@ export const admins = pgTable("admins", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  customerName: text("customer_name").notNull(),
+  customerPhone: text("customer_phone").notNull(),
+  totalAmount: integer("total_amount").notNull(),
+  status: text("status").notNull().default("pending"), // pending, paid, delivered, cancelled
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertProductSchema = createInsertSchema(products).omit({ id: true });
 export const insertAdminSchema = createInsertSchema(admins).omit({ id: true, createdAt: true });
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true });
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Admin = typeof admins.$inferSelect;
 export type InsertAdmin = z.infer<typeof insertAdminSchema>;
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
 
 // Types for API
 export type ProductResponse = Product;
