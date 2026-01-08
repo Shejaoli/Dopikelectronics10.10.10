@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertProductSchema, type InsertProduct } from "@shared/schema";
@@ -10,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Upload, Loader2 } from "lucide-react";
 
 interface AdminAddProductProps {
   onBack: () => void;
@@ -18,6 +19,7 @@ interface AdminAddProductProps {
 
 export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
   const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
@@ -60,6 +62,48 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
       });
     },
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: "Maximum size is 5MB",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    setIsUploading(true);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      form.setValue("imageUrl", data.url);
+      toast({
+        title: "Image uploaded",
+        description: "Product image uploaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -154,19 +198,55 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Image URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://example.com/image.jpg" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-4">
+              <FormLabel>Product Image</FormLabel>
+              <div className="flex flex-col gap-4">
+                {form.watch("imageUrl") && (
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+                    <img 
+                      src={form.watch("imageUrl")} 
+                      alt="Preview" 
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-4">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                    disabled={isUploading}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-11 border-dashed"
+                    onClick={() => document.getElementById("image-upload")?.click()}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 mr-2" />
+                    )}
+                    {form.watch("imageUrl") ? "Change Image" : "Upload Product Image"}
+                  </Button>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem className="hidden">
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
               <FormField
@@ -215,7 +295,7 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
             <Button 
               type="submit" 
               className="w-full h-11 transition-all hover-elevate active-elevate-2"
-              disabled={createMutation.isPending}
+              disabled={createMutation.isPending || isUploading}
             >
               {createMutation.isPending ? "Creating..." : "Create Product"}
             </Button>

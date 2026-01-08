@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft } from "lucide-react";
-import { useEffect } from "react";
+import { ArrowLeft, Upload, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface AdminEditProductProps {
   productId: number;
@@ -20,6 +20,7 @@ interface AdminEditProductProps {
 
 export default function AdminEditProduct({ productId, onBack }: AdminEditProductProps) {
   const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
 
   const { data: product, isLoading: isLoadingProduct } = useQuery<Product>({
     queryKey: [`/api/products/${productId}`],
@@ -84,6 +85,48 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
       });
     },
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: "Maximum size is 5MB",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    setIsUploading(true);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      form.setValue("imageUrl", data.url);
+      toast({
+        title: "Image uploaded",
+        description: "Product image uploaded successfully.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (isLoadingProduct) {
     return (
@@ -181,19 +224,55 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Image URL</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-4">
+              <FormLabel>Product Image</FormLabel>
+              <div className="flex flex-col gap-4">
+                {form.watch("imageUrl") && (
+                  <div className="relative w-full aspect-video rounded-lg overflow-hidden border">
+                    <img 
+                      src={form.watch("imageUrl")} 
+                      alt="Preview" 
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+                <div className="flex items-center gap-4">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload-edit"
+                    disabled={isUploading}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-11 border-dashed"
+                    onClick={() => document.getElementById("image-upload-edit")?.click()}
+                    disabled={isUploading}
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 mr-2" />
+                    )}
+                    {form.watch("imageUrl") ? "Change Image" : "Upload Product Image"}
+                  </Button>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem className="hidden">
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
               <FormField
@@ -242,7 +321,7 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
             <Button 
               type="submit" 
               className="w-full h-11 transition-all hover-elevate active-elevate-2"
-              disabled={updateMutation.isPending}
+              disabled={updateMutation.isPending || isUploading}
             >
               {updateMutation.isPending ? "Updating..." : "Update Product"}
             </Button>
