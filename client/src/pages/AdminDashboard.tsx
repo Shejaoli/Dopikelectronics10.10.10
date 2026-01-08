@@ -8,11 +8,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Admin } from "@shared/schema";
 import AdminProducts from "./AdminProducts";
+import AdminAddProduct from "./AdminAddProduct";
 
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("Dashboard");
+  const [showAddProduct, setShowAddProduct] = useState(false);
 
   const { data: admin, isLoading, error } = useQuery<Admin>({
     queryKey: ["/api/admin/me"],
@@ -97,7 +99,11 @@ export default function AdminDashboard() {
           
           <main className="flex-1 overflow-auto p-6">
             {activeTab === "Products" ? (
-              <AdminProducts />
+              showAddProduct ? (
+                <AdminAddProduct onBack={() => setShowAddProduct(false)} />
+              ) : (
+                <AdminProducts onAddClick={() => setShowAddProduct(true)} />
+              )
             ) : (
               <div className="grid gap-6">
                 <div className="p-8 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground bg-muted/30">

@@ -10,10 +10,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Plus } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
-export default function AdminProducts() {
+interface AdminProductsProps {
+  onAddClick: () => void;
+}
+
+export default function AdminProducts({ onAddClick }: AdminProductsProps) {
   const { data: products, isLoading } = useProducts();
 
   if (isLoading) {
@@ -28,6 +32,10 @@ export default function AdminProducts() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Products</h2>
+        <Button onClick={onAddClick} className="hover-elevate active-elevate-2">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Product
+        </Button>
       </div>
 
       <div className="rounded-md border bg-card">
