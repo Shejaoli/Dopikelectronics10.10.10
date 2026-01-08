@@ -48,7 +48,7 @@ export function CheckoutModal({ product, open, onOpenChange }: CheckoutModalProp
         return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
       };
 
-      const message = `Hello DOPIK ELECTRONICS, my name is ${order.customerName}. I have placed an order for ${product.name}. Total amount: ${formatPrice(order.totalAmount)}. Order ID: #${order.id}. Thank you.`;
+      const message = `Hello DOPIK ELECTRONICS, my name is ${order.customerName}. I have placed an order for ${product.name}. Total amount: ${order.totalAmount} RWF. Order ID: #${order.id}. Thank you.`;
       const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
       
       onOpenChange(false);
