@@ -41,22 +41,22 @@ export default function Home() {
                 Premium Refurbished Electronics
               </div>
               <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-                Refurbished Electronics <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">You Can Trust</span>
+                Premium Electronics <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Perfectly Refurbished</span>
               </h1>
               <p className="max-w-xl text-lg text-muted-foreground">
-                Premium devices. Better prices. Kigali pickup available. Experience high-end tech without the high-end price tag.
+                Get high-end tech without the high-end price tag. Certified products, expert support, and fast delivery across Rwanda.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Link href="/shop">
-                  <span className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-transform hover:scale-105 hover:bg-yellow-400">
-                    Shop Now
+                  <span className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all hover:scale-[1.02] shadow-lg shadow-primary/20">
+                    Explore Shop
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </span>
                 </Link>
                 <a href="https://wa.me/250783562143" target="_blank" rel="noreferrer">
-                  <span className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl border border-border bg-card px-8 py-4 text-base font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-accent sm:w-auto">
-                    Chat on WhatsApp
+                  <span className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl border border-border bg-card/50 backdrop-blur-md px-8 py-4 text-base font-semibold text-foreground transition-all hover:bg-accent sm:w-auto">
+                    Chat with Experts
                   </span>
                 </a>
               </div>
