@@ -86,17 +86,14 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
     },
   });
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleImageUpload = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
       toast({
         variant: "destructive",
         title: "File too large",
         description: "Maximum size is 5MB",
       });
-      return;
+      return null;
     }
 
     const formData = new FormData();
@@ -113,19 +110,31 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
 
       const data = await res.json();
       form.setValue("imageUrl", data.url);
-      toast({
-        title: "Image uploaded",
-        description: "Product image uploaded successfully.",
-      });
+      return data.url;
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Upload failed",
         description: "Failed to upload image. Please try again.",
       });
+      return null;
     } finally {
       setIsUploading(false);
     }
+  };
+
+  const onSubmit = async (data: InsertProduct) => {
+    const fileInput = document.getElementById("image-upload-edit") as HTMLInputElement;
+    const file = fileInput?.files?.[0];
+    
+    let imageUrl = data.imageUrl;
+    if (file) {
+      const uploadedUrl = await handleImageUpload(file);
+      if (!uploadedUrl) return;
+      imageUrl = uploadedUrl;
+    }
+
+    updateMutation.mutate({ ...data, imageUrl });
   };
 
   if (isLoadingProduct) {
@@ -147,7 +156,7 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
 
       <div className="rounded-lg border bg-card p-6 shadow-sm">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit((data) => updateMutation.mutate(data))} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -240,7 +249,16 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
                   <Input
                     type="file"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          form.setValue("imageUrl", reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
                     className="hidden"
                     id="image-upload-edit"
                     disabled={isUploading}
