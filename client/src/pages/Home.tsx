@@ -24,7 +24,7 @@ export default function Home() {
       <WhatsAppFloat />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-24 lg:pb-32 transition-colors duration-300">
+      <section className="relative overflow-hidden pt-8 pb-16 lg:pt-24 lg:pb-32 transition-colors duration-300">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-background to-background"></div>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
@@ -34,20 +34,20 @@ export default function Home() {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
-              className="space-y-8"
+              className="space-y-6 lg:space-y-8 text-center lg:text-left"
             >
-              <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+              <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs lg:text-sm font-bold text-primary">
                 <span className="mr-2 inline-block h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-                Premium Refurbished Electronics
+                PREMIUM REFURBISHED ELECTRONICS
               </div>
-              <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
                 Premium Electronics <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600">Perfectly Refurbished</span>
               </h1>
-              <p className="max-w-xl text-lg text-muted-foreground">
+              <p className="mx-auto lg:mx-0 max-w-xl text-base lg:text-lg text-muted-foreground">
                 Get high-end tech without the high-end price tag. Certified products, expert support, and fast delivery across Rwanda.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
                 <Link href="/shop">
                   <span className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-primary px-8 py-4 text-base font-semibold text-primary-foreground transition-all hover:scale-[1.02] shadow-lg shadow-primary/20">
                     Explore Shop

@@ -41,19 +41,19 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="mb-4 text-lg font-semibold text-foreground">Contact Us</h4>
+            <h4 className="mb-6 text-lg font-bold text-foreground">Contact Us</h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3 text-muted-foreground">
-                <MapPin className="h-5 w-5 shrink-0 text-primary" />
+              <li className="flex items-start gap-3 text-sm text-muted-foreground">
+                <MapPin className="h-5 w-5 shrink-0 text-primary mt-0.5" />
                 <span>KN 48 St, Kigali, Rwanda<br/>(Code: 3335+6Q Kigali)</span>
               </li>
-              <li className="flex items-center gap-3 text-muted-foreground">
+              <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone className="h-5 w-5 shrink-0 text-primary" />
                 <span>+250 783 562 143</span>
               </li>
-              <li className="flex items-center gap-3 text-muted-foreground">
+              <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="h-5 w-5 shrink-0 text-primary" />
-                <span>dopikelectronics@gmail.com</span>
+                <span className="truncate">dopikelectronics@gmail.com</span>
               </li>
             </ul>
           </div>

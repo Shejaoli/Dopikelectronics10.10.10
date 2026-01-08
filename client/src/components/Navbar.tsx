@@ -38,7 +38,7 @@ export function Navbar() {
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href}>
               <span 
-                className={`cursor-pointer text-sm font-medium transition-colors hover:text-primary ${
+                className={`cursor-pointer text-sm font-semibold transition-all hover:text-primary active:scale-95 ${
                   isActive(link.href) ? "text-primary" : "text-muted-foreground"
                 }`}
               >
@@ -49,22 +49,22 @@ export function Navbar() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <ThemeToggle />
           <Link href="/shop">
-             <button className="text-muted-foreground hover:text-primary transition-colors">
-                <Search className="h-5 w-5" />
-             </button>
+            <button className="p-2 text-muted-foreground hover:text-primary hover:bg-accent/50 rounded-full transition-all active:scale-90">
+              <Search className="h-5 w-5" />
+            </button>
           </Link>
           <Link href="/shop">
-            <button className="relative text-muted-foreground hover:text-primary transition-colors">
+            <button className="relative p-2 text-muted-foreground hover:text-primary hover:bg-accent/50 rounded-full transition-all active:scale-90">
               <ShoppingBag className="h-5 w-5" />
             </button>
           </Link>
           
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden text-foreground"
+            className="md:hidden p-2 text-foreground hover:bg-accent rounded-lg transition-all active:scale-90"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

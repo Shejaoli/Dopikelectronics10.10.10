@@ -86,23 +86,23 @@ export default function ProductDetails() {
             </p>
 
             {/* Specs */}
-            <div className="mb-8 rounded-2xl border border-border bg-card p-6">
-              <h3 className="mb-4 text-sm font-bold uppercase text-foreground">Technical Specifications</h3>
-              <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+            <div className="mb-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6">
+              <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">Technical Specifications</h3>
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
                 {Object.entries(specs).map(([key, value]) => (
-                  <div key={key} className="border-b border-border pb-2">
-                    <dt className="text-xs text-muted-foreground">{key}</dt>
-                    <dd className="text-sm font-medium text-foreground">{value}</dd>
+                  <div key={key} className="border-b border-border pb-2 group transition-colors hover:border-primary/30">
+                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{key}</dt>
+                    <dd className="text-sm font-semibold text-foreground">{value}</dd>
                   </div>
                 ))}
               </dl>
             </div>
 
             {/* Actions */}
-            <div className="mt-auto space-y-4">
+            <div className="mt-auto space-y-4 pt-6">
               <Button 
                 onClick={() => setIsCheckoutOpen(true)}
-                className="flex w-full items-center justify-center rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-[1.02] shadow-lg shadow-primary/20"
+                className="flex w-full items-center justify-center rounded-xl bg-primary px-8 py-6 text-lg font-bold text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 Buy Now (Direct)
@@ -111,11 +111,11 @@ export default function ProductDetails() {
                 href={whatsappUrl}
                 target="_blank" 
                 rel="noreferrer"
-                className="flex w-full items-center justify-center rounded-xl border-2 border-[#25D366] bg-transparent px-8 py-4 text-lg font-bold text-[#25D366] transition-transform hover:scale-[1.02] hover:bg-[#25D366]/5"
+                className="flex w-full items-center justify-center rounded-xl border-2 border-[#25D366] bg-transparent px-8 py-6 text-lg font-bold text-[#25D366] transition-all hover:scale-[1.02] active:scale-[0.98] hover:bg-[#25D366]/5"
               >
                 Inquire on WhatsApp
               </a>
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="text-center text-xs text-muted-foreground px-4">
                 Direct orders will be confirmed via phone call. WhatsApp inquiries are handled by our sales team.
               </p>
             </div>

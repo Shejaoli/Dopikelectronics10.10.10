@@ -25,19 +25,19 @@ export default function Shop() {
       <WhatsAppFloat />
 
       {/* Header */}
-      <div className="bg-card border-b border-border py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-foreground">Our Shop</h1>
-          <p className="mt-2 text-muted-foreground">Discover premium electronics at unbeatable prices.</p>
+      <div className="bg-card border-b border-border py-8 lg:py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center lg:text-left">
+          <h1 className="text-3xl lg:text-4xl font-bold text-foreground">Our Shop</h1>
+          <p className="mt-2 text-sm lg:text-base text-muted-foreground">Discover premium electronics at unbeatable prices.</p>
         </div>
       </div>
 
       {/* Filters & Content */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-8 lg:flex-row">
+      <div className="mx-auto max-w-7xl px-4 py-6 lg:py-8 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-6 lg:gap-8 lg:flex-row">
           
           {/* Sidebar Filters */}
-          <aside className="w-full space-y-8 lg:w-64 lg:shrink-0">
+          <aside className="w-full space-y-6 lg:w-64 lg:shrink-0">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -46,22 +46,22 @@ export default function Shop() {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-xl border border-border bg-card/50 backdrop-blur-md py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
               />
             </div>
 
             {/* Categories */}
-            <div>
-              <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-muted-foreground">Categories</h3>
-              <div className="space-y-2">
+            <div className="overflow-x-auto pb-2 lg:overflow-visible lg:pb-0">
+              <h3 className="mb-3 hidden lg:block text-xs font-bold uppercase tracking-wider text-muted-foreground">Categories</h3>
+              <div className="flex flex-row gap-2 lg:flex-col lg:space-y-1.5 min-w-max lg:min-w-0">
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setCategory(cat)}
-                    className={`flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm font-medium transition-colors ${
+                    className={`flex items-center justify-between rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 whitespace-nowrap lg:w-full ${
                       (category === cat || (cat === "All" && !category))
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground active:scale-95"
                     }`}
                   >
                     {cat}
