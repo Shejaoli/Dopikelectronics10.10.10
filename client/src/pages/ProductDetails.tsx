@@ -30,8 +30,8 @@ export default function ProductDetails() {
   const whatsappMessage = `Hello DOPIK ELECTRONICS, I’m interested in buying the ${product.name} priced at ${formatPrice(product.price)}. Is it available?`;
   const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(whatsappMessage)}`;
 
-  // Parse specs if they are stored as JSON, otherwise use placeholder
-  const specs = product.specs as Record<string, string> || { "Warranty": "1 Year", "Condition": "Brand New" };
+  // Parse specs if they are stored as JSON, otherwise use empty object
+  const specs = product.specs as Record<string, string> || {};
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -86,17 +86,19 @@ export default function ProductDetails() {
             </p>
 
             {/* Specs */}
-            <div className="mb-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6">
-              <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">Technical Specifications</h3>
-              <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-                {Object.entries(specs).map(([key, value]) => (
-                  <div key={key} className="border-b border-border pb-2 group transition-colors hover:border-primary/30">
-                    <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{key}</dt>
-                    <dd className="text-sm font-semibold text-foreground">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+            {Object.keys(specs).length > 0 && (
+              <div className="mb-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6">
+                <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">Technical Specifications</h3>
+                <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                  {Object.entries(specs).map(([key, value]) => (
+                    <div key={key} className="border-b border-border pb-2 group transition-colors hover:border-primary/30">
+                      <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{key}</dt>
+                      <dd className="text-sm font-semibold text-foreground">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="mt-auto space-y-4 pt-6">

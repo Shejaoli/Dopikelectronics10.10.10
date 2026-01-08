@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface AdminEditProductProps {
@@ -21,6 +21,7 @@ interface AdminEditProductProps {
 export default function AdminEditProduct({ productId, onBack }: AdminEditProductProps) {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
+  const [specEntries, setSpecEntries] = useState<{ key: string; value: string }[]>([]);
 
   const { data: product, isLoading: isLoadingProduct } = useQuery<Product>({
     queryKey: [`/api/products/${productId}`],
@@ -56,8 +57,30 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
         additionalImages: product.additionalImages || [],
         specs: product.specs || {},
       });
+
+      if (product.specs) {
+        const entries = Object.entries(product.specs as Record<string, string>).map(([key, value]) => ({
+          key,
+          value,
+        }));
+        setSpecEntries(entries);
+      }
     }
   }, [product, form]);
+
+  const addSpec = () => {
+    setSpecEntries([...specEntries, { key: "", value: "" }]);
+  };
+
+  const removeSpec = (index: number) => {
+    setSpecEntries(specEntries.filter((_, i) => i !== index));
+  };
+
+  const updateSpec = (index: number, field: "key" | "value", value: string) => {
+    const newSpecs = [...specEntries];
+    newSpecs[index][field] = value;
+    setSpecEntries(newSpecs);
+  };
 
   const updateMutation = useMutation({
     mutationFn: async (values: InsertProduct) => {
@@ -149,7 +172,15 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
       return;
     }
 
-    updateMutation.mutate({ ...data, imageUrl });
+    // Convert spec entries to object
+    const specs: Record<string, string> = {};
+    specEntries.forEach(entry => {
+      if (entry.key.trim()) {
+        specs[entry.key.trim()] = entry.value.trim();
+      }
+    });
+
+    updateMutation.mutate({ ...data, imageUrl, specs });
   };
 
   if (isLoadingProduct) {
@@ -349,6 +380,46 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
                   </FormItem>
                 )}
               />
+            </div>
+
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <FormLabel className="text-base">Technical Specifications</FormLabel>
+                <Button type="button" variant="outline" size="sm" onClick={addSpec} className="hover-elevate">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Spec
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {specEntries.map((spec, index) => (
+                  <div key={index} className="flex gap-3">
+                    <Input
+                      placeholder="e.g. Chip"
+                      value={spec.key}
+                      onChange={(e) => updateSpec(index, "key", e.target.value)}
+                      className="flex-1"
+                    />
+                    <Input
+                      placeholder="e.g. A19 Pro"
+                      value={spec.value}
+                      onChange={(e) => updateSpec(index, "value", e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeSpec(index)}
+                      className="text-destructive hover:text-destructive/90"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                {specEntries.length === 0 && (
+                  <p className="text-sm text-muted-foreground italic">No specifications added yet.</p>
+                )}
+              </div>
             </div>
 
             <Button 
