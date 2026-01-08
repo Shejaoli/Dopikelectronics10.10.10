@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { Button } from "@/components/ui/button";
 import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
