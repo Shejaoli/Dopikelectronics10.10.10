@@ -15,9 +15,10 @@ import { formatCurrency } from "@/lib/utils";
 
 interface AdminProductsProps {
   onAddClick: () => void;
+  onEditClick: (productId: number) => void;
 }
 
-export default function AdminProducts({ onAddClick }: AdminProductsProps) {
+export default function AdminProducts({ onAddClick, onEditClick }: AdminProductsProps) {
   const { data: products, isLoading } = useProducts();
 
   if (isLoading) {
@@ -84,7 +85,12 @@ export default function AdminProducts({ onAddClick }: AdminProductsProps) {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={() => onEditClick(product.id)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">

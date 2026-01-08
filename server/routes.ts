@@ -87,6 +87,17 @@ export async function registerRoutes(
     res.json(product);
   });
 
+  app.patch("/api/products/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const data = insertProductSchema.partial().parse(req.body);
+      const updated = await storage.updateProduct(id, data);
+      res.json(updated);
+    } catch (error) {
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid data" });
+    }
+  });
+
   // Seed data endpoint (internal use or auto-run)
   await seedDatabase();
 

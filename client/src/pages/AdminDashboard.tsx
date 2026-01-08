@@ -9,12 +9,14 @@ import { useToast } from "@/hooks/use-toast";
 import type { Admin } from "@shared/schema";
 import AdminProducts from "./AdminProducts";
 import AdminAddProduct from "./AdminAddProduct";
+import AdminEditProduct from "./AdminEditProduct";
 
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
 
   const { data: admin, isLoading, error } = useQuery<Admin>({
     queryKey: ["/api/admin/me"],
@@ -99,10 +101,18 @@ export default function AdminDashboard() {
           
           <main className="flex-1 overflow-auto p-6">
             {activeTab === "Products" ? (
-              showAddProduct ? (
+              editingProductId ? (
+                <AdminEditProduct 
+                  productId={editingProductId} 
+                  onBack={() => setEditingProductId(null)} 
+                />
+              ) : showAddProduct ? (
                 <AdminAddProduct onBack={() => setShowAddProduct(false)} />
               ) : (
-                <AdminProducts onAddClick={() => setShowAddProduct(true)} />
+                <AdminProducts 
+                  onAddClick={() => setShowAddProduct(true)} 
+                  onEditClick={(id) => setEditingProductId(id)}
+                />
               )
             ) : (
               <div className="grid gap-6">
