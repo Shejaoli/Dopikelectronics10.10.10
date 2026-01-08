@@ -36,6 +36,7 @@ export function Footer() {
               <li><Link href="/shop"><span className="cursor-pointer text-muted-foreground hover:text-primary">Shop Now</span></Link></li>
               <li><Link href="/about"><span className="cursor-pointer text-muted-foreground hover:text-primary">About Us</span></Link></li>
               <li><Link href="/contact"><span className="cursor-pointer text-muted-foreground hover:text-primary">Contact</span></Link></li>
+              <li><Link href="/admin/login"><span className="cursor-pointer text-muted-foreground hover:text-primary">Admin Login</span></Link></li>
             </ul>
           </div>
 
