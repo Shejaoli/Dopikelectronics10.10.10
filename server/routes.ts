@@ -117,6 +117,23 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const { status } = req.body;
+      const validStatuses = ["pending", "paid", "delivered", "cancelled"];
+      
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const updated = await storage.updateOrderStatus(id, status);
+      res.json(updated);
+    } catch (error) {
+      res.status(404).json({ message: error instanceof Error ? error.message : "Order not found" });
+    }
+  });
+
   // Seed data endpoint (internal use or auto-run)
   await seedDatabase();
 

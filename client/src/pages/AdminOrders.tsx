@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -8,12 +8,36 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Order } from "@shared/schema";
 import { format } from "date-fns";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminOrders() {
+  const { toast } = useToast();
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ["/api/orders"],
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      await apiRequest("PATCH", `/api/orders/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({
+        title: "Order updated",
+        description: "The order status has been successfully updated.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Update failed",
+        description: error.message,
+      });
+    },
   });
 
   if (isLoading) {
@@ -66,9 +90,25 @@ export default function AdminOrders() {
                   }).format(order.totalAmount)}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={getStatusColor(order.status) as any}>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                  </Badge>
+                  <Select
+                    defaultValue={order.status}
+                    onValueChange={(value) => statusMutation.mutate({ id: order.id, status: value })}
+                    disabled={statusMutation.isPending}
+                  >
+                    <SelectTrigger className="w-[130px] h-8">
+                      <SelectValue>
+                        <Badge variant={getStatusColor(order.status) as any}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </Badge>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="delivered">Delivered</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {format(new Date(order.createdAt), "MMM d, yyyy")}
