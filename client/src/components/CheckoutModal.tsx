@@ -38,13 +38,26 @@ export function CheckoutModal({ product, open, onOpenChange }: CheckoutModalProp
       }
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (order) => {
       toast({
         title: "Order placed successfully!",
-        description: "We will contact you shortly to confirm your purchase.",
+        description: "Redirecting to WhatsApp for confirmation...",
       });
+      
+      const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
+      };
+
+      const message = `Hello DOPIK ELECTRONICS, my name is ${order.customerName}. I have placed an order for ${product.name}. Total amount: ${formatPrice(order.totalAmount)}. Order ID: #${order.id}. Thank you.`;
+      const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
+      
       onOpenChange(false);
       form.reset();
+
+      // Small delay to ensure toast is visible before redirect
+      setTimeout(() => {
+        window.open(whatsappUrl, "_blank");
+      }, 1000);
     },
     onError: (error: Error) => {
       toast({
