@@ -7,6 +7,7 @@ export interface IStorage {
   getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
   
   // Admin methods
   getAdminByEmail(email: string): Promise<Admin | undefined>;
@@ -53,6 +54,14 @@ export class DatabaseStorage implements IStorage {
       .returning();
     if (!updatedProduct) throw new Error("Product not found");
     return updatedProduct;
+  }
+
+  async deleteProduct(id: number): Promise<void> {
+    const [deletedProduct] = await db
+      .delete(products)
+      .where(eq(products.id, id))
+      .returning();
+    if (!deletedProduct) throw new Error("Product not found");
   }
 
   async getAdminByEmail(email: string): Promise<Admin | undefined> {

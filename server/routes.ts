@@ -98,6 +98,16 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/products/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      await storage.deleteProduct(id);
+      res.sendStatus(200);
+    } catch (error) {
+      res.status(404).json({ message: error instanceof Error ? error.message : "Product not found" });
+    }
+  });
+
   // Seed data endpoint (internal use or auto-run)
   await seedDatabase();
 

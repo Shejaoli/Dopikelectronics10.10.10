@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Plus } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminProductsProps {
   onAddClick: () => void;
@@ -20,6 +23,33 @@ interface AdminProductsProps {
 
 export default function AdminProducts({ onAddClick, onEditClick }: AdminProductsProps) {
   const { data: products, isLoading } = useProducts();
+  const { toast } = useToast();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/products/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      toast({
+        title: "Product deleted",
+        description: "The product has been successfully removed.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Delete failed",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleDelete = (id: number) => {
+    if (confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -93,7 +123,13 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-destructive"
+                      onClick={() => handleDelete(product.id)}
+                      disabled={deleteMutation.isPending}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
