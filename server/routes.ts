@@ -43,12 +43,21 @@ export async function registerRoutes(
   // Serve uploaded files
   app.use("/uploads", express.static("public/uploads"));
 
-  app.post("/api/upload", requireAdminAuth, upload.single("image"), (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-    const imageUrl = `/uploads/products/${req.file.filename}`;
-    res.json({ url: imageUrl });
+  app.post("/api/upload", requireAdminAuth, (req, res, next) => {
+    upload.single("image")(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ message: `Multer error: ${err.message}` });
+      } else if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+      
+      const imageUrl = `/uploads/products/${req.file.filename}`;
+      res.status(200).json({ url: imageUrl });
+    });
   });
 
   app.get("/api/admin/protected", requireAdminAuth, (req, res) => {
