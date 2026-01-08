@@ -131,7 +131,7 @@ export async function registerRoutes(
     res.json(product);
   });
 
-  app.patch("/api/products/:id", requireAdminAuth, async (req, res) => {
+  app.patch("/api/products/:id", requireAdminAuth, express.json(), async (req, res) => {
     try {
       const id = Number(req.params.id);
       const data = insertProductSchema.partial().parse(req.body);
@@ -139,6 +139,16 @@ export async function registerRoutes(
       res.json(updated);
     } catch (error) {
       res.status(400).json({ message: error instanceof Error ? error.message : "Invalid data" });
+    }
+  });
+
+  app.post("/api/products", requireAdminAuth, express.json(), async (req, res) => {
+    try {
+      const data = insertProductSchema.parse(req.body);
+      const product = await storage.createProduct(data);
+      res.status(201).json(product);
+    } catch (error) {
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid product data" });
     }
   });
 

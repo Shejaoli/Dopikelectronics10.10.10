@@ -83,7 +83,11 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Upload error response:", errorText);
+        throw new Error("Upload failed");
+      }
 
       const data = await res.json();
       form.setValue("imageUrl", data.url);
@@ -105,17 +109,19 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
     const file = fileInput?.files?.[0];
     
     let imageUrl = data.imageUrl;
-    if (file) {
+    
+    // Only upload if it's a data URL (newly selected but not yet uploaded)
+    if (file && imageUrl.startsWith("data:")) {
       const uploadedUrl = await handleImageUpload(file);
       if (!uploadedUrl) return;
       imageUrl = uploadedUrl;
     }
 
-    if (!imageUrl) {
+    if (!imageUrl || imageUrl.startsWith("data:")) {
       toast({
         variant: "destructive",
         title: "Image required",
-        description: "Please upload a product image.",
+        description: "Please upload the product image first.",
       });
       return;
     }
