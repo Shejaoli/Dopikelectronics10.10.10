@@ -7,10 +7,12 @@ import { LayoutDashboard, Package, ShoppingCart, LogOut } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Admin } from "@shared/schema";
+import AdminProducts from "./AdminProducts";
 
 export default function AdminDashboard() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("Dashboard");
 
   const { data: admin, isLoading, error } = useQuery<Admin>({
     queryKey: ["/api/admin/me"],
@@ -60,7 +62,10 @@ export default function AdminDashboard() {
                 <SidebarMenu>
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton>
+                      <SidebarMenuButton 
+                        onClick={() => setActiveTab(item.title)}
+                        isActive={activeTab === item.title}
+                      >
                         <item.icon className="w-4 h-4 mr-2" />
                         <span>{item.title}</span>
                       </SidebarMenuButton>
@@ -91,11 +96,15 @@ export default function AdminDashboard() {
           </header>
           
           <main className="flex-1 overflow-auto p-6">
-            <div className="grid gap-6">
-              <div className="p-8 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground bg-muted/30">
-                Admin content will appear here
+            {activeTab === "Products" ? (
+              <AdminProducts />
+            ) : (
+              <div className="grid gap-6">
+                <div className="p-8 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground bg-muted/30">
+                  {activeTab} content will appear here
+                </div>
               </div>
-            </div>
+            )}
           </main>
         </div>
       </div>
