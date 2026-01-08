@@ -117,6 +117,16 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/orders", async (req, res) => {
+    try {
+      const data = insertOrderSchema.parse(req.body);
+      const order = await storage.createOrder(data);
+      res.status(201).json(order);
+    } catch (error) {
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid order data" });
+    }
+  });
+
   app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
     try {
       const id = Number(req.params.id);

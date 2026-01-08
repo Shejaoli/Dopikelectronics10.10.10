@@ -3,13 +3,16 @@ import { useProduct } from "@/hooks/use-products";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
-import { ArrowLeft, Check, Shield, Truck, Share2 } from "lucide-react";
+import { CheckoutModal } from "@/components/CheckoutModal";
+import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 export default function ProductDetails() {
   const [match, params] = useRoute("/product/:id");
   const id = params ? parseInt(params.id) : 0;
   const { data: product, isLoading, error } = useProduct(id);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-background text-primary">Loading...</div>;
   if (error || !product) return (
@@ -96,18 +99,32 @@ export default function ProductDetails() {
 
             {/* Actions */}
             <div className="mt-auto space-y-4">
+              <Button 
+                onClick={() => setIsCheckoutOpen(true)}
+                className="flex w-full items-center justify-center rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground transition-transform hover:scale-[1.02] shadow-lg shadow-primary/20"
+              >
+                <ShoppingBag className="mr-2 h-5 w-5" />
+                Buy Now (Direct)
+              </Button>
               <a 
                 href={whatsappUrl}
                 target="_blank" 
                 rel="noreferrer"
-                className="flex w-full items-center justify-center rounded-xl bg-[#25D366] px-8 py-4 text-lg font-bold text-white transition-transform hover:scale-[1.02] hover:bg-[#20bd5a] shadow-lg shadow-green-900/20"
+                className="flex w-full items-center justify-center rounded-xl border-2 border-[#25D366] bg-transparent px-8 py-4 text-lg font-bold text-[#25D366] transition-transform hover:scale-[1.02] hover:bg-[#25D366]/5"
               >
-                Buy Now via WhatsApp
+                Inquire on WhatsApp
               </a>
               <p className="text-center text-xs text-muted-foreground">
-                Clicking will open WhatsApp with a pre-filled message about this product.
+                Direct orders will be confirmed via phone call. WhatsApp inquiries are handled by our sales team.
               </p>
             </div>
+
+            {/* Checkout Modal */}
+            <CheckoutModal 
+              product={product} 
+              open={isCheckoutOpen} 
+              onOpenChange={setIsCheckoutOpen} 
+            />
 
             {/* Trust Indicators */}
             <div className="mt-8 grid grid-cols-3 gap-4 border-t border-border pt-8">
