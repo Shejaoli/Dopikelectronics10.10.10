@@ -5,6 +5,30 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { hashPassword, verifyPassword, requireAdminAuth } from "./auth";
 import { insertProductSchema, insertOrderSchema } from "@shared/schema";
+import multer from "multer";
+import path from "path";
+import express from "express";
+
+const storage_config = multer.diskStorage({
+  destination: "./public/uploads/products/",
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({
+  storage: storage_config,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only .jpg, .png and .webp formats allowed!"));
+    }
+  },
+});
 
 declare module "express-session" {
   interface SessionData {
@@ -16,7 +40,17 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  
+  // Serve uploaded files
+  app.use("/uploads", express.static("public/uploads"));
+
+  app.post("/api/upload", requireAdminAuth, upload.single("image"), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const imageUrl = `/uploads/products/${req.file.filename}`;
+    res.json({ url: imageUrl });
+  });
+
   app.get("/api/admin/protected", requireAdminAuth, (req, res) => {
     res.json({ message: "Access granted: You are an authenticated admin", adminId: req.session.adminId });
   });
