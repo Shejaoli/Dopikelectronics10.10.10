@@ -1,0 +1,83 @@
+DO NOT switch modes.
+DO NOT explain.
+DO NOT summarize.
+DO NOT continue past this task.
+
+You must complete ONLY ONE MICRO TASK.
+
+========================
+MICRO TASK: ADMIN SIDEBAR IMPROVEMENTS
+========================
+
+GOAL:
+Improve the Admin sidebar for better navigation clarity and usability.
+
+STRICT SCOPE:
+
+========================
+PART 1: ACTIVE MENU HIGHLIGHT
+========================
+
+- Clearly highlight the currently active menu item
+- Use:
+  - Stronger background color
+  - Accent border or indicator
+  - Font weight change
+- Active state must persist across page reloads
+- Active item must be obvious at a glance
+
+========================
+PART 2: COLLAPSIBLE SIDEBAR (OPTIONAL BUT PREFERRED)
+========================
+
+- Add ability to collapse / expand the sidebar
+- When collapsed:
+  - Show icons only
+- When expanded:
+  - Show icons + labels
+- Sidebar state should persist during navigation
+
+========================
+PART 3: ICON + LABEL CONSISTENCY
+========================
+
+- Ensure all sidebar items have:
+  - Icon
+  - Text label
+- Icons should:
+  - Be consistent in style and size
+  - Align properly with text
+- Maintain clean spacing and alignment
+
+========================
+UI REQUIREMENTS
+========================
+
+- Clean, modern, minimal look
+- Consistent with existing admin theme
+- Smooth transitions (no jarring animations)
+- Responsive on desktop and tablet
+
+FILES YOU MAY TOUCH:
+- client/src/components/admin/AdminSidebar.tsx
+- client/src/pages/admin/AdminDashboard.tsx
+- related admin layout components
+
+========================
+STRICTLY FORBIDDEN
+========================
+- Adding new pages
+- Changing routes
+- Backend changes
+- New dependencies
+- Mode switching
+
+========================
+STOP CONDITION
+========================
+- Active menu item is clearly highlighted
+- Sidebar can be collapsed/expanded (if implemented)
+- Icons and labels are clean and consistent
+- Admin navigation feels polished and professional
+
+STOP immediately after completion.

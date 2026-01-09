@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { 
+  SidebarProvider, 
+  Sidebar, 
+  SidebarContent, 
+  SidebarGroup, 
+  SidebarGroupContent, 
+  SidebarMenu, 
+  SidebarMenuItem, 
+  SidebarMenuButton,
+  SidebarTrigger,
+  SidebarHeader,
+  SidebarFooter
+} from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Package, ShoppingCart, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Admin } from "@shared/schema";
@@ -22,7 +34,6 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
-  Legend
 } from "recharts";
 
 export function formatCurrency(amount: number) {
@@ -87,23 +98,38 @@ export default function AdminDashboard() {
     { title: "Orders", icon: ShoppingCart },
   ];
 
+  const style = {
+    "--sidebar-width": "16rem",
+    "--sidebar-width-icon": "4rem",
+  };
+
   return (
-    <SidebarProvider>
+    <SidebarProvider style={style as React.CSSProperties}>
       <div className="flex h-screen w-full bg-background">
-        <Sidebar>
+        <Sidebar collapsible="icon" className="border-r">
+          <SidebarHeader className="p-4 flex items-center justify-between group-data-[collapsible=icon]:justify-center">
+            <h2 className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">DOPIK</h2>
+            <div className="hidden group-data-[collapsible=icon]:block text-xl font-bold text-primary">D</div>
+          </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupContent className="p-4">
-                <h2 className="text-xl font-bold text-primary mb-6">DOPIK</h2>
+              <SidebarGroupContent className="p-2">
                 <SidebarMenu>
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton 
                         onClick={() => setActiveTab(item.title)}
                         isActive={activeTab === item.title}
+                        className={`
+                          w-full transition-all duration-200 
+                          ${activeTab === item.title 
+                            ? "bg-primary/10 text-primary font-semibold border-r-2 border-primary rounded-none" 
+                            : "hover:bg-muted"
+                          }
+                        `}
                       >
-                        <item.icon className="w-4 h-4 mr-2" />
-                        <span>{item.title}</span>
+                        <item.icon className={`w-4 h-4 mr-2 ${activeTab === item.title ? "text-primary" : "text-muted-foreground"}`} />
+                        <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
@@ -111,23 +137,28 @@ export default function AdminDashboard() {
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
+          <SidebarFooter className="p-4 border-t group-data-[collapsible=icon]:p-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              className="w-full justify-start hover-elevate group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+            >
+              <LogOut className="w-4 h-4 mr-2 group-data-[collapsible=icon]:mr-0" />
+              <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+            </Button>
+          </SidebarFooter>
         </Sidebar>
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <header className="h-16 border-b flex items-center justify-between px-6 bg-card">
-            <h1 className="text-lg font-semibold">DOPIK ELECTRONICS – Admin</h1>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">{admin.email}</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => logoutMutation.mutate()}
-                disabled={logoutMutation.isPending}
-                className="hover-elevate"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
+              <SidebarTrigger className="hover-elevate" />
+              <h1 className="text-lg font-semibold">DOPIK ELECTRONICS – Admin</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground hidden sm:inline-block">{admin.email}</span>
             </div>
           </header>
           

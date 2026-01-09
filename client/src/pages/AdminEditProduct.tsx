@@ -368,7 +368,7 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
                       <Checkbox
-                        checked={field.value}
+                        checked={field.value ?? false}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
