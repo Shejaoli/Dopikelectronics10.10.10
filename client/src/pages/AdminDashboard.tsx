@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { LayoutDashboard, Package, ShoppingCart, LogOut } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +12,18 @@ import AdminProducts from "./AdminProducts";
 import AdminAddProduct from "./AdminAddProduct";
 import AdminEditProduct from "./AdminEditProduct";
 import AdminOrders from "./AdminOrders";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  Legend
+} from "recharts";
 
 export function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-RW", {
@@ -34,6 +47,11 @@ export default function AdminDashboard() {
 
   const { data: stats } = useQuery<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }>({
     queryKey: ["/api/admin/stats"],
+    enabled: activeTab === "Dashboard",
+  });
+
+  const { data: analytics } = useQuery<{ date: string; orders: number; revenue: number }[]>({
+    queryKey: ["/api/admin/analytics"],
     enabled: activeTab === "Dashboard",
   });
 
@@ -133,34 +151,96 @@ export default function AdminDashboard() {
             ) : (
               <div className="grid gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
-                      <ShoppingCart className="w-4 h-4" />
-                      <span className="text-sm font-medium">Total Orders</span>
-                    </div>
-                    <div className="text-2xl font-bold">{stats?.totalOrders ?? 0}</div>
-                  </div>
-                  <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
-                      <LayoutDashboard className="w-4 h-4" />
-                      <span className="text-sm font-medium">Total Revenue</span>
-                    </div>
-                    <div className="text-2xl font-bold">{formatCurrency(stats?.totalRevenue ?? 0)}</div>
-                  </div>
-                  <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
-                      <Package className="w-4 h-4" />
-                      <span className="text-sm font-medium">Products in Stock</span>
-                    </div>
-                    <div className="text-2xl font-bold">{stats?.totalProducts ?? 0}</div>
-                  </div>
-                  <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
-                      <ShoppingCart className="w-4 h-4" />
-                      <span className="text-sm font-medium">Pending Orders</span>
-                    </div>
-                    <div className="text-2xl font-bold text-primary">{stats?.pendingOrders ?? 0}</div>
-                  </div>
+                  <Card className="hover-elevate">
+                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Orders</CardTitle>
+                      <ShoppingCart className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stats?.totalOrders ?? 0}</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="hover-elevate">
+                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
+                      <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{formatCurrency(stats?.totalRevenue ?? 0)}</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="hover-elevate">
+                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Products in Stock</CardTitle>
+                      <Package className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stats?.totalProducts ?? 0}</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="hover-elevate">
+                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Pending Orders</CardTitle>
+                      <ShoppingCart className="w-4 h-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-primary">{stats?.pendingOrders ?? 0}</div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="p-4">
+                    <CardHeader>
+                      <CardTitle className="text-base font-semibold">Orders Over Time</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={analytics}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
+                          <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                          <Tooltip 
+                            contentStyle={ { backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" } }
+                            itemStyle={ { color: "hsl(var(--foreground))" } }
+                          />
+                          <Bar dataKey="orders" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="p-4">
+                    <CardHeader>
+                      <CardTitle className="text-base font-semibold">Revenue Over Time</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[300px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={analytics}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                          <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
+                          <YAxis 
+                            fontSize={12} 
+                            tickLine={false} 
+                            axisLine={false} 
+                            tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                          />
+                          <Tooltip 
+                            contentStyle={ { backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" } }
+                            formatter={(value: number) => formatCurrency(value)}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="revenue" 
+                            stroke="hsl(var(--primary))" 
+                            strokeWidth={2} 
+                            dot={ { r: 4, fill: "hsl(var(--primary))" } }
+                            activeDot={ { r: 6 } }
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
                 </div>
                 
                 <div className="p-8 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground bg-muted/30">

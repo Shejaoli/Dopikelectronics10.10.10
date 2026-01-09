@@ -229,6 +229,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/analytics", requireAdminAuth, async (_req, res) => {
+    try {
+      const analytics = await storage.getDailyAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   // Seed data logic protected to only run if database is empty
   try {
     const existingProducts = await storage.getProducts();

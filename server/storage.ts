@@ -20,6 +20,7 @@ export interface IStorage {
   updateOrderStatus(id: number, status: string): Promise<Order>;
   getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined>;
   getAdminStats(): Promise<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }>;
+  getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -125,6 +126,31 @@ export class DatabaseStorage implements IStorage {
       .reduce((sum, o) => sum + o.totalAmount, 0);
 
     return { totalOrders, totalRevenue, totalProducts, pendingOrders };
+  }
+
+  async getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>{
+    const allOrders = await db.select().from(orders);
+    
+    // Group by date
+    const dailyData: Record<string, { orders: number; revenue: number }> = {};
+    
+    allOrders.forEach(order => {
+      const date = order.createdAt.toISOString().split('T')[0];
+      
+      if (!dailyData[date]) {
+        dailyData[date] = { orders: 0, revenue: 0 };
+      }
+      
+      dailyData[date].orders += 1;
+      if (order.status === "paid" || order.status === "delivered") {
+        dailyData[date].revenue += order.totalAmount;
+      }
+    });
+
+    return Object.entries(dailyData).map(([date, data]) => ({
+      date,
+      ...data
+    })).sort((a, b) => a.date.localeCompare(b.date));
   }
 }
 
