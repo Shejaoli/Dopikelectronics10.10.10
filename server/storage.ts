@@ -3,7 +3,7 @@ import { products, admins, orders, type Product, type InsertProduct, type Admin,
 import { eq, like, and, desc } from "drizzle-orm";
 
 export interface IStorage {
-  getProducts(filters?: { category?: string; featured?: boolean; search?: string }): Promise<Product[]>;
+  getProducts(filters?: { category?: string; featured?: boolean; search?: string; stockStatus?: string }): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
@@ -15,7 +15,7 @@ export interface IStorage {
   createAdmin(admin: InsertAdmin): Promise<Admin>;
 
   // Order methods
-  getOrders(): Promise<Order[]>;
+  getOrders(filters?: { search?: string; status?: string; startDate?: string; endDate?: string }): Promise<Order[]>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order>;
   getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined>;
@@ -24,7 +24,7 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async getProducts(filters?: { category?: string; featured?: boolean; search?: string }): Promise<Product[]> {
+  async getProducts(filters?: { category?: string; featured?: boolean; search?: string; stockStatus?: string }): Promise<Product[]> {
     let conditions = [];
     
     if (filters?.category) {
@@ -35,6 +35,9 @@ export class DatabaseStorage implements IStorage {
     }
     if (filters?.search) {
       conditions.push(like(products.name, `%${filters.search}%`));
+    }
+    if (filters?.stockStatus) {
+      conditions.push(eq(products.stockStatus, filters.stockStatus));
     }
 
     if (conditions.length > 0) {
@@ -87,7 +90,70 @@ export class DatabaseStorage implements IStorage {
     return newAdmin;
   }
 
-  async getOrders(): Promise<Order[]> {
+  async getOrders(filters?: { search?: string; status?: string; startDate?: string; endDate?: string }): Promise<Order[]> {
+    let conditions = [];
+
+    if (filters?.search) {
+      conditions.push(and(
+        like(orders.customerName, `%${filters.search}%`),
+        like(orders.customerPhone, `%${filters.search}%`)
+      ));
+      // Note: In a real app we might want OR, but for simple filtering AND with customer name/phone is often used or we just check both
+      // Re-evaluating: user wants customer name OR customer phone
+    }
+
+    // Correcting search condition for OR
+    let query = db.select().from(orders);
+    
+    let searchConditions = [];
+    if (filters?.search) {
+      searchConditions.push(like(orders.customerName, `%${filters.search}%`));
+      searchConditions.push(like(orders.customerPhone, `%${filters.search}%`));
+    }
+
+    if (filters?.status) {
+      conditions.push(eq(orders.status, filters.status));
+    }
+
+    if (filters?.startDate) {
+      conditions.push(and(
+        // @ts-ignore
+        orders.createdAt >= new Date(filters.startDate)
+      ));
+    }
+
+    if (filters?.endDate) {
+      conditions.push(and(
+        // @ts-ignore
+        orders.createdAt <= new Date(filters.endDate)
+      ));
+    }
+
+    // Use drizzle's gte/lte if available, but since I'm in fast mode and want to be sure:
+    // Actually better to use proper drizzle operators
+    const { gte, lte, or } = require("drizzle-orm");
+    
+    let finalConditions = [];
+    if (filters?.search) {
+      finalConditions.push(or(
+        like(orders.customerName, `%${filters.search}%`),
+        like(orders.customerPhone, `%${filters.search}%`)
+      ));
+    }
+    if (filters?.status) {
+      finalConditions.push(eq(orders.status, filters.status));
+    }
+    if (filters?.startDate) {
+      finalConditions.push(gte(orders.createdAt, new Date(filters.startDate)));
+    }
+    if (filters?.endDate) {
+      finalConditions.push(lte(orders.createdAt, new Date(filters.endDate)));
+    }
+
+    if (finalConditions.length > 0) {
+      return await db.select().from(orders).where(and(...finalConditions)).orderBy(desc(orders.createdAt));
+    }
+
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
 

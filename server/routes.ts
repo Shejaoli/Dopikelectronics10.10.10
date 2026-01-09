@@ -119,7 +119,8 @@ export async function registerRoutes(
     const category = req.query.category as string;
     const featured = req.query.featured === 'true';
     const search = req.query.search as string;
-    const products = await storage.getProducts({ category, featured, search });
+    const stockStatus = req.query.stockStatus as string;
+    const products = await storage.getProducts({ category, featured, search, stockStatus });
     res.json(products);
   });
 
@@ -164,7 +165,13 @@ export async function registerRoutes(
 
   app.get("/api/orders", requireAdminAuth, async (req, res) => {
     try {
-      const orders = await storage.getOrders();
+      const { search, status, startDate, endDate } = req.query;
+      const orders = await storage.getOrders({ 
+        search: search as string, 
+        status: status as string, 
+        startDate: startDate as string, 
+        endDate: endDate as string 
+      });
       res.json(orders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });

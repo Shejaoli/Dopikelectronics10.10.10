@@ -9,11 +9,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Plus, Download, Upload } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Edit, Trash2, Plus, Download, Upload, Search, X } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useRef } from "react";
+import { useRef, useState, useMemo } from "react";
 
 export function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-RW", {
@@ -32,6 +34,31 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
   const { data: products, isLoading } = useProducts();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [stockStatus, setStockStatus] = useState("all");
+
+  const categories = useMemo(() => {
+    if (!products) return [];
+    return Array.from(new Set(products.map(p => p.category))).sort();
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = category === "all" || product.category === category;
+      const matchesStock = stockStatus === "all" || product.stockStatus === stockStatus;
+      return matchesSearch && matchesCategory && matchesStock;
+    });
+  }, [products, search, category, stockStatus]);
+
+  const clearFilters = () => {
+    setSearch("");
+    setCategory("all");
+    setStockStatus("all");
+  };
 
   const importMutation = useMutation({
     mutationFn: async (data: any[]) => {
@@ -164,6 +191,51 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
         </div>
       </div>
 
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-muted/30 p-4 rounded-lg border">
+        <div className="flex flex-1 flex-col gap-4 md:flex-row md:items-center">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              className="pl-8"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              data-testid="input-search-products"
+            />
+          </div>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={stockStatus} onValueChange={setStockStatus}>
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Stock Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="in_stock">In Stock</SelectItem>
+              <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+              <SelectItem value="pre_order">Pre-order</SelectItem>
+            </SelectContent>
+          </Select>
+          {(search || category !== "all" || stockStatus !== "all") && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 px-2 lg:px-3">
+              Reset
+              <X className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
       <div className="rounded-md border bg-card">
         <Table>
           <TableHeader>
@@ -177,7 +249,7 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products?.map((product) => (
+            {filteredProducts.map((product) => (
               <TableRow key={product.id}>
                 <TableCell>
                   <img

@@ -1,0 +1,101 @@
+DO NOT switch modes.
+DO NOT explain.
+DO NOT summarize.
+DO NOT continue past this task.
+
+You must complete ONLY ONE MICRO TASK.
+
+========================
+MICRO TASK: ADMIN SEARCH & FILTERS
+========================
+
+GOAL:
+Add professional search and filtering capabilities to the Admin Products and Orders pages.
+
+STRICT SCOPE:
+
+========================
+PART 1: PRODUCTS PAGE
+========================
+
+Add the following controls at the top of the Admin Products page:
+
+1. 🔍 SEARCH
+- Search input to filter products by:
+  - product name
+- Search should update results dynamically
+
+2. FILTERS
+- Category filter (dropdown)
+  - List all existing product categories
+- Stock status filter (dropdown)
+  - In Stock
+  - Out of Stock
+  - Pre-order (if applicable)
+
+3. BEHAVIOR
+- Filters can be combined
+- Clearing filters restores full list
+- No page reloads
+
+FILES YOU MAY TOUCH:
+- client/src/pages/admin/AdminProducts.tsx
+- server/routes.ts (optional query params)
+- server/storage.ts (filter helpers)
+
+========================
+PART 2: ORDERS PAGE
+========================
+
+Add the following controls at the top of the Admin Orders page:
+
+1. 🔍 SEARCH
+- Search orders by:
+  - customer name
+  - customer phone number
+
+2. FILTERS
+- Order status filter (dropdown):
+  - Pending
+  - Paid
+  - Delivered
+  - Canceled
+- Date range filter:
+  - Start date
+  - End date
+
+3. BEHAVIOR
+- Filters can be combined
+- Date range filters orders by creation date
+- Clearing filters restores full list
+- Results update dynamically
+
+FILES YOU MAY TOUCH:
+- client/src/pages/admin/AdminOrders.tsx
+- server/routes.ts (optional query params)
+- server/storage.ts (filter helpers)
+
+========================
+UI REQUIREMENTS
+========================
+- Clean, minimal UI
+- Consistent with existing admin design
+- Responsive on mobile and desktop
+
+========================
+STRICTLY FORBIDDEN
+========================
+- Database schema changes
+- Pagination
+- Export features
+- Mode switching
+
+========================
+STOP CONDITION
+========================
+- Admin can search and filter products
+- Admin can search and filter orders
+- Filters work together correctly
+- UX feels fast and professional
+
+STOP immediately after completion.
