@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { products, admins, orders, type Product, type InsertProduct, type Admin, type InsertAdmin, type Order, type InsertOrder } from "@shared/schema";
-import { eq, like, and, desc } from "drizzle-orm";
+import { eq, like, and, desc, gte, lte, or } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(filters?: { category?: string; featured?: boolean; search?: string; stockStatus?: string }): Promise<Product[]>;
@@ -129,10 +129,6 @@ export class DatabaseStorage implements IStorage {
       ));
     }
 
-    // Use drizzle's gte/lte if available, but since I'm in fast mode and want to be sure:
-    // Actually better to use proper drizzle operators
-    const { gte, lte, or } = require("drizzle-orm");
-    
     let finalConditions = [];
     if (filters?.search) {
       finalConditions.push(or(
