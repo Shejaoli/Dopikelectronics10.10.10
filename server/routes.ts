@@ -198,6 +198,28 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/products/import", requireAdminAuth, express.json({ limit: '10mb' }), async (req, res) => {
+    try {
+      const items = z.array(insertProductSchema).parse(req.body);
+      let importedCount = 0;
+      let skippedCount = 0;
+
+      for (const item of items) {
+        const existing = await storage.getProductByNameAndBrand(item.name, item.brand);
+        if (!existing) {
+          await storage.createProduct(item);
+          importedCount++;
+        } else {
+          skippedCount++;
+        }
+      }
+
+      res.json({ message: `Import successful: ${importedCount} products imported, ${skippedCount} skipped.`, importedCount, skippedCount });
+    } catch (error) {
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid import data" });
+    }
+  });
+
   // Seed data logic protected to only run if database is empty
   try {
     const existingProducts = await storage.getProducts();

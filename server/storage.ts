@@ -18,6 +18,7 @@ export interface IStorage {
   getOrders(): Promise<Order[]>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order>;
+  getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -101,6 +102,14 @@ export class DatabaseStorage implements IStorage {
       .returning();
     if (!updatedOrder) throw new Error("Order not found");
     return updatedOrder;
+  }
+
+  async getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined> {
+    const [product] = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.name, name), eq(products.brand, brand)));
+    return product;
   }
 }
 

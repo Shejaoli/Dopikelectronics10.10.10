@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Plus } from "lucide-react";
+import { Edit, Trash2, Plus, Download, Upload } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useRef } from "react";
 
 interface AdminProductsProps {
   onAddClick: () => void;
@@ -24,6 +25,65 @@ interface AdminProductsProps {
 export default function AdminProducts({ onAddClick, onEditClick }: AdminProductsProps) {
   const { data: products, isLoading } = useProducts();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const importMutation = useMutation({
+    mutationFn: async (data: any[]) => {
+      const res = await apiRequest("POST", "/api/admin/products/import", data);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      toast({
+        title: "Import successful",
+        description: data.message,
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Import failed",
+        description: error.message,
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    },
+  });
+
+  const handleExport = () => {
+    if (!products) return;
+    const dataStr = JSON.stringify(products, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = 'products_export.json';
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const data = JSON.parse(content);
+        if (!Array.isArray(data)) {
+          throw new Error("Invalid file format: Expected an array of products");
+        }
+        importMutation.mutate(data);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Import failed",
+          description: error instanceof Error ? error.message : "Invalid JSON file",
+        });
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -63,10 +123,39 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Products</h2>
-        <Button onClick={onAddClick} className="hover-elevate active-elevate-2">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Product
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleExport} 
+            className="hover-elevate active-elevate-2"
+            disabled={!products || products.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+          <div className="relative">
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleImport}
+              className="hidden"
+              ref={fileInputRef}
+            />
+            <Button 
+              variant="outline" 
+              onClick={() => fileInputRef.current?.click()} 
+              className="hover-elevate active-elevate-2"
+              disabled={importMutation.isPending}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              {importMutation.isPending ? "Importing..." : "Import"}
+            </Button>
+          </div>
+          <Button onClick={onAddClick} className="hover-elevate active-elevate-2">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-md border bg-card">
