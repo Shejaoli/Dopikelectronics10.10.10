@@ -159,7 +159,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrder(order: InsertOrder): Promise<Order> {
-    const [newOrder] = await db.insert(orders).values(order).returning();
+    const [newOrder] = await db.insert(orders).values({
+      customerName: order.customerName,
+      customerPhone: order.customerPhone,
+      totalAmount: order.totalAmount,
+      status: order.status || "pending",
+      items: order.items || [],
+    }).returning();
     return newOrder;
   }
 

@@ -65,6 +65,10 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
     return Array.from(new Set(products.map(p => p.category))).sort();
   }, [products]);
 
+  const handleDelete = (id: number) => {
+    deleteMutation.mutate(id);
+  };
+
   const sortedAndFilteredProducts = useMemo(() => {
     if (!products) return [];
     
