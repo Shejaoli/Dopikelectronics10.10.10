@@ -352,9 +352,24 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="in_stock">In Stock</SelectItem>
-                        <SelectItem value="out_of_stock">Out of Stock</SelectItem>
-                        <SelectItem value="pre_order">Pre-Order</SelectItem>
+                        <SelectItem value="in_stock">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-green-500" />
+                            In Stock
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="pre_order">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-yellow-500" />
+                            Low Stock
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="out_of_stock">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-red-500" />
+                            Out of Stock
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

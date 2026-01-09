@@ -191,8 +191,37 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
     },
   });
 
-  const handleDelete = (id: number) => {
-    deleteMutation.mutate(id);
+  const getStockBadge = (status: string) => {
+    switch (status) {
+      case "in_stock":
+        return (
+          <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 border-green-200 shadow-none gap-1.5 py-0.5 px-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+            In Stock
+          </Badge>
+        );
+      case "out_of_stock":
+        return (
+          <Badge variant="destructive" className="shadow-none gap-1.5 py-0.5 px-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            Out of Stock
+          </Badge>
+        );
+      case "pre_order":
+        return (
+          <Badge className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border-yellow-200 shadow-none gap-1.5 py-0.5 px-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
+            Low Stock
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="secondary" className="shadow-none gap-1.5 py-0.5 px-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+            {status.replace("_", " ")}
+          </Badge>
+        );
+    }
   };
 
   if (isLoading) {
@@ -336,17 +365,7 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
                     {formatCurrency(product.price)}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        product.stockStatus === "in_stock"
-                          ? "default"
-                          : product.stockStatus === "out_of_stock"
-                          ? "destructive"
-                          : "secondary"
-                      }
-                    >
-                      {product.stockStatus.replace("_", " ")}
-                    </Badge>
+                    {getStockBadge(product.stockStatus)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
