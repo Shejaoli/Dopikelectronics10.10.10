@@ -11,7 +11,14 @@ import AdminProducts from "./AdminProducts";
 import AdminAddProduct from "./AdminAddProduct";
 import AdminEditProduct from "./AdminEditProduct";
 import AdminOrders from "./AdminOrders";
-import { formatCurrency } from "@/lib/utils";
+
+export function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("en-RW", {
+    style: "currency",
+    currency: "RWF",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
 
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
@@ -25,7 +32,7 @@ export default function AdminDashboard() {
     retry: false,
   });
 
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }>({
     queryKey: ["/api/admin/stats"],
     enabled: activeTab === "Dashboard",
   });
@@ -61,11 +68,6 @@ export default function AdminDashboard() {
     { title: "Products", icon: Package },
     { title: "Orders", icon: ShoppingCart },
   ];
-
-  const { data: stats } = useQuery({
-    queryKey: ["/api/admin/stats"],
-    enabled: activeTab === "Dashboard",
-  });
 
   return (
     <SidebarProvider>

@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useProducts } from "@/hooks/use-products";
 import {
   Table,
@@ -11,11 +10,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Plus, Download, Upload } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useRef } from "react";
+
+export function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("en-RW", {
+    style: "currency",
+    currency: "RWF",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
 
 interface AdminProductsProps {
   onAddClick: () => void;
@@ -183,11 +189,7 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>{product.category}</TableCell>
                 <TableCell>
-                  {new Intl.NumberFormat("en-RW", {
-                    style: "currency",
-                    currency: "RWF",
-                    maximumFractionDigits: 0,
-                  }).format(product.price)}
+                  {formatCurrency(product.price)}
                 </TableCell>
                 <TableCell>
                   <Badge
