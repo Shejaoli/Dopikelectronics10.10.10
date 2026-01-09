@@ -22,7 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Edit, Trash2, Plus, Download, Upload, Search, X } from "lucide-react";
+import { Edit, Trash2, Plus, Download, Upload, Search, X, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +41,9 @@ interface AdminProductsProps {
   onEditClick: (productId: number) => void;
 }
 
+type SortField = "name" | "price" | "stockStatus" | "category";
+type SortOrder = "asc" | "desc";
+
 export default function AdminProducts({ onAddClick, onEditClick }: AdminProductsProps) {
   const { data: products, isLoading } = useProducts();
   const { toast } = useToast();
@@ -49,26 +52,65 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [stockStatus, setStockStatus] = useState("all");
+  
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const categories = useMemo(() => {
     if (!products) return [];
     return Array.from(new Set(products.map(p => p.category))).sort();
   }, [products]);
 
-  const filteredProducts = useMemo(() => {
+  const sortedAndFilteredProducts = useMemo(() => {
     if (!products) return [];
-    return products.filter(product => {
+    
+    let filtered = products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = category === "all" || product.category === category;
       const matchesStock = stockStatus === "all" || product.stockStatus === stockStatus;
       return matchesSearch && matchesCategory && matchesStock;
     });
-  }, [products, search, category, stockStatus]);
+
+    return filtered.sort((a, b) => {
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
+      
+      if (typeof aValue === "string") aValue = aValue.toLowerCase();
+      if (typeof bValue === "string") bValue = bValue.toLowerCase();
+
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [products, search, category, stockStatus, sortField, sortOrder]);
+
+  const totalPages = Math.ceil(sortedAndFilteredProducts.length / itemsPerPage);
+  const paginatedProducts = sortedAndFilteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
 
   const clearFilters = () => {
     setSearch("");
     setCategory("all");
     setStockStatus("all");
+    setCurrentPage(1);
+  };
+
+  const SortIndicator = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return null;
+    return sortOrder === "asc" ? <ChevronUp className="ml-1 h-4 w-4 inline" /> : <ChevronDown className="ml-1 h-4 w-4 inline" />;
   };
 
   const importMutation = useMutation({
@@ -245,91 +287,161 @@ export default function AdminProducts({ onAddClick, onEditClick }: AdminProducts
         </div>
       </div>
 
-      <div className="rounded-md border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80px]">Image</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Stock Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>
-                  <img
-                    src={product.imageUrl}
-                    alt={product.name}
-                    className="h-10 w-10 rounded-md object-cover border"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell>
-                  {formatCurrency(product.price)}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      product.stockStatus === "in_stock"
-                        ? "default"
-                        : product.stockStatus === "out_of_stock"
-                        ? "destructive"
-                        : "secondary"
-                    }
-                  >
-                    {product.stockStatus.replace("_", " ")}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={() => onEditClick(product.id)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-destructive"
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this product? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(product.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </TableCell>
+      <div className="rounded-md border bg-card overflow-hidden">
+        <div className="overflow-x-auto relative max-h-[600px]">
+          <Table>
+            <TableHeader className="sticky top-0 z-10 bg-card shadow-sm">
+              <TableRow>
+                <TableHead className="w-[80px]">Image</TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:text-primary transition-colors"
+                  onClick={() => toggleSort("name")}
+                >
+                  Name <SortIndicator field="name" />
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:text-primary transition-colors"
+                  onClick={() => toggleSort("category")}
+                >
+                  Category <SortIndicator field="category" />
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:text-primary transition-colors"
+                  onClick={() => toggleSort("price")}
+                >
+                  Price <SortIndicator field="price" />
+                </TableHead>
+                <TableHead 
+                  className="cursor-pointer hover:text-primary transition-colors"
+                  onClick={() => toggleSort("stockStatus")}
+                >
+                  Stock Status <SortIndicator field="stockStatus" />
+                </TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paginatedProducts.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-10 w-10 rounded-md object-cover border"
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{product.category}</TableCell>
+                  <TableCell>
+                    {formatCurrency(product.price)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        product.stockStatus === "in_stock"
+                          ? "default"
+                          : product.stockStatus === "out_of_stock"
+                          ? "destructive"
+                          : "secondary"
+                      }
+                    >
+                      {product.stockStatus.replace("_", " ")}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8"
+                        onClick={() => onEditClick(product.id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-destructive"
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this product? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(product.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {paginatedProducts.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    No products found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/20">
+            <div className="text-sm text-muted-foreground">
+              Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedAndFilteredProducts.length)} of {sortedAndFilteredProducts.length} items
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

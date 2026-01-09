@@ -1,0 +1,96 @@
+DO NOT switch modes.
+DO NOT explain.
+DO NOT summarize.
+DO NOT continue past this task.
+
+You must complete ONLY ONE MICRO TASK.
+
+========================
+MICRO TASK: ADMIN TABLE USABILITY
+========================
+
+GOAL:
+Improve usability of admin tables (Products & Orders) for large datasets.
+
+STRICT SCOPE:
+
+========================
+PART 1: STICKY TABLE HEADERS
+========================
+
+- Make table headers sticky while scrolling
+- Header should:
+  - Stay visible at the top
+  - Maintain background color
+  - Not overlap table rows
+
+APPLY TO:
+- Products table
+- Orders table
+
+========================
+PART 2: PAGINATION
+========================
+
+- Add pagination to tables
+- Default:
+  - 10 items per page
+- Controls:
+  - Next / Previous
+  - Page numbers (if simple)
+- Pagination must:
+  - Update dynamically
+  - Preserve filters and search state
+
+========================
+PART 3: SORTING
+========================
+
+PRODUCTS TABLE:
+Allow sorting by:
+- Price
+- Date created
+- Stock status
+
+ORDERS TABLE (if applicable):
+Allow sorting by:
+- Date
+- Total amount
+- Status
+
+SORTING BEHAVIOR:
+- Click column header to sort
+- Toggle ascending / descending
+- Visual indicator for active sort
+
+========================
+UI REQUIREMENTS
+========================
+
+- Clean, minimal controls
+- Consistent with admin design
+- Responsive behavior
+- No layout shifts
+
+FILES YOU MAY TOUCH:
+- client/src/pages/admin/AdminProducts.tsx
+- client/src/pages/admin/AdminOrders.tsx
+- shared table components (if any)
+
+========================
+STRICTLY FORBIDDEN
+========================
+- Database schema changes
+- Backend logic changes (client-side sorting/pagination is acceptable)
+- Adding external table libraries
+- Mode switching
+
+========================
+STOP CONDITION
+========================
+- Table headers stay visible when scrolling
+- Pagination works correctly
+- Sorting works and is intuitive
+- Tables remain fast and readable with many items
+
+STOP immediately after completion.
