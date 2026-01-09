@@ -198,8 +198,22 @@ export async function registerRoutes(
     }
   });
 
-  // Seed data endpoint (internal use or auto-run)
-  await seedDatabase();
+  // Seed data logic protected to only run if database is empty
+  try {
+    const existingProducts = await storage.getProducts();
+    const existingAdmins = await storage.getAdminByEmail("admin@dopik.com");
+    
+    if (existingProducts.length === 0 || !existingAdmins) {
+      console.log("Database empty or missing admin, running seed logic...");
+      await seedDatabase();
+    } else {
+      console.log("Database already initialized, skipping seed.");
+    }
+  } catch (error) {
+    console.error("Error checking database status during startup:", error);
+    // Attempt to seed anyway if check fails (might be first run with empty tables)
+    await seedDatabase();
+  }
 
   return httpServer;
 }
@@ -277,6 +291,7 @@ async function seedDatabase() {
     ];
 
     for (const product of seedProducts) {
+      // @ts-ignore - Specs type compatibility for seed data
       await storage.createProduct(product);
     }
   }
