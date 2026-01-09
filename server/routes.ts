@@ -220,6 +220,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/stats", requireAdminAuth, async (_req, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch admin stats" });
+    }
+  });
+
   // Seed data logic protected to only run if database is empty
   try {
     const existingProducts = await storage.getProducts();

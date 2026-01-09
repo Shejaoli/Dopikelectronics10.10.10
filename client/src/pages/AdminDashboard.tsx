@@ -11,6 +11,7 @@ import AdminProducts from "./AdminProducts";
 import AdminAddProduct from "./AdminAddProduct";
 import AdminEditProduct from "./AdminEditProduct";
 import AdminOrders from "./AdminOrders";
+import { formatCurrency } from "@/lib/utils";
 
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
@@ -22,6 +23,11 @@ export default function AdminDashboard() {
   const { data: admin, isLoading, error } = useQuery<Admin>({
     queryKey: ["/api/admin/me"],
     retry: false,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["/api/admin/stats"],
+    enabled: activeTab === "Dashboard",
   });
 
   useEffect(() => {
@@ -55,6 +61,11 @@ export default function AdminDashboard() {
     { title: "Products", icon: Package },
     { title: "Orders", icon: ShoppingCart },
   ];
+
+  const { data: stats } = useQuery({
+    queryKey: ["/api/admin/stats"],
+    enabled: activeTab === "Dashboard",
+  });
 
   return (
     <SidebarProvider>
@@ -119,8 +130,39 @@ export default function AdminDashboard() {
               <AdminOrders />
             ) : (
               <div className="grid gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
+                      <ShoppingCart className="w-4 h-4" />
+                      <span className="text-sm font-medium">Total Orders</span>
+                    </div>
+                    <div className="text-2xl font-bold">{stats?.totalOrders ?? 0}</div>
+                  </div>
+                  <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span className="text-sm font-medium">Total Revenue</span>
+                    </div>
+                    <div className="text-2xl font-bold">{formatCurrency(stats?.totalRevenue ?? 0)}</div>
+                  </div>
+                  <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
+                      <Package className="w-4 h-4" />
+                      <span className="text-sm font-medium">Products in Stock</span>
+                    </div>
+                    <div className="text-2xl font-bold">{stats?.totalProducts ?? 0}</div>
+                  </div>
+                  <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
+                    <div className="flex items-center gap-3 text-muted-foreground mb-2">
+                      <ShoppingCart className="w-4 h-4" />
+                      <span className="text-sm font-medium">Pending Orders</span>
+                    </div>
+                    <div className="text-2xl font-bold text-primary">{stats?.pendingOrders ?? 0}</div>
+                  </div>
+                </div>
+                
                 <div className="p-8 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground bg-muted/30">
-                  {activeTab} content will appear here
+                  Welcome to the Admin Dashboard. Select a tab from the sidebar to manage your store.
                 </div>
               </div>
             )}

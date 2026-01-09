@@ -19,6 +19,7 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order>;
   getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined>;
+  getAdminStats(): Promise<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -110,6 +111,20 @@ export class DatabaseStorage implements IStorage {
       .from(products)
       .where(and(eq(products.name, name), eq(products.brand, brand)));
     return product;
+  }
+
+  async getAdminStats(): Promise<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }> {
+    const allOrders = await db.select().from(orders);
+    const allProducts = await db.select().from(products);
+    
+    const totalOrders = allOrders.length;
+    const totalProducts = allProducts.length;
+    const pendingOrders = allOrders.filter(o => o.status === "pending").length;
+    const totalRevenue = allOrders
+      .filter(o => o.status === "paid" || o.status === "delivered")
+      .reduce((sum, o) => sum + o.totalAmount, 0);
+
+    return { totalOrders, totalRevenue, totalProducts, pendingOrders };
   }
 }
 
