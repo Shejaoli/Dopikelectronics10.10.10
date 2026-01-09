@@ -1,0 +1,83 @@
+DO NOT switch modes.
+DO NOT explain.
+DO NOT summarize.
+DO NOT continue past this task.
+
+You must complete ONLY ONE MICRO TASK.
+
+========================
+MICRO TASK: CONFIRMATION & FEEDBACK UX (ADMIN)
+========================
+
+GOAL:
+Improve admin safety and clarity by adding confirmation dialogs and toast notifications.
+
+STRICT SCOPE:
+
+========================
+PART 1: DELETE CONFIRMATION
+========================
+
+PRODUCTS:
+- Before deleting a product:
+  - Show a confirmation dialog
+  - Message example:
+    "Are you sure you want to delete this product? This action cannot be undone."
+- Allow:
+  - Confirm (Delete)
+  - Cancel (Abort action)
+
+FILES YOU MAY TOUCH:
+- client/src/pages/admin/AdminProducts.tsx
+- client/src/pages/admin/AdminEditProduct.tsx (if delete exists here)
+
+========================
+PART 2: TOAST NOTIFICATIONS
+========================
+
+Add toast notifications for the following actions:
+
+PRODUCTS:
+- "Product added successfully"
+- "Product updated successfully"
+- "Product deleted successfully"
+
+ORDERS:
+- "Order status updated successfully"
+
+GENERAL:
+- Toasts should:
+  - Appear briefly (auto-dismiss)
+  - Be non-blocking
+  - Use success / error styles appropriately
+
+========================
+UI REQUIREMENTS
+========================
+- Clean, minimal toast design
+- Consistent with existing admin UI
+- No intrusive modals except delete confirmation
+
+========================
+TECHNICAL
+========================
+- Use existing toast / notification system if present
+- Do NOT add heavy dependencies
+- Do NOT change backend logic
+
+========================
+STRICTLY FORBIDDEN
+========================
+- Database schema changes
+- Business logic changes
+- Mode switching
+
+========================
+STOP CONDITION
+========================
+- Delete actions require confirmation
+- Toasts appear on success actions
+- UX feels safe and polished
+- No accidental destructive actions
+
+STOP immediately after completion.

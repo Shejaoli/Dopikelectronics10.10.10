@@ -64,7 +64,7 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       toast({
-        title: "Product created",
+        title: "Product added successfully",
         description: "The new product has been successfully added.",
       });
       onBack();

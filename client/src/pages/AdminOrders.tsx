@@ -71,7 +71,7 @@ export default function AdminOrders() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       toast({
-        title: "Order updated",
+        title: "Order status updated successfully",
         description: "The order status has been successfully updated.",
       });
     },

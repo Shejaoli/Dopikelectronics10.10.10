@@ -95,7 +95,7 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}`] });
       toast({
-        title: "Product updated",
+        title: "Product updated successfully",
         description: "The product has been successfully updated.",
       });
       onBack();
