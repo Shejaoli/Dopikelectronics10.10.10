@@ -1,0 +1,74 @@
+DO NOT switch modes.
+DO NOT explain.
+DO NOT summarize.
+DO NOT continue past this task.
+
+You must complete ONLY ONE MICRO TASK.
+
+========================
+MICRO TASK: FIX PRODUCT DATA MISMATCH AFTER PUBLISH
+========================
+
+PROBLEM:
+Products added via the admin panel appear in development,
+but disappear or show fewer items after publishing the app.
+
+GOAL:
+Ensure ALL products added through the admin dashboard
+persist and appear identically in BOTH:
+- development
+- published (production) environment
+
+ROOT CAUSE TO FIX:
+- Initial seed logic is re-running or overriding data
+- OR production is pointing to a different database
+- OR products are conditionally filtered (e.g. featured, published flag, env-based logic)
+
+STRICT SCOPE:
+
+1. DATABASE CONSISTENCY
+- Ensure the app uses the SAME database for:
+  - development
+  - production
+- Remove any environment-based product loading differences
+
+2. SEED LOGIC SAFETY
+- Ensure seed logic:
+  - runs ONLY if the products table is completely empty
+  - NEVER overwrites or replaces existing products
+- Seed logic must NEVER run on publish if data exists
+
+3. PUBLIC SHOP QUERY
+- Public shop must:
+  - fetch ALL products from the database
+  - NOT rely on hardcoded arrays
+  - NOT filter products unless explicitly selected by category/search
+
+4. FEATURED / VISIBILITY CHECK
+- Ensure products are NOT hidden due to:
+  - featured-only filtering
+  - draft / unpublished flags
+  - dev-only conditions
+
+FILES YOU MAY TOUCH:
+- server/index.ts
+- server/routes.ts
+- server/storage.ts
+- any seed or init logic file
+- public shop product fetch logic
+
+STRICTLY FORBIDDEN:
+- Database schema changes
+- Deleting existing products
+- Hardcoding products
+- UI changes
+
+========================
+STOP CONDITION
+========================
+- Products added via admin appear after publish
+- Dev and production show the SAME product count
+- No data loss on restart or redeploy
+- Admin-added products persist permanently
+
+STOP immediately after completion.
