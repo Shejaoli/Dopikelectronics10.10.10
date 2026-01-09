@@ -16,9 +16,10 @@ import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo } from "react";
-import { Search, X, Calendar as CalendarIcon, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, X, Calendar as CalendarIcon, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, FileText, Download, Eye } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 type SortField = "id" | "customerName" | "totalAmount" | "status" | "createdAt";
 type SortOrder = "asc" | "desc";
@@ -38,6 +39,34 @@ export default function AdminOrders() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  const exportCSV = () => {
+    if (!orders) return;
+    const headers = ["Order ID", "Customer Name", "Customer Phone", "Total Amount", "Status", "Date"];
+    const csvContent = [
+      headers.join(","),
+      ...orders.map(o => [
+        o.id,
+        `"${o.customerName}"`,
+        `"${o.customerPhone}"`,
+        o.totalAmount,
+        o.status,
+        format(new Date(o.createdAt), "yyyy-MM-dd")
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `orders_export_${format(new Date(), "yyyyMMdd")}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const filteredAndSortedOrders = useMemo(() => {
     if (!orders) return [];
@@ -153,6 +182,10 @@ export default function AdminOrders() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Orders</h2>
+        <Button onClick={exportCSV} variant="outline" size="sm">
+          <Download className="w-4 h-4 mr-2" />
+          Export CSV
+        </Button>
       </div>
 
       <div className="flex flex-col gap-4 bg-muted/30 p-4 rounded-lg border">
@@ -262,6 +295,7 @@ export default function AdminOrders() {
                 >
                   Date <SortIndicator field="createdAt" />
                 </TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -300,6 +334,11 @@ export default function AdminOrders() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {format(new Date(order.createdAt), "MMM d, yyyy")}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedOrder(order)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -355,6 +394,59 @@ export default function AdminOrders() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Order Details - #{selectedOrder?.id}</DialogTitle>
+            <DialogDescription>Full details for the selected customer order.</DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4 border p-4 rounded-lg bg-muted/30">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Customer Name</p>
+                  <p className="text-base">{selectedOrder.customerName}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Customer Phone</p>
+                  <p className="text-base">{selectedOrder.customerPhone}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Order Date</p>
+                  <p className="text-base">{format(new Date(selectedOrder.createdAt), "PPpp")}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <Badge variant={getStatusColor(selectedOrder.status) as any}>
+                    {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                  </Badge>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">Order Summary</h4>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead className="text-right">Price</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>Items and quantity tracking enabled for future orders.</TableCell>
+                        <TableCell className="text-right font-bold">{new Intl.NumberFormat("en-RW", { style: "currency", currency: "RWF", maximumFractionDigits: 0 }).format(selectedOrder.totalAmount)}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

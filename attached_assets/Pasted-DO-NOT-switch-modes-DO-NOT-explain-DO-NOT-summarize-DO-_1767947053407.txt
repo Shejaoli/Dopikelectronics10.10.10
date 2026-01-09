@@ -1,0 +1,110 @@
+DO NOT switch modes.
+DO NOT explain.
+DO NOT summarize.
+DO NOT continue past this task.
+
+You must complete ONLY ONE MICRO TASK.
+
+========================
+MICRO TASK: ADVANCED ADMIN UPGRADES (FOUNDATION)
+========================
+
+GOAL:
+Lay the foundation for advanced admin features that allow the system to scale safely and professionally.
+
+STRICT SCOPE:
+
+========================
+PART 1: ROLE-BASED ACCESS (ADMIN VS STAFF)
+========================
+
+- Use existing admin role field if present
+- Define two roles:
+  - Admin: full access
+  - Staff: limited access
+- Staff users:
+  - Can view orders
+  - Can update order status
+  - Cannot delete products
+  - Cannot access settings or export
+
+- Protect routes and UI elements accordingly
+- Hide restricted actions from Staff UI
+
+========================
+PART 2: ORDER DETAILS VIEW
+========================
+
+- Add ability to view full order details:
+  - Either modal or dedicated page
+- Include:
+  - Customer info
+  - Ordered products
+  - Total amount
+  - Order status
+  - Created date
+- Accessible from Orders table via “View” action
+
+========================
+PART 3: EXPORT ORDERS
+========================
+
+- Add "Export Orders" button
+- Allow export as:
+  - CSV (required)
+  - PDF (optional)
+- Export includes:
+  - Order ID
+  - Customer name & phone
+  - Total
+  - Status
+  - Date
+
+========================
+PART 4: AUDIT LOG (BASIC)
+========================
+
+- Track basic admin actions:
+  - Product created
+  - Product edited
+  - Product deleted
+  - Order status updated
+- Store:
+  - Action type
+  - Admin email
+  - Timestamp
+- Display read-only audit list in admin
+
+========================
+PART 5: DARK MODE (ADMIN ONLY)
+========================
+
+- Add dark mode toggle for admin panel
+- Persist preference across sessions
+- Do NOT affect public website
+
+========================
+FILES YOU MAY TOUCH:
+========================
+- client/src/pages/admin/*
+- client/src/components/admin/*
+- server/routes.ts
+- server/storage.ts
+
+========================
+STRICTLY FORBIDDEN
+========================
+- Breaking existing functionality
+- Database schema changes beyond minimal additions
+- Public website changes
+- Mode switching
+
+========================
+STOP CONDITION
+========================
+- Admin system supports future scaling
+- Advanced features are functional or scaffolded
+- UX feels enterprise-ready
+- No regressions
+
+STOP immediately after completion.

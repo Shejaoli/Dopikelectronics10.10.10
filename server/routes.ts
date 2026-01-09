@@ -135,8 +135,16 @@ export async function registerRoutes(
   app.patch("/api/products/:id", requireAdminAuth, express.json(), async (req, res) => {
     try {
       const id = Number(req.params.id);
+      const admin = await storage.getAdminById(req.session.adminId!);
+      if (admin?.role === "staff") {
+        return res.status(403).json({ message: "Staff cannot edit products" });
+      }
       const data = insertProductSchema.partial().parse(req.body);
       const updated = await storage.updateProduct(id, data);
+      await storage.createAuditLog({
+        action: `Product Edited: ${updated.name}`,
+        adminEmail: admin?.email || "unknown"
+      });
       res.json(updated);
     } catch (error) {
       res.status(400).json({ message: error instanceof Error ? error.message : "Invalid data" });
@@ -145,8 +153,16 @@ export async function registerRoutes(
 
   app.post("/api/products", requireAdminAuth, express.json(), async (req, res) => {
     try {
+      const admin = await storage.getAdminById(req.session.adminId!);
+      if (admin?.role === "staff") {
+        return res.status(403).json({ message: "Staff cannot create products" });
+      }
       const data = insertProductSchema.parse(req.body);
       const product = await storage.createProduct(data);
+      await storage.createAuditLog({
+        action: `Product Created: ${product.name}`,
+        adminEmail: admin?.email || "unknown"
+      });
       res.status(201).json(product);
     } catch (error) {
       res.status(400).json({ message: error instanceof Error ? error.message : "Invalid product data" });
@@ -155,12 +171,32 @@ export async function registerRoutes(
 
   app.delete("/api/products/:id", requireAdminAuth, async (req, res) => {
     try {
+      const admin = await storage.getAdminById(req.session.adminId!);
+      if (admin?.role === "staff") {
+        return res.status(403).json({ message: "Staff cannot delete products" });
+      }
       const id = Number(req.params.id);
+      const product = await storage.getProduct(id);
       await storage.deleteProduct(id);
+      await storage.createAuditLog({
+        action: `Product Deleted: ${product?.name || id}`,
+        adminEmail: admin?.email || "unknown"
+      });
       res.sendStatus(200);
     } catch (error) {
       res.status(404).json({ message: error instanceof Error ? error.message : "Product not found" });
     }
+  });
+
+  app.get("/api/orders/:id", requireAdminAuth, async (req, res) => {
+    const order = await storage.getOrder(Number(req.params.id));
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json(order);
+  });
+
+  app.get("/api/admin/audit-logs", requireAdminAuth, async (_req, res) => {
+    const logs = await storage.getAuditLogs();
+    res.json(logs);
   });
 
   app.get("/api/orders", requireAdminAuth, async (req, res) => {
@@ -199,6 +235,11 @@ export async function registerRoutes(
       }
 
       const updated = await storage.updateOrderStatus(id, status);
+      const admin = await storage.getAdminById(req.session.adminId!);
+      await storage.createAuditLog({
+        action: `Order Status Updated: Order #${id} to ${status}`,
+        adminEmail: admin?.email || "unknown"
+      });
       res.json(updated);
     } catch (error) {
       res.status(404).json({ message: error instanceof Error ? error.message : "Order not found" });

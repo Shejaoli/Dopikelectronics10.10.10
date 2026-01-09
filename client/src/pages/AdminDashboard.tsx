@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Admin } from "@shared/schema";
@@ -24,6 +24,7 @@ import AdminProducts from "./AdminProducts";
 import AdminAddProduct from "./AdminAddProduct";
 import AdminEditProduct from "./AdminEditProduct";
 import AdminOrders from "./AdminOrders";
+import AdminAuditLog from "./AdminAuditLog";
 import { 
   BarChart, 
   Bar, 
@@ -50,6 +51,19 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [isAdminDark, setIsAdminDark] = useState(() => {
+    return localStorage.getItem("admin-theme") === "dark";
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (isAdminDark) {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    localStorage.setItem("admin-theme", isAdminDark ? "dark" : "light");
+  }, [isAdminDark]);
 
   const { data: admin, isLoading, error } = useQuery<Admin>({
     queryKey: ["/api/admin/me"],
@@ -96,6 +110,7 @@ export default function AdminDashboard() {
     { title: "Dashboard", icon: LayoutDashboard },
     { title: "Products", icon: Package },
     { title: "Orders", icon: ShoppingCart },
+    { title: "Audit Log", icon: History },
   ];
 
   const style = {
@@ -158,7 +173,17 @@ export default function AdminDashboard() {
               <h1 className="text-lg font-semibold">DOPIK ELECTRONICS – Admin</h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground hidden sm:inline-block">{admin.email}</span>
+              <span className="text-sm text-muted-foreground hidden sm:inline-block">
+                {admin.email} ({admin.role})
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsAdminDark(!isAdminDark)}
+                className="rounded-full"
+              >
+                {isAdminDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
             </div>
           </header>
           
@@ -179,6 +204,8 @@ export default function AdminDashboard() {
               )
             ) : activeTab === "Orders" ? (
               <AdminOrders />
+            ) : activeTab === "Audit Log" ? (
+              <AdminAuditLog />
             ) : (
               <div className="grid gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

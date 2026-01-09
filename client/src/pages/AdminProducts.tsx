@@ -23,10 +23,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Edit, Trash2, Plus, Download, Upload, Search, X, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useRef, useState, useMemo } from "react";
+import type { Admin } from "@shared/schema";
 
 export function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-RW", {
@@ -45,6 +46,7 @@ type SortField = "name" | "price" | "stockStatus" | "category";
 type SortOrder = "asc" | "desc";
 
 export default function AdminProducts({ onAddClick, onEditClick }: AdminProductsProps) {
+  const { data: admin } = useQuery<Admin>({ queryKey: ["/api/admin/me"] });
   const { data: products, isLoading } = useProducts();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);

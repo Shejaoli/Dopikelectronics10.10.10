@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { products, admins, orders, type Product, type InsertProduct, type Admin, type InsertAdmin, type Order, type InsertOrder } from "@shared/schema";
+import { products, admins, orders, auditLogs, type Product, type InsertProduct, type Admin, type InsertAdmin, type Order, type InsertOrder, type AuditLog, type InsertAuditLog } from "@shared/schema";
 import { eq, like, and, desc, gte, lte, or } from "drizzle-orm";
 
 export interface IStorage {
@@ -16,11 +16,16 @@ export interface IStorage {
 
   // Order methods
   getOrders(filters?: { search?: string; status?: string; startDate?: string; endDate?: string }): Promise<Order[]>;
+  getOrder(id: number): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order>;
   getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined>;
   getAdminStats(): Promise<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }>;
   getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>;
+
+  // Audit methods
+  getAuditLogs(): Promise<AuditLog[]>;
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -213,6 +218,20 @@ export class DatabaseStorage implements IStorage {
       date,
       ...data
     })).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    return order;
+  }
+
+  async getAuditLogs(): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs).orderBy(desc(auditLogs.timestamp));
+  }
+
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const [newLog] = await db.insert(auditLogs).values(log).returning();
+    return newLog;
   }
 }
 
