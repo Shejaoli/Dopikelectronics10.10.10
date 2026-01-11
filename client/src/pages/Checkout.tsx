@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag, ChevronRight, CheckCircle2, MessageCircle, Truck } from "lucide-react";
+import { ShoppingBag, ChevronRight, CheckCircle2, MessageCircle, Truck, CreditCard as CardIcon, Wallet } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
@@ -98,6 +98,9 @@ export default function Checkout() {
   const paymentForm = useForm({
     defaultValues: {
       paymentMethod: "Cash on Delivery",
+      cardNumber: "",
+      cardExpiry: "",
+      cardCvc: "",
     },
   });
 
@@ -136,7 +139,7 @@ export default function Checkout() {
     setLocation("/checkout/payment");
   };
 
-  const onPaymentSubmit = (data: { paymentMethod: string }) => {
+  const onPaymentSubmit = (data: any) => {
     if (!shippingData) {
       setLocation("/checkout/shipping");
       return;
@@ -487,6 +490,64 @@ export default function Checkout() {
                                       <p className="text-sm text-muted-foreground">Send your order details to us on WhatsApp for manual confirmation and payment instructions.</p>
                                     </div>
                                   </FormItem>
+
+                                  <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
+                                    <FormControl>
+                                      <RadioGroupItem value="Card Payment" className="mt-1" />
+                                    </FormControl>
+                                    <div className="space-y-4 w-full">
+                                      <div className="space-y-1">
+                                        <FormLabel className="font-bold text-lg flex items-center justify-between gap-2">
+                                          <div className="flex items-center gap-2">
+                                            <CardIcon className="h-5 w-5 text-primary" />
+                                            Card Payment
+                                          </div>
+                                          <div className="flex gap-1">
+                                            <div className="h-6 w-10 bg-muted rounded border border-border flex items-center justify-center text-[10px] font-bold">VISA</div>
+                                            <div className="h-6 w-10 bg-muted rounded border border-border flex items-center justify-center text-[10px] font-bold">MC</div>
+                                          </div>
+                                        </FormLabel>
+                                        <p className="text-sm text-muted-foreground">Pay securely with your credit or debit card.</p>
+                                      </div>
+                                      
+                                      {paymentForm.watch("paymentMethod") === "Card Payment" && (
+                                        <div className="grid gap-4 pt-2">
+                                          <div className="space-y-2">
+                                            <Input 
+                                              placeholder="Card Number" 
+                                              className="h-12 rounded-xl"
+                                              {...paymentForm.register("cardNumber")}
+                                            />
+                                          </div>
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <Input 
+                                              placeholder="MM/YY" 
+                                              className="h-12 rounded-xl"
+                                              {...paymentForm.register("cardExpiry")}
+                                            />
+                                            <Input 
+                                              placeholder="CVC" 
+                                              className="h-12 rounded-xl"
+                                              {...paymentForm.register("cardCvc")}
+                                            />
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </FormItem>
+
+                                  <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
+                                    <FormControl>
+                                      <RadioGroupItem value="PayPal" className="mt-1" />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <FormLabel className="font-bold text-lg flex items-center gap-2">
+                                        <Wallet className="h-5 w-5 text-[#0070ba]" />
+                                        PayPal
+                                      </FormLabel>
+                                      <p className="text-sm text-muted-foreground">You will be redirected to PayPal to complete your purchase.</p>
+                                    </div>
+                                  </FormItem>
                                 </RadioGroup>
                               </FormControl>
                               <FormMessage />
@@ -494,22 +555,27 @@ export default function Checkout() {
                           )}
                         />
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          onClick={() => setLocation("/checkout/shipping")}
-                          className="flex-1 py-7 text-lg font-bold rounded-2xl"
-                        >
-                          Back to Shipping
-                        </Button>
-                        <Button 
-                          type="submit" 
-                          disabled={orderMutation.isPending}
-                          className="flex-[2] py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
-                        >
-                          {orderMutation.isPending ? "Processing..." : "Place Order"}
-                        </Button>
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            onClick={() => setLocation("/checkout/shipping")}
+                            className="flex-1 py-7 text-lg font-bold rounded-2xl"
+                          >
+                            Back to Shipping
+                          </Button>
+                          <Button 
+                            type="submit" 
+                            disabled={orderMutation.isPending}
+                            className="flex-[2] py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
+                          >
+                            {orderMutation.isPending ? "Processing..." : "Place Order"}
+                          </Button>
+                        </div>
+                        <p className="text-center text-xs text-muted-foreground">
+                          Payments are simulated for demo purposes
+                        </p>
                       </div>
                     </form>
                   </Form>
