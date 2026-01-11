@@ -1,0 +1,88 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+ADMIN STEP — ORDER ITEMS TRACKING (CRITICAL)
+
+This step ONLY.
+Do NOT touch Storefront pages.
+Do NOT redesign Admin UI.
+Do NOT change routing.
+
+========================
+GOAL
+========================
+Extend the existing order system to properly support
+multiple order items per order.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- Order model / schema
+- Order creation logic (where orders are saved)
+- Order Details modal rendering
+- Order total calculation logic
+
+========================
+ORDER ITEM DATA (REQUIRED)
+========================
+
+Each order MUST store an array of items with:
+- productId
+- productName
+- selectedStorage (nullable)
+- selectedColor (nullable)
+- quantity
+- pricePerItem
+
+========================
+BACKEND RULES
+========================
+
+- Orders must support multiple items
+- Total amount MUST be calculated from order items
+- Do NOT hardcode totals
+- Existing orders without items must still load safely
+
+========================
+ADMIN UI RULES
+========================
+
+Update the existing Order Details modal to:
+- Display a table of order items
+- Columns:
+  - Product
+  - Storage
+  - Color
+  - Quantity
+  - Price
+  - Subtotal
+- Keep existing layout, spacing, and styles
+- Do NOT add new sections or redesign modal
+
+========================
+COMPATIBILITY RULES
+========================
+
+- Existing orders created before this change must not break
+- If an old order has no items array:
+  - Show a fallback message
+  - Do NOT throw errors
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Orders store multiple items correctly
+- Order Details modal displays item table
+- Order total equals sum of item subtotals
+- No console or runtime errors
+
+STOP immediately after this step.

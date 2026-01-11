@@ -425,22 +425,48 @@ export default function AdminOrders() {
               </div>
 
               <div>
-                <h4 className="font-semibold mb-2">Order Summary</h4>
+                <h4 className="font-semibold mb-2 text-sm text-muted-foreground uppercase tracking-wider">Order Items</h4>
                 <div className="border rounded-lg overflow-hidden">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/50">
                       <TableRow>
-                        <TableHead>Product</TableHead>
+                        <TableHead className="w-[40%]">Product</TableHead>
+                        <TableHead>Storage</TableHead>
+                        <TableHead>Color</TableHead>
+                        <TableHead className="text-center">Qty</TableHead>
                         <TableHead className="text-right">Price</TableHead>
+                        <TableHead className="text-right">Subtotal</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      <TableRow>
-                        <TableCell>Items and quantity tracking enabled for future orders.</TableCell>
-                        <TableCell className="text-right font-bold">{new Intl.NumberFormat("en-RW", { style: "currency", currency: "RWF", maximumFractionDigits: 0 }).format(selectedOrder.totalAmount)}</TableCell>
-                      </TableRow>
+                      {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                        selectedOrder.items.map((item, index) => (
+                          <TableRow key={`${item.productId}-${index}`}>
+                            <TableCell className="font-medium">{item.name}</TableCell>
+                            <TableCell>{item.storage || "-"}</TableCell>
+                            <TableCell>{item.color || "-"}</TableCell>
+                            <TableCell className="text-center">{item.quantity}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {formatCurrency(item.price * item.quantity)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                            This is an older order without itemized tracking.
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <div className="bg-primary/5 border border-primary/10 rounded-lg px-6 py-3 text-right">
+                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest mb-1">Total Amount</p>
+                    <p className="text-2xl font-bold text-primary">{formatCurrency(selectedOrder.totalAmount)}</p>
+                  </div>
                 </div>
               </div>
             </div>

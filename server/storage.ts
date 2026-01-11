@@ -121,30 +121,6 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (filters?.startDate) {
-      conditions.push(and(
-        // @ts-ignore
-        orders.createdAt >= new Date(filters.startDate)
-      ));
-    }
-
-    if (filters?.endDate) {
-      conditions.push(and(
-        // @ts-ignore
-        orders.createdAt <= new Date(filters.endDate)
-      ));
-    }
-
-    let finalConditions = [];
-    if (filters?.search) {
-      finalConditions.push(or(
-        like(orders.customerName, `%${filters.search}%`),
-        like(orders.customerPhone, `%${filters.search}%`)
-      ));
-    }
-    if (filters?.status) {
-      finalConditions.push(eq(orders.status, filters.status));
-    }
-    if (filters?.startDate) {
       finalConditions.push(gte(orders.createdAt, new Date(filters.startDate)));
     }
     if (filters?.endDate) {
@@ -162,6 +138,8 @@ export class DatabaseStorage implements IStorage {
     const [newOrder] = await db.insert(orders).values({
       customerName: order.customerName,
       customerPhone: order.customerPhone,
+      deliveryLocation: order.deliveryLocation,
+      paymentMethod: order.paymentMethod,
       totalAmount: order.totalAmount,
       status: order.status || "pending",
       items: order.items || [],
