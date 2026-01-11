@@ -1,0 +1,91 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+ADMIN STEP — AUTO STOCK DEDUCTION
+
+This step ONLY.
+Do NOT touch Storefront pages.
+Do NOT redesign Admin UI.
+Do NOT change routing.
+
+========================
+GOAL
+========================
+Automatically manage product stock levels
+based on order status changes.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- Product stock logic
+- Order status update side-effects
+- Backend validation for stock availability
+
+========================
+STOCK RULES (MANDATORY)
+========================
+
+- Stock must be tracked per product variation:
+  - productId
+  - selectedStorage (nullable)
+  - selectedColor (nullable)
+
+- When order status changes to:
+  Confirmed
+  → Deduct stock for each order item (quantity-based)
+
+- When order is cancelled or reverted before Paid:
+  → Restore stock correctly
+
+========================
+VALIDATION RULES
+========================
+
+- Prevent status change to Confirmed if:
+  - Any order item has insufficient stock
+- Show a clear validation error
+- Do NOT partially deduct stock
+
+========================
+DATA SAFETY RULES
+========================
+
+- Stock updates must be atomic (all-or-nothing)
+- Prevent negative stock values
+- Existing products without variations must still work
+
+========================
+ADMIN UI RULES
+========================
+
+- Do NOT add new UI elements
+- Do NOT change tables, dropdowns, or layout
+- Errors must display using existing notification patterns
+
+========================
+COMPATIBILITY RULES
+========================
+
+- Existing orders created before this feature must not break
+- If an old order has no item-level stock:
+  - Skip deduction safely
+  - Log warning (not error)
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Stock is deducted on Confirmed status
+- Orders with insufficient stock cannot be confirmed
+- Stock is restored when applicable
+- No console or runtime errors
+
+STOP immediately after this step.

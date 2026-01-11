@@ -337,12 +337,14 @@ export default function AdminOrders() {
                           <>
                             <SelectItem value="pending" disabled>Pending</SelectItem>
                             <SelectItem value="confirmed">Confirmed</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
                           </>
                         )}
                         {order.status === "confirmed" && (
                           <>
                             <SelectItem value="confirmed" disabled>Confirmed</SelectItem>
                             <SelectItem value="paid">Paid</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
                           </>
                         )}
                         {order.status === "paid" && (

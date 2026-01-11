@@ -254,7 +254,10 @@ export async function registerRoutes(
 
       const allowedNext = validTransitions[currentStatus] || [];
       
-      if (!allowedNext.includes(nextStatus)) {
+      // Allow cancellation from pending or confirmed (restoring stock logic is in storage)
+      if (nextStatus === "cancelled" && (currentStatus === "pending" || currentStatus === "confirmed")) {
+        // Allowed
+      } else if (!allowedNext.includes(nextStatus)) {
         return res.status(400).json({ 
           message: `Invalid status transition: ${currentStatus} -> ${nextStatus}. Allowed: ${allowedNext.join(", ")}` 
         });

@@ -154,13 +154,106 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateOrderStatus(id: number, status: string): Promise<Order> {
-    const [updatedOrder] = await db
-      .update(orders)
-      .set({ status })
-      .where(eq(orders.id, id))
-      .returning();
-    if (!updatedOrder) throw new Error("Order not found");
-    return updatedOrder;
+    return await db.transaction(async (tx) => {
+      const [order] = await tx.select().from(orders).where(eq(orders.id, id));
+      if (!order) throw new Error("Order not found");
+
+      const oldStatus = order.status;
+      const nextStatus = status;
+
+      // Deduct stock when moving to confirmed
+      if (nextStatus === "confirmed" && oldStatus !== "confirmed") {
+        for (const item of order.items || []) {
+          const [product] = await tx.select().from(products).where(eq(products.id, item.productId));
+          if (!product) {
+            console.warn(`Product ${item.productId} not found for stock deduction. Skipping.`);
+            continue;
+          }
+
+          if (item.storage || item.color) {
+            // Variation stock
+            const variations = product.variations || {};
+            let updated = false;
+
+            if (item.storage && variations.storage) {
+              const storageOpt = variations.storage.find((s: any) => s.option === item.storage);
+              if (storageOpt) {
+                if ((storageOpt.stock ?? 0) < item.quantity) {
+                  throw new Error(`Insufficient stock for ${product.name} (${item.storage})`);
+                }
+                storageOpt.stock = (storageOpt.stock ?? 0) - item.quantity;
+                updated = true;
+              }
+            }
+
+            if (item.color && variations.colors) {
+              const colorOpt = variations.colors.find((c: any) => c.name === item.color);
+              if (colorOpt) {
+                if ((colorOpt.stock ?? 0) < item.quantity) {
+                  throw new Error(`Insufficient stock for ${product.name} (${item.color})`);
+                }
+                colorOpt.stock = (colorOpt.stock ?? 0) - item.quantity;
+                updated = true;
+              }
+            }
+
+            if (updated) {
+              await tx.update(products).set({ variations }).where(eq(products.id, product.id));
+            }
+          } else {
+            // Simple product stock (if we had a global stock field, but currently we only have stockStatus)
+            // For now, based on schema, stock is only in variations or indicated by stockStatus.
+            // If the user meant a generic stock field, it's missing from schema.
+            // But requirement says "Existing products without variations must still work".
+            // Since there's no numeric stock field in `products` table for non-variations, 
+            // we'll skip deduction but log a warning as per Compatibility Rules.
+            console.warn(`Product ${product.name} has no numeric stock field for non-variation items. Skipping deduction.`);
+          }
+        }
+      }
+
+      // Restore stock if cancelled or reverted from confirmed/paid before Delivered
+      const isReverting = (oldStatus === "confirmed" || oldStatus === "paid") && (nextStatus === "pending" || nextStatus === "cancelled");
+      if (isReverting) {
+        for (const item of order.items || []) {
+          const [product] = await tx.select().from(products).where(eq(products.id, item.productId));
+          if (!product) continue;
+
+          if (item.storage || item.color) {
+            const variations = product.variations || {};
+            let updated = false;
+
+            if (item.storage && variations.storage) {
+              const storageOpt = variations.storage.find((s: any) => s.option === item.storage);
+              if (storageOpt) {
+                storageOpt.stock = (storageOpt.stock ?? 0) + item.quantity;
+                updated = true;
+              }
+            }
+
+            if (item.color && variations.colors) {
+              const colorOpt = variations.colors.find((c: any) => c.name === item.color);
+              if (colorOpt) {
+                colorOpt.stock = (colorOpt.stock ?? 0) + item.quantity;
+                updated = true;
+              }
+            }
+
+            if (updated) {
+              await tx.update(products).set({ variations }).where(eq(products.id, product.id));
+            }
+          }
+        }
+      }
+
+      const [updatedOrder] = await tx
+        .update(orders)
+        .set({ status: nextStatus })
+        .where(eq(orders.id, id))
+        .returning();
+      
+      return updatedOrder;
+    });
   }
 
   async getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined> {
