@@ -188,6 +188,26 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/orders/public/track", async (req, res) => {
+    try {
+      const { id, phone } = req.query;
+      if (!id || !phone) {
+        return res.status(400).json({ message: "Order ID and Phone Number are required" });
+      }
+
+      const order = await storage.getOrder(Number(id));
+      if (!order || order.customerPhone !== phone) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Return only necessary data for public tracking
+      const { customerName, customerPhone, deliveryLocation, paymentMethod, totalAmount, status, items, createdAt, id: orderId } = order;
+      res.json({ id: orderId, customerName, customerPhone, deliveryLocation, paymentMethod, totalAmount, status, items, createdAt });
+    } catch (error) {
+      res.status(500).json({ message: "Tracking failed" });
+    }
+  });
+
   app.get("/api/orders/:id", requireAdminAuth, async (req, res) => {
     const order = await storage.getOrder(Number(req.params.id));
     if (!order) return res.status(404).json({ message: "Order not found" });
