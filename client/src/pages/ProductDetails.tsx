@@ -15,22 +15,29 @@ export default function ProductDetails() {
   const id = params ? parseInt(params.id) : 0;
   const { data: product, isLoading, error } = useProduct(id);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [selectedStorage, setSelectedStorage] = useState("256GB");
-  const [selectedColor, setSelectedColor] = useState("");
+
+  // Variations and Stock Handling
+  const variations = product?.variations as {
+    storage?: { option: string; priceOffset: number; stock?: number }[];
+    colors?: { name: string; value: string; stock?: number }[];
+  } || {};
+
+  const storageOptions = variations.storage || [
+    { option: "256GB", priceOffset: 0, stock: 10 },
+    { option: "512GB", priceOffset: 150000, stock: 5 },
+    { option: "1TB", priceOffset: 300000, stock: 0 },
+  ];
+
+  const colorOptions = variations.colors || [
+    { name: "Silver", value: "#C0C0C0", stock: 10 },
+    { name: "Graphite", value: "#383838", stock: 10 },
+    { name: "Gold", value: "#D4AF37", stock: 0 },
+    { name: "Sierra Blue", value: "#9FB1C3", stock: 5 },
+  ];
+
+  const [selectedStorage, setSelectedStorage] = useState(storageOptions[0]?.option || "");
+  const [selectedColor, setSelectedColor] = useState(colorOptions[0]?.name || "");
   const [quantity, setQuantity] = useState(1);
-
-  const storageOptions = [
-    { label: "256GB", priceOffset: 0 },
-    { label: "512GB", priceOffset: 150000 },
-    { label: "1TB", priceOffset: 300000 },
-  ];
-
-  const colorOptions = [
-    { name: "Silver", value: "#C0C0C0" },
-    { name: "Graphite", value: "#383838" },
-    { name: "Gold", value: "#D4AF37" },
-    { name: "Sierra Blue", value: "#9FB1C3" },
-  ];
 
   const { toast } = useToast();
 
@@ -42,12 +49,21 @@ export default function ProductDetails() {
     </div>
   );
 
+  const currentStorage = storageOptions.find(s => s.option === selectedStorage);
+  const currentColor = colorOptions.find(c => c.name === selectedColor);
+  
+  const isOutOfStock = (currentStorage?.stock === 0) || (currentColor?.stock === 0);
+  const maxStock = Math.min(currentStorage?.stock ?? 99, currentColor?.stock ?? 99);
+
   const handleAddToCart = () => {
+    const currentPriceOffset = currentStorage?.priceOffset || 0;
+    const itemTotalPrice = (product.price + currentPriceOffset) * quantity;
+
     const cartItem = {
       productId: product.id,
       name: product.name,
-      price: totalPrice / quantity, // Base price with offset but without quantity multiplier
-      totalPrice: totalPrice,
+      price: itemTotalPrice / quantity,
+      totalPrice: itemTotalPrice,
       quantity,
       storage: selectedStorage,
       color: selectedColor,
@@ -64,7 +80,7 @@ export default function ProductDetails() {
     });
   };
 
-  const currentPriceOffset = storageOptions.find(s => s.label === selectedStorage)?.priceOffset || 0;
+  const currentPriceOffset = currentStorage?.priceOffset || 0;
   const totalPrice = (product.price + currentPriceOffset) * quantity;
 
   const formatPrice = (price: number) => {
@@ -114,7 +130,9 @@ export default function ProductDetails() {
           >
             <div className="mb-2 inline-flex items-center gap-2">
                <span className="text-sm font-bold uppercase tracking-wider text-primary">{product.brand}</span>
-               {product.stockStatus === 'in_stock' && (
+               {isOutOfStock ? (
+                 <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Out of Stock</span>
+               ) : product.stockStatus === 'in_stock' && (
                  <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-500">In Stock</span>
                )}
             </div>
@@ -133,13 +151,15 @@ export default function ProductDetails() {
                 <div className="flex flex-wrap gap-2">
                   {storageOptions.map((option) => (
                     <Button
-                      key={option.label}
-                      variant={selectedStorage === option.label ? "default" : "outline"}
+                      key={option.option}
+                      variant={selectedStorage === option.option ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setSelectedStorage(option.label)}
-                      className="rounded-lg font-semibold"
+                      onClick={() => setSelectedStorage(option.option)}
+                      className={`rounded-lg font-semibold ${option.stock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                      disabled={option.stock === 0}
                     >
-                      {option.label}
+                      {option.option}
+                      {option.stock === 0 && <span className="ml-2 text-[10px] opacity-70">(Out)</span>}
                     </Button>
                   ))}
                 </div>
@@ -153,11 +173,12 @@ export default function ProductDetails() {
                     <button
                       key={color.name}
                       onClick={() => setSelectedColor(color.name)}
+                      disabled={color.stock === 0}
                       className={`h-8 w-8 rounded-full border-2 transition-all hover:scale-110 ${
                         selectedColor === color.name ? "border-primary scale-110 shadow-md" : "border-transparent"
-                      }`}
+                      } ${color.stock === 0 ? "opacity-30 cursor-not-allowed grayscale" : ""}`}
                       style={{ backgroundColor: color.value }}
-                      title={color.name}
+                      title={color.stock === 0 ? `${color.name} (Out of Stock)` : color.name}
                     />
                   ))}
                 </div>
@@ -185,6 +206,11 @@ export default function ProductDetails() {
 
             {/* Actions */}
             <div className="mt-auto space-y-4 pt-6">
+              {isOutOfStock && (
+                <div className="rounded-lg bg-destructive/10 p-3 text-center text-sm font-semibold text-destructive">
+                  This combination is currently out of stock.
+                </div>
+              )}
               {/* Quantity Selector */}
               <div className="flex items-center gap-4">
                 <span className="text-sm font-bold uppercase tracking-widest text-primary">Quantity</span>
@@ -203,7 +229,8 @@ export default function ProductDetails() {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 rounded-md"
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(maxStock, quantity + 1))}
+                    disabled={quantity >= maxStock || isOutOfStock}
                   >
                     <PlusIcon className="h-4 w-4" />
                   </Button>
@@ -212,18 +239,20 @@ export default function ProductDetails() {
 
               <Button 
                 onClick={() => setIsCheckoutOpen(true)}
-                className="flex w-full items-center justify-center rounded-xl bg-primary px-8 py-6 text-lg font-bold text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
+                disabled={isOutOfStock}
+                className="flex w-full items-center justify-center rounded-xl bg-primary px-8 py-6 text-lg font-bold text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20 disabled:opacity-50 disabled:hover:scale-100"
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
-                Buy Now (Direct)
+                {isOutOfStock ? "Out of Stock" : "Buy Now (Direct)"}
               </Button>
               <Button 
                 onClick={handleAddToCart}
                 variant="outline"
-                className="flex w-full items-center justify-center rounded-xl border-2 border-primary bg-transparent px-8 py-6 text-lg font-bold text-primary transition-all hover:scale-[1.02] active:scale-[0.98] hover:bg-primary/5"
+                disabled={isOutOfStock}
+                className="flex w-full items-center justify-center rounded-xl border-2 border-primary bg-transparent px-8 py-6 text-lg font-bold text-primary transition-all hover:scale-[1.02] active:scale-[0.98] hover:bg-primary/5 disabled:opacity-50 disabled:hover:scale-100"
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
-                Add to Cart
+                {isOutOfStock ? "Out of Stock" : "Add to Cart"}
               </Button>
               <a 
                 href={whatsappUrl}

@@ -15,8 +15,8 @@ export const products = pgTable("products", {
   isFeatured: boolean("is_featured").default(false),
   specs: jsonb("specs").$type<Record<string, string>>(), // Key-value pairs for specs
   variations: jsonb("variations").$type<{
-    storage?: { option: string; priceOffset: number }[];
-    colors?: { name: string; value: string }[];
+    storage?: { option: string; priceOffset: number; stock?: number }[];
+    colors?: { name: string; value: string; stock?: number }[];
   }>(),
 });
 
