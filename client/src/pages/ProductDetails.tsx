@@ -1,12 +1,13 @@
 import { useRoute, Link } from "wouter";
-import { useProduct } from "@/hooks/use-products";
+import { useProduct, useProducts } from "@/hooks/use-products";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag, Minus, Plus as PlusIcon } from "lucide-react";
+import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag, Minus, Plus as PlusIcon, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -42,6 +43,9 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
 
   const { toast } = useToast();
+
+  const { data: relatedProducts, isLoading: isLoadingRelated } = useProducts({ category: product?.category });
+  const recommendations = relatedProducts?.filter(p => p.id !== product?.id).slice(0, 4) || [];
 
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-background text-primary">Loading...</div>;
   if (error || !product) return (
@@ -325,6 +329,29 @@ export default function ProductDetails() {
             </div>
           </motion.div>
         </div>
+
+        {/* Recommendations Section */}
+        {recommendations.length > 0 && (
+          <div className="mt-20">
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">You May Also Like</h2>
+                <p className="text-sm text-muted-foreground mt-1">Customers who viewed this also considered these items</p>
+              </div>
+              <Link href="/shop">
+                <Button variant="ghost" className="text-primary hover:text-primary/80">
+                  View All <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {recommendations.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />
