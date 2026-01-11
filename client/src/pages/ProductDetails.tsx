@@ -1,4 +1,4 @@
-import { useRoute, Link } from "wouter";
+import { useRoute, Link, useLocation } from "wouter";
 import { useProduct, useProducts } from "@/hooks/use-products";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -15,6 +15,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 export default function ProductDetails() {
   const [match, params] = useRoute("/product/:id");
+  const [, setLocation] = useLocation();
   const id = params ? parseInt(params.id) : 0;
   const { data: product, isLoading, error } = useProduct(id);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
