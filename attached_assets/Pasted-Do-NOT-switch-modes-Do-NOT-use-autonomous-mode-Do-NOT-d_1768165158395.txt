@@ -1,0 +1,108 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT describe complexity.
+Do NOT refactor UI.
+Do NOT redesign anything.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Integrate REAL Stripe card payments (TEST MODE ONLY).
+
+This is NOT full checkout.
+This is NOT PayPal.
+This is STEP 1 ONLY.
+
+========================
+STEP 1 — STRIPE CARD PAYMENTS (FOUNDATION)
+========================
+
+SCOPE (STRICT):
+- Implement Stripe card payments ONLY
+- Use Stripe TEST keys only
+- Do NOT touch PayPal
+- Do NOT change layout, spacing, colors, or typography
+- Do NOT change existing checkout UI
+- Reuse existing card form visually
+
+========================
+BACKEND CHANGES (ONLY THESE)
+========================
+
+1) Install Stripe SDK
+
+2) Create backend route:
+POST /api/payments/stripe/create-intent
+
+- Accept:
+  - amount (number)
+  - currency
+- Create Stripe PaymentIntent
+- Return client_secret
+
+3) Stripe secret key:
+- Loaded from environment variables
+- NEVER exposed to frontend
+
+========================
+FRONTEND CHANGES (ONLY THESE)
+========================
+
+1) Install Stripe frontend SDK:
+- @stripe/stripe-js
+- @stripe/react-stripe-js
+
+2) Wrap checkout page with <Elements>
+
+3) Connect EXISTING card form to Stripe:
+- Card number
+- Expiry
+- CVC
+
+(UI MUST LOOK IDENTICAL)
+
+4) On "Pay now":
+- Call /api/payments/stripe/create-intent
+- Confirm card payment using client_secret
+- Show success or error state
+
+========================
+STYLE & UI RULES
+========================
+- NO UI redesign
+- NO layout changes
+- NO new components unless required
+- Existing checkout page must look EXACTLY the same
+
+========================
+SECURITY RULES
+========================
+- Stripe secret key ONLY on backend
+- Client secret ONLY used to confirm payment
+- Test mode ONLY
+
+========================
+VALIDATION
+========================
+
+After STEP 1:
+- User can enter real test card numbers
+- Stripe test payment succeeds
+- PaymentIntent appears in Stripe dashboard
+- Checkout UI unchanged
+- No console or runtime errors
+
+========================
+STOP CONDITION
+========================
+
+Once Stripe card payment works:
+- STOP
+- Do NOT add PayPal
+- Do NOT refactor code
+- Do NOT improve UX
+- Do NOT continue to next step
+
+START IMPLEMENTING STEP 1 NOW.
