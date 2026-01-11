@@ -7,14 +7,19 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingBag, ChevronRight } from "lucide-react";
+import { ShoppingBag, ChevronRight, CheckCircle2, MessageCircle, Truck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { apiRequest } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
+import { insertOrderSchema } from "@shared/schema";
 
-// Shipping schema according to rules
+// Shipping schema
 const shippingSchema = z.object({
   email: z.string().email("Invalid email address"),
   updates: z.boolean().default(false),
@@ -43,29 +48,37 @@ interface CartItem {
 }
 
 export default function Checkout() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [shippingData, setShippingData] = useState<ShippingForm | null>(null);
+  const [createdOrder, setCreatedOrder] = useState<any>(null);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
       const parsedCart = JSON.parse(savedCart);
-      if (parsedCart.length === 0) {
+      if (parsedCart.length === 0 && location !== "/order-success") {
         setLocation("/shop");
       }
       setCart(parsedCart);
-    } else {
+    } else if (location !== "/order-success") {
       setLocation("/shop");
     }
-  }, [setLocation]);
+
+    const savedShipping = localStorage.getItem("checkout_shipping");
+    if (savedShipping) {
+      setShippingData(JSON.parse(savedShipping));
+    }
+  }, [location, setLocation]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
-  const total = subtotal; // Free shipping
+  const total = subtotal;
 
-  const form = useForm<ShippingForm>({
+  // Shipping Form
+  const shippingForm = useForm<ShippingForm>({
     resolver: zodResolver(shippingSchema),
-    defaultValues: {
+    defaultValues: shippingData || {
       email: "",
       updates: false,
       country: "Rwanda",
@@ -80,282 +93,391 @@ export default function Checkout() {
     },
   });
 
-  const onSubmit = (data: ShippingForm) => {
-    // Store shipping data and move to payment (not implemented in this step as per scope)
-    console.log("Shipping data:", data);
-    toast({
-      title: "Shipping details saved",
-      description: "Moving to payment...",
-    });
-    // For now, redirecting to home since payment step is not required here
-    setLocation("/");
+  // Payment Form
+  const paymentForm = useForm({
+    defaultValues: {
+      paymentMethod: "Cash on Delivery",
+    },
+  });
+
+  const orderMutation = useMutation({
+    mutationFn: async (values: any) => {
+      const res = await apiRequest("POST", "/api/orders", values);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to place order");
+      }
+      return res.json();
+    },
+    onSuccess: (order) => {
+      setCreatedOrder(order);
+      if (paymentForm.getValues("paymentMethod") === "WhatsApp Order Confirmation") {
+        const message = `Hello DOPIK ELECTRONICS, my name is ${shippingData?.firstName} ${shippingData?.lastName}. I've placed order #${order.id} via WhatsApp.\n\nItems:\n${cart.map(item => `- ${item.quantity}x ${item.name} (${item.storage}, ${item.color}) - ${formatPrice(item.price)}`).join("\n")}\n\nTotal: ${formatPrice(total)}\n\nShipping Address: ${shippingData?.address}, ${shippingData?.city}, ${shippingData?.province}\nPhone: ${shippingData?.phone}`;
+        const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank");
+      }
+      localStorage.removeItem("cart");
+      localStorage.removeItem("checkout_shipping");
+      setLocation("/order-success");
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Order failed",
+        description: error.message,
+      });
+    },
+  });
+
+  const onShippingSubmit = (data: ShippingForm) => {
+    setShippingData(data);
+    localStorage.setItem("checkout_shipping", JSON.stringify(data));
+    setLocation("/checkout/payment");
+  };
+
+  const onPaymentSubmit = (data: { paymentMethod: string }) => {
+    if (!shippingData) {
+      setLocation("/checkout/shipping");
+      return;
+    }
+
+    const orderData = {
+      customerName: `${shippingData.firstName} ${shippingData.lastName}`,
+      customerPhone: shippingData.phone,
+      deliveryLocation: `${shippingData.address}, ${shippingData.city}, ${shippingData.province}`,
+      paymentMethod: data.paymentMethod,
+      totalAmount: total,
+      status: "pending",
+      items: cart.map(item => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        storage: item.storage,
+        color: item.color
+      })),
+    };
+
+    orderMutation.mutate(orderData);
   };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
   };
 
-  if (cart.length === 0) return null;
+  if (cart.length === 0 && location !== "/order-success") return null;
+
+  const OrderSummary = () => (
+    <div className="lg:sticky lg:top-24 h-fit">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <h2 className="mb-6 text-xl font-bold flex items-center gap-2">
+          <ShoppingBag className="h-5 w-5 text-primary" />
+          Order Summary
+        </h2>
+        <ScrollArea className="h-[400px] pr-4">
+          <div className="space-y-6">
+            {cart.map((item, index) => (
+              <div key={index} className="flex gap-4">
+                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-background p-2">
+                  <img src={item.imageUrl} alt={item.name} className="h-full w-full object-contain" />
+                </div>
+                <div className="flex flex-1 flex-col justify-center">
+                  <div className="flex justify-between font-bold">
+                    <span className="line-clamp-1">{item.name}</span>
+                    <span>{formatPrice(item.totalPrice)}</span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                    <span>{item.storage}</span>
+                    <span>•</span>
+                    <span>{item.color}</span>
+                    <span>•</span>
+                    <span>Qty: {item.quantity}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+        <Separator className="my-6" />
+        <div className="space-y-3">
+          <div className="flex justify-between text-muted-foreground">
+            <span className="font-medium">Subtotal</span>
+            <span className="font-bold text-foreground">{formatPrice(subtotal)}</span>
+          </div>
+          <div className="flex justify-between text-muted-foreground">
+            <span className="font-medium">Shipping</span>
+            <span className="font-bold text-green-500">FREE</span>
+          </div>
+          <Separator className="my-4" />
+          <div className="flex justify-between items-baseline">
+            <span className="text-lg font-bold">Total</span>
+            <span className="text-2xl font-bold text-primary">{formatPrice(total)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* Breadcrumbs */}
-        <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/cart" className="hover:text-foreground">Cart</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="font-bold text-foreground">Information</span>
-          <ChevronRight className="h-4 w-4" />
-          <span>Payment</span>
-        </nav>
-
-        <div className="grid gap-12 lg:grid-cols-2">
-          {/* LEFT: Shipping Form */}
-          <div className="space-y-8">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {/* CONTACT */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold">Contact</h2>
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            placeholder="Email" 
-                            {...field} 
-                            className={`h-12 rounded-xl ${form.formState.errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="updates"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center space-x-2 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            className="rounded-md"
-                          />
-                        </FormControl>
-                        <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                          Send me order updates
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                {/* DELIVERY */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold">Delivery</h2>
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input {...field} disabled className="h-12 rounded-xl bg-muted cursor-not-allowed" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              placeholder="First Name" 
-                              {...field} 
-                              className={`h-12 rounded-xl ${form.formState.errors.firstName ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              placeholder="Last Name" 
-                              {...field} 
-                              className={`h-12 rounded-xl ${form.formState.errors.lastName ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            placeholder="Shipping Address" 
-                            {...field} 
-                            className={`h-12 rounded-xl ${form.formState.errors.address ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="apartment"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input placeholder="Apartment / Unit (optional)" {...field} className="h-12 rounded-xl" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <FormField
-                      control={form.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              placeholder="City" 
-                              {...field} 
-                              className={`h-12 rounded-xl ${form.formState.errors.city ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="province"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              placeholder="Province" 
-                              {...field} 
-                              className={`h-12 rounded-xl ${form.formState.errors.province ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="postalCode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input 
-                              placeholder="Postal Code" 
-                              {...field} 
-                              className={`h-12 rounded-xl ${form.formState.errors.postalCode ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input 
-                            placeholder="Phone Number" 
-                            {...field} 
-                            className={`h-12 rounded-xl ${form.formState.errors.phone ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <Button type="submit" className="w-full py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2">
-                  Continue to Payment
-                </Button>
-              </form>
-            </Form>
-          </div>
-
-          {/* RIGHT: Order Summary */}
-          <div className="lg:sticky lg:top-24 h-fit">
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <h2 className="mb-6 text-xl font-bold flex items-center gap-2">
-                <ShoppingBag className="h-5 w-5 text-primary" />
-                Order Summary
-              </h2>
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-6">
-                  {cart.map((item, index) => (
-                    <div key={index} className="flex gap-4">
-                      <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-background p-2">
-                        <img src={item.imageUrl} alt={item.name} className="h-full w-full object-contain" />
-                      </div>
-                      <div className="flex flex-1 flex-col justify-center">
-                        <div className="flex justify-between font-bold">
-                          <span className="line-clamp-1">{item.name}</span>
-                          <span>{formatPrice(item.totalPrice)}</span>
-                        </div>
-                        <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                          <span>{item.storage}</span>
-                          <span>•</span>
-                          <span>{item.color}</span>
-                          <span>•</span>
-                          <span>Qty: {item.quantity}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-              
-              <Separator className="my-6" />
-              
-              <div className="space-y-3">
-                <div className="flex justify-between text-muted-foreground">
-                  <span className="font-medium">Subtotal</span>
-                  <span className="font-bold text-foreground">{formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground">
-                  <span className="font-medium">Shipping</span>
-                  <span className="font-bold text-green-500">FREE</span>
-                </div>
-                <Separator className="my-4" />
-                <div className="flex justify-between items-baseline">
-                  <span className="text-lg font-bold">Total</span>
-                  <span className="text-2xl font-bold text-primary">{formatPrice(total)}</span>
-                </div>
+        {location === "/order-success" ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mx-auto max-w-2xl text-center"
+          >
+            <div className="rounded-3xl border border-border bg-card p-12 shadow-xl">
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                <CheckCircle2 className="h-12 w-12 text-primary" />
               </div>
+              <h2 className="mb-2 text-3xl font-bold">Order Confirmed!</h2>
+              <p className="mb-8 text-muted-foreground">
+                Thank you for your purchase. We've received your order.
+              </p>
+              <Link href="/shop">
+                <Button className="w-full py-6 text-lg font-bold rounded-2xl">
+                  Continue Shopping
+                </Button>
+              </Link>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        ) : (
+          <>
+            <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+              <Link href="/cart" className="hover:text-foreground">Cart</Link>
+              <ChevronRight className="h-4 w-4" />
+              <Link href="/checkout/shipping" className={`hover:text-foreground ${location === "/checkout/shipping" ? "font-bold text-foreground" : ""}`}>Information</Link>
+              <ChevronRight className="h-4 w-4" />
+              <span className={location === "/checkout/payment" ? "font-bold text-foreground" : ""}>Payment</span>
+            </nav>
+
+            <div className="grid gap-12 lg:grid-cols-2">
+              <div className="space-y-8">
+                {location === "/checkout/shipping" ? (
+                  <Form {...shippingForm}>
+                    <form onSubmit={shippingForm.handleSubmit(onShippingSubmit)} className="space-y-8">
+                      <div className="space-y-4">
+                        <h2 className="text-xl font-bold">Contact</h2>
+                        <FormField
+                          control={shippingForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="Email" {...field} className="h-12 rounded-xl" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={shippingForm.control}
+                          name="updates"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                              </FormControl>
+                              <FormLabel className="text-sm font-medium">Send me order updates</FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="space-y-4">
+                        <h2 className="text-xl font-bold">Delivery</h2>
+                        <FormField
+                          control={shippingForm.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input {...field} disabled className="h-12 rounded-xl bg-muted" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FormField
+                            control={shippingForm.control}
+                            name="firstName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder="First Name" {...field} className="h-12 rounded-xl" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={shippingForm.control}
+                            name="lastName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder="Last Name" {...field} className="h-12 rounded-xl" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={shippingForm.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="Shipping Address" {...field} className="h-12 rounded-xl" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={shippingForm.control}
+                          name="apartment"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="Apartment / Unit (optional)" {...field} className="h-12 rounded-xl" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid gap-4 sm:grid-cols-3">
+                          <FormField
+                            control={shippingForm.control}
+                            name="city"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder="City" {...field} className="h-12 rounded-xl" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={shippingForm.control}
+                            name="province"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder="Province" {...field} className="h-12 rounded-xl" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={shippingForm.control}
+                            name="postalCode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input placeholder="Postal Code" {...field} className="h-12 rounded-xl" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={shippingForm.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="Phone Number" {...field} className="h-12 rounded-xl" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <Button type="submit" className="w-full py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2">
+                        Continue to Payment
+                      </Button>
+                    </form>
+                  </Form>
+                ) : (
+                  <Form {...paymentForm}>
+                    <form onSubmit={paymentForm.handleSubmit(onPaymentSubmit)} className="space-y-8">
+                      <div className="space-y-6">
+                        <h2 className="text-xl font-bold">Payment</h2>
+                        <p className="text-sm text-muted-foreground">All transactions are secure and encrypted.</p>
+                        
+                        <FormField
+                          control={paymentForm.control}
+                          name="paymentMethod"
+                          render={({ field }) => (
+                            <FormItem className="space-y-3">
+                              <FormControl>
+                                <RadioGroup
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                  className="flex flex-col gap-4"
+                                >
+                                  <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
+                                    <FormControl>
+                                      <RadioGroupItem value="Cash on Delivery" className="mt-1" />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <FormLabel className="font-bold text-lg flex items-center gap-2">
+                                        <Truck className="h-5 w-5 text-primary" />
+                                        Cash on Delivery
+                                      </FormLabel>
+                                      <p className="text-sm text-muted-foreground">Pay with cash when your order is delivered to your doorstep.</p>
+                                    </div>
+                                  </FormItem>
+
+                                  <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
+                                    <FormControl>
+                                      <RadioGroupItem value="WhatsApp Order Confirmation" className="mt-1" />
+                                    </FormControl>
+                                    <div className="space-y-1">
+                                      <FormLabel className="font-bold text-lg flex items-center gap-2">
+                                        <MessageCircle className="h-5 w-5 text-[#25D366]" />
+                                        WhatsApp Order Confirmation
+                                      </FormLabel>
+                                      <p className="text-sm text-muted-foreground">Send your order details to us on WhatsApp for manual confirmation and payment instructions.</p>
+                                    </div>
+                                  </FormItem>
+                                </RadioGroup>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          onClick={() => setLocation("/checkout/shipping")}
+                          className="flex-1 py-7 text-lg font-bold rounded-2xl"
+                        >
+                          Back to Shipping
+                        </Button>
+                        <Button 
+                          type="submit" 
+                          disabled={orderMutation.isPending}
+                          className="flex-[2] py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
+                        >
+                          {orderMutation.isPending ? "Processing..." : "Place Order"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                )}
+              </div>
+              <OrderSummary />
+            </div>
+          </>
+        )}
       </main>
       <Footer />
     </div>

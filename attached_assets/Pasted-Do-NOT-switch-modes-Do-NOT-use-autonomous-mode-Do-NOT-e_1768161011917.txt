@@ -1,0 +1,120 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+STOREFRONT STEP — CHECKOUT (PAYMENT PAGE)
+
+This step ONLY.
+Do NOT touch Admin pages.
+Do NOT redesign UI.
+Do NOT change existing Cart or Shipping pages.
+
+========================
+ROUTING RULES
+========================
+
+- Shipping page → /checkout/shipping
+- Payment page → /checkout/payment
+- "Continue to Payment" must redirect to /checkout/payment
+
+========================
+GOAL
+========================
+Create a Payment page that finalizes the order
+using WhatsApp confirmation or Cash on Delivery,
+while keeping the current site design.
+
+========================
+PAGE STRUCTURE (STRICT)
+========================
+
+Layout must match Shipping page:
+- LEFT: Payment options
+- RIGHT: Order summary (same as Shipping)
+
+========================
+LEFT SIDE — PAYMENT OPTIONS
+========================
+
+Add TWO payment methods:
+
+1️⃣ Cash on Delivery (Default)
+- Radio selectable
+- Description text below
+
+2️⃣ WhatsApp Order Confirmation
+- Radio selectable
+- Description text below
+
+========================
+PAYMENT BEHAVIOR
+========================
+
+When "Place Order" is clicked:
+
+IF Cash on Delivery selected:
+- Create order in frontend state
+- Show success message
+- Redirect to /order-success
+
+IF WhatsApp selected:
+- Open WhatsApp with pre-filled message
+- Message must include:
+  - Order ID
+  - Customer name
+  - Phone number
+  - Shipping address
+  - All order items:
+    - Product name
+    - Storage
+    - Color
+    - Quantity
+    - Price
+  - Total price
+
+========================
+RIGHT SIDE — ORDER SUMMARY
+========================
+
+Show:
+- Same cart items as Shipping
+- Subtotal
+- Shipping: FREE
+- Total
+
+No duplication of logic.
+
+========================
+DATA RULES
+========================
+
+- Use data from Cart + Shipping steps
+- Do NOT hardcode values
+- Persist checkout data until order is placed
+
+========================
+DESIGN RULES
+========================
+
+- Keep existing UI styles
+- No new global styles
+- Rounded cards
+- Clean, simple layout
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Payment page loads correctly
+- WhatsApp opens with correct order message
+- Cash on Delivery completes order
+- Order summary is accurate
+- No console errors
+
+STOP immediately after this step.
