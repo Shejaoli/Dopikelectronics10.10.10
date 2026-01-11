@@ -235,22 +235,40 @@ export async function registerRoutes(
   app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const { status } = req.body;
-      const validStatuses = ["pending", "paid", "delivered", "cancelled"];
+      const { status: nextStatus } = req.body;
+      const order = await storage.getOrder(id);
       
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: "Invalid status" });
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
       }
 
-      const updated = await storage.updateOrderStatus(id, status);
+      const currentStatus = order.status;
+      
+      // Strict transition rules
+      const validTransitions: Record<string, string[]> = {
+        "pending": ["confirmed"],
+        "confirmed": ["paid"],
+        "paid": ["delivered"],
+        "delivered": [], // Locked
+      };
+
+      const allowedNext = validTransitions[currentStatus] || [];
+      
+      if (!allowedNext.includes(nextStatus)) {
+        return res.status(400).json({ 
+          message: `Invalid status transition: ${currentStatus} -> ${nextStatus}. Allowed: ${allowedNext.join(", ")}` 
+        });
+      }
+
+      const updated = await storage.updateOrderStatus(id, nextStatus);
       const admin = await storage.getAdminById(req.session.adminId!);
       await storage.createAuditLog({
-        action: `Order Status Updated: Order #${id} to ${status}`,
+        action: `Order Status Updated: Order #${id} from ${currentStatus} to ${nextStatus}`,
         adminEmail: admin?.email || "unknown"
       });
       res.json(updated);
     } catch (error) {
-      res.status(404).json({ message: error instanceof Error ? error.message : "Order not found" });
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update order status" });
     }
   });
 

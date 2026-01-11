@@ -1,0 +1,86 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+ADMIN STEP — ORDER STATUS FLOW RULES
+
+This step ONLY.
+Do NOT touch Storefront pages.
+Do NOT redesign Admin UI.
+Do NOT change routing.
+
+========================
+GOAL
+========================
+Enforce a strict and safe order status progression
+to prevent admin mistakes and data inconsistency.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- Order status update logic
+- Status dropdown behavior
+- Backend validation for status changes
+
+========================
+ALLOWED STATUS FLOW
+========================
+
+The ONLY valid transitions are:
+
+- Pending → Confirmed
+- Confirmed → Paid
+- Paid → Delivered
+
+========================
+RULES (MANDATORY)
+========================
+
+- Admin MUST NOT skip steps
+- Admin MUST NOT go backward
+- Invalid transitions must be blocked
+- Status dropdown must only show valid next status
+- Backend must re-validate status change (do not rely on frontend only)
+
+========================
+ERROR HANDLING
+========================
+
+If an invalid status change is attempted:
+- Prevent the update
+- Show a clear validation message
+- Do NOT crash
+- Do NOT silently fail
+
+========================
+UI RULES
+========================
+
+- Keep existing dropdown UI
+- Keep existing colors and badges
+- Do NOT add new buttons or redesign
+
+========================
+COMPATIBILITY RULES
+========================
+
+- Existing orders with valid statuses must continue to work
+- Orders already marked as Delivered must be locked (no further changes)
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Status transitions strictly follow the allowed flow
+- Invalid transitions are blocked
+- UI only allows valid next steps
+- No console or runtime errors
+
+STOP immediately after this step.

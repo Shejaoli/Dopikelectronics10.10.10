@@ -323,7 +323,7 @@ export default function AdminOrders() {
                     <Select
                       defaultValue={order.status}
                       onValueChange={(value) => statusMutation.mutate({ id: order.id, status: value })}
-                      disabled={statusMutation.isPending}
+                      disabled={statusMutation.isPending || order.status === "delivered"}
                     >
                       <SelectTrigger className="w-[130px] h-8">
                         <SelectValue>
@@ -333,10 +333,27 @@ export default function AdminOrders() {
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="paid">Paid</SelectItem>
-                        <SelectItem value="delivered">Delivered</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                        {order.status === "pending" && (
+                          <>
+                            <SelectItem value="pending" disabled>Pending</SelectItem>
+                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                          </>
+                        )}
+                        {order.status === "confirmed" && (
+                          <>
+                            <SelectItem value="confirmed" disabled>Confirmed</SelectItem>
+                            <SelectItem value="paid">Paid</SelectItem>
+                          </>
+                        )}
+                        {order.status === "paid" && (
+                          <>
+                            <SelectItem value="paid" disabled>Paid</SelectItem>
+                            <SelectItem value="delivered">Delivered</SelectItem>
+                          </>
+                        )}
+                        {order.status === "delivered" && (
+                          <SelectItem value="delivered" disabled>Delivered</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </TableCell>
