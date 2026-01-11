@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, ChevronRight, CheckCircle2, MessageCircle, Truck, CreditCard as CardIcon, Wallet } from "lucide-react";
+import { SiVisa, SiMastercard, SiPaypal } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
@@ -104,6 +105,8 @@ export default function Checkout() {
     },
   });
 
+  const watchPaymentMethod = paymentForm.watch("paymentMethod");
+
   const orderMutation = useMutation({
     mutationFn: async (values: any) => {
       const res = await apiRequest("POST", "/api/orders", values);
@@ -115,7 +118,8 @@ export default function Checkout() {
     },
     onSuccess: (order) => {
       setCreatedOrder(order);
-      if (paymentForm.getValues("paymentMethod") === "WhatsApp Order Confirmation") {
+      const paymentMethod = paymentForm.getValues("paymentMethod");
+      if (paymentMethod === "WhatsApp Order Confirmation") {
         const message = `Hello DOPIK ELECTRONICS, my name is ${shippingData?.firstName} ${shippingData?.lastName}. I've placed order #${order.id} via WhatsApp.\n\nItems:\n${cart.map(item => `- ${item.quantity}x ${item.name} (${item.storage}, ${item.color}) - ${formatPrice(item.price)}`).join("\n")}\n\nTotal: ${formatPrice(total)}\n\nShipping Address: ${shippingData?.address}, ${shippingData?.city}, ${shippingData?.province}\nPhone: ${shippingData?.phone}`;
         const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
@@ -491,61 +495,92 @@ export default function Checkout() {
                                     </div>
                                   </FormItem>
 
-                                  <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
-                                    <FormControl>
-                                      <RadioGroupItem value="Card Payment" className="mt-1" />
-                                    </FormControl>
-                                    <div className="space-y-4 w-full">
-                                      <div className="space-y-1">
-                                        <FormLabel className="font-bold text-lg flex items-center justify-between gap-2">
-                                          <div className="flex items-center gap-2">
+                                  <FormItem className="flex flex-col rounded-2xl border border-border overflow-hidden cursor-pointer hover:bg-accent/5 transition-colors">
+                                    <div className="flex items-start space-x-4 p-6">
+                                      <FormControl>
+                                        <RadioGroupItem value="Card Payment" className="mt-1" />
+                                      </FormControl>
+                                      <div className="flex-1">
+                                        <div className="flex items-center justify-between mb-1">
+                                          <FormLabel className="font-bold text-lg flex items-center gap-2">
                                             <CardIcon className="h-5 w-5 text-primary" />
                                             Card Payment
-                                          </div>
-                                          <div className="flex gap-1">
-                                            <div className="h-6 w-10 bg-muted rounded border border-border flex items-center justify-center text-[10px] font-bold">VISA</div>
-                                            <div className="h-6 w-10 bg-muted rounded border border-border flex items-center justify-center text-[10px] font-bold">MC</div>
-                                          </div>
-                                        </FormLabel>
-                                        <p className="text-sm text-muted-foreground">Pay securely with your credit or debit card.</p>
-                                      </div>
-                                      
-                                      {paymentForm.watch("paymentMethod") === "Card Payment" && (
-                                        <div className="grid gap-4 pt-2">
-                                          <div className="space-y-2">
-                                            <Input 
-                                              placeholder="Card Number" 
-                                              className="h-12 rounded-xl"
-                                              {...paymentForm.register("cardNumber")}
-                                            />
-                                          </div>
-                                          <div className="grid grid-cols-2 gap-4">
-                                            <Input 
-                                              placeholder="MM/YY" 
-                                              className="h-12 rounded-xl"
-                                              {...paymentForm.register("cardExpiry")}
-                                            />
-                                            <Input 
-                                              placeholder="CVC" 
-                                              className="h-12 rounded-xl"
-                                              {...paymentForm.register("cardCvc")}
-                                            />
+                                          </FormLabel>
+                                          <div className="flex gap-2">
+                                            <SiVisa className="h-5 w-8 text-[#1A1F71]" />
+                                            <SiMastercard className="h-5 w-8 text-[#EB001B]" />
                                           </div>
                                         </div>
-                                      )}
+                                        <p className="text-sm text-muted-foreground">Secure payment using your credit or debit card.</p>
+                                      </div>
                                     </div>
+
+                                    <AnimatePresence>
+                                      {watchPaymentMethod === "Card Payment" && (
+                                        <motion.div
+                                          initial={{ height: 0, opacity: 0 }}
+                                          animate={{ height: "auto", opacity: 1 }}
+                                          exit={{ height: 0, opacity: 0 }}
+                                          className="bg-muted/30 border-t border-border"
+                                        >
+                                          <div className="p-6 space-y-4">
+                                            <FormField
+                                              control={paymentForm.control}
+                                              name="cardNumber"
+                                              render={({ field }) => (
+                                                <FormItem>
+                                                  <FormControl>
+                                                    <Input placeholder="Card number" {...field} className="h-12 rounded-xl bg-background" />
+                                                  </FormControl>
+                                                  <FormMessage />
+                                                </FormItem>
+                                              )}
+                                            />
+                                            <div className="grid gap-4 grid-cols-2">
+                                              <FormField
+                                                control={paymentForm.control}
+                                                name="cardExpiry"
+                                                render={({ field }) => (
+                                                  <FormItem>
+                                                    <FormControl>
+                                                      <Input placeholder="Expiry date (MM/YY)" {...field} className="h-12 rounded-xl bg-background" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                  </FormItem>
+                                                )}
+                                              />
+                                              <FormField
+                                                control={paymentForm.control}
+                                                name="cardCvc"
+                                                render={({ field }) => (
+                                                  <FormItem>
+                                                    <FormControl>
+                                                      <Input placeholder="CVC" {...field} className="h-12 rounded-xl bg-background" />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                  </FormItem>
+                                                )}
+                                              />
+                                            </div>
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
                                   </FormItem>
 
                                   <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
                                     <FormControl>
                                       <RadioGroupItem value="PayPal" className="mt-1" />
                                     </FormControl>
-                                    <div className="space-y-1">
-                                      <FormLabel className="font-bold text-lg flex items-center gap-2">
-                                        <Wallet className="h-5 w-5 text-[#0070ba]" />
-                                        PayPal
-                                      </FormLabel>
-                                      <p className="text-sm text-muted-foreground">You will be redirected to PayPal to complete your purchase.</p>
+                                    <div className="space-y-1 flex-1">
+                                      <div className="flex items-center justify-between">
+                                        <FormLabel className="font-bold text-lg flex items-center gap-2">
+                                          <Wallet className="h-5 w-5 text-[#003087]" />
+                                          PayPal
+                                        </FormLabel>
+                                        <SiPaypal className="h-5 w-8 text-[#003087]" />
+                                      </div>
+                                      <p className="text-sm text-muted-foreground">You will be redirected to PayPal to complete your purchase securely.</p>
                                     </div>
                                   </FormItem>
                                 </RadioGroup>
@@ -570,7 +605,7 @@ export default function Checkout() {
                             disabled={orderMutation.isPending}
                             className="flex-[2] py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
                           >
-                            {orderMutation.isPending ? "Processing..." : "Place Order"}
+                            {orderMutation.isPending ? "Processing..." : (watchPaymentMethod === "WhatsApp Order Confirmation" ? "Complete on WhatsApp" : "Pay Now")}
                           </Button>
                         </div>
                         <p className="text-center text-xs text-muted-foreground">
