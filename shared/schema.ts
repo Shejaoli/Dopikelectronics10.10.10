@@ -32,6 +32,11 @@ export const auditLogs = pgTable("audit_logs", {
   id: serial("id").primaryKey(),
   action: text("action").notNull(),
   adminEmail: text("admin_email").notNull(),
+  actionType: text("action_type").notNull().default("unknown"), // "status_change", "stock_deduction", "stock_restoration"
+  targetType: text("target_type").notNull().default("unknown"), // "Order", "Product"
+  targetId: integer("target_id").notNull().default(0),
+  previousValue: text("previous_value"),
+  newValue: text("new_value"),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 

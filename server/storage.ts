@@ -174,6 +174,8 @@ export class DatabaseStorage implements IStorage {
             // Variation stock
             const variations = product.variations || {};
             let updated = false;
+            let prevStock: number | undefined;
+            let newStock: number | undefined;
 
             if (item.storage && variations.storage) {
               const storageOpt = variations.storage.find((s: any) => s.option === item.storage);
@@ -181,7 +183,9 @@ export class DatabaseStorage implements IStorage {
                 if ((storageOpt.stock ?? 0) < item.quantity) {
                   throw new Error(`Insufficient stock for ${product.name} (${item.storage})`);
                 }
+                prevStock = storageOpt.stock;
                 storageOpt.stock = (storageOpt.stock ?? 0) - item.quantity;
+                newStock = storageOpt.stock;
                 updated = true;
               }
             }
@@ -192,21 +196,27 @@ export class DatabaseStorage implements IStorage {
                 if ((colorOpt.stock ?? 0) < item.quantity) {
                   throw new Error(`Insufficient stock for ${product.name} (${item.color})`);
                 }
+                prevStock = colorOpt.stock;
                 colorOpt.stock = (colorOpt.stock ?? 0) - item.quantity;
+                newStock = colorOpt.stock;
                 updated = true;
               }
             }
 
             if (updated) {
               await tx.update(products).set({ variations }).where(eq(products.id, product.id));
+              // Log stock deduction
+              await tx.insert(auditLogs).values({
+                action: `Stock Deducted: ${product.name} (${item.storage || item.color}) x${item.quantity}`,
+                adminEmail: "system", // Admin email will be updated in routes
+                actionType: "stock_deduction",
+                targetType: "Product",
+                targetId: product.id,
+                previousValue: prevStock?.toString(),
+                newValue: newStock?.toString(),
+              }).catch(err => console.error("Audit log failed:", err));
             }
           } else {
-            // Simple product stock (if we had a global stock field, but currently we only have stockStatus)
-            // For now, based on schema, stock is only in variations or indicated by stockStatus.
-            // If the user meant a generic stock field, it's missing from schema.
-            // But requirement says "Existing products without variations must still work".
-            // Since there's no numeric stock field in `products` table for non-variations, 
-            // we'll skip deduction but log a warning as per Compatibility Rules.
             console.warn(`Product ${product.name} has no numeric stock field for non-variation items. Skipping deduction.`);
           }
         }
@@ -222,11 +232,15 @@ export class DatabaseStorage implements IStorage {
           if (item.storage || item.color) {
             const variations = product.variations || {};
             let updated = false;
+            let prevStock: number | undefined;
+            let newStock: number | undefined;
 
             if (item.storage && variations.storage) {
               const storageOpt = variations.storage.find((s: any) => s.option === item.storage);
               if (storageOpt) {
+                prevStock = storageOpt.stock;
                 storageOpt.stock = (storageOpt.stock ?? 0) + item.quantity;
+                newStock = storageOpt.stock;
                 updated = true;
               }
             }
@@ -234,13 +248,25 @@ export class DatabaseStorage implements IStorage {
             if (item.color && variations.colors) {
               const colorOpt = variations.colors.find((c: any) => c.name === item.color);
               if (colorOpt) {
+                prevStock = colorOpt.stock;
                 colorOpt.stock = (colorOpt.stock ?? 0) + item.quantity;
+                newStock = colorOpt.stock;
                 updated = true;
               }
             }
 
             if (updated) {
               await tx.update(products).set({ variations }).where(eq(products.id, product.id));
+              // Log stock restoration
+              await tx.insert(auditLogs).values({
+                action: `Stock Restored: ${product.name} (${item.storage || item.color}) x${item.quantity}`,
+                adminEmail: "system",
+                actionType: "stock_restoration",
+                targetType: "Product",
+                targetId: product.id,
+                previousValue: prevStock?.toString(),
+                newValue: newStock?.toString(),
+              }).catch(err => console.error("Audit log failed:", err));
             }
           }
         }

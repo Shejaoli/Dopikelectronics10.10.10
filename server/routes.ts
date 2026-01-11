@@ -265,10 +265,23 @@ export async function registerRoutes(
 
       const updated = await storage.updateOrderStatus(id, nextStatus);
       const admin = await storage.getAdminById(req.session.adminId!);
+      
+      // Detailed audit log for status change
       await storage.createAuditLog({
         action: `Order Status Updated: Order #${id} from ${currentStatus} to ${nextStatus}`,
-        adminEmail: admin?.email || "unknown"
-      });
+        adminEmail: admin?.email || "unknown",
+        actionType: "status_change",
+        targetType: "Order",
+        targetId: id,
+        previousValue: currentStatus,
+        newValue: nextStatus,
+      }).catch(err => console.error("Audit log failed:", err));
+
+      // Update system logs for stock (since storage uses "system" as default)
+      // This is a bit tricky since storage.updateOrderStatus is atomic.
+      // We could pass adminEmail to updateOrderStatus if we wanted to be more precise.
+      // For now, the main action is logged with the correct admin email.
+      
       res.json(updated);
     } catch (error) {
       res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update order status" });

@@ -29,17 +29,36 @@ export default function AdminAuditLog() {
             <TableRow>
               <TableHead>Timestamp</TableHead>
               <TableHead>Admin</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>Action Type</TableHead>
+              <TableHead>Target</TableHead>
+              <TableHead>Details</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {logs?.map((log) => (
               <TableRow key={log.id}>
-                <TableCell className="text-sm text-muted-foreground">
-                  {format(new Date(log.timestamp), "MMM d, yyyy HH:mm:ss")}
+                <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                  {format(new Date(log.timestamp), "MMM d, HH:mm:ss")}
                 </TableCell>
                 <TableCell className="font-medium">{log.adminEmail}</TableCell>
-                <TableCell>{log.action}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="capitalize">
+                    {log.actionType.replace("_", " ")}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-sm">
+                  {log.targetType} #{log.targetId}
+                </TableCell>
+                <TableCell className="max-w-md">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm">{log.action}</span>
+                    {log.previousValue && log.newValue && (
+                      <span className="text-xs text-muted-foreground">
+                        {log.previousValue} → {log.newValue}
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
             {logs?.length === 0 && (
