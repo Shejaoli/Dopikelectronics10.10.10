@@ -1,0 +1,100 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+ADMIN STEP — ORDER CANCELLATION + STOCK RESTORE
+
+This step ONLY.
+Do NOT touch Storefront pages.
+Do NOT redesign Admin UI.
+Do NOT change routing.
+
+========================
+GOAL
+========================
+Allow safe order cancellation
+while restoring product stock correctly.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- Order status logic
+- Stock restoration logic
+- Order validation rules
+
+========================
+CANCELLATION RULES
+========================
+
+- Orders can be cancelled ONLY if status is:
+  - Pending
+  - Confirmed
+
+- Orders with status:
+  - Paid
+  - Delivered
+  MUST NOT be cancellable
+
+========================
+STOCK RESTORATION RULES
+========================
+
+- When an order is cancelled:
+  - Restore stock for each order item
+  - Restore exact quantity per variation
+- Stock restoration must be atomic
+- Do NOT restore stock more than once
+
+========================
+STATUS RULES
+========================
+
+- Cancelled is a terminal status
+- Cancelled orders cannot be modified
+- Cancelled orders must be clearly marked
+
+========================
+ADMIN UI RULES
+========================
+
+- Use existing status dropdown
+- Add "Cancelled" only when allowed
+- Do NOT redesign or add new UI components
+
+========================
+AUDIT LOG RULES
+========================
+
+- Log order cancellation in Audit Log
+- Record:
+  - Admin
+  - Order ID
+  - Previous status
+  - Timestamp
+
+========================
+COMPATIBILITY RULES
+========================
+
+- Existing orders must not break
+- Old orders without item data must cancel safely
+- Do NOT throw runtime errors
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Orders cancel correctly
+- Stock restores accurately
+- Invalid cancellations are blocked
+- Audit log records cancellation
+- No console or runtime errors
+
+STOP immediately after this step.

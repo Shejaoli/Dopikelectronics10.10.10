@@ -323,7 +323,7 @@ export default function AdminOrders() {
                     <Select
                       defaultValue={order.status}
                       onValueChange={(value) => statusMutation.mutate({ id: order.id, status: value })}
-                      disabled={statusMutation.isPending || order.status === "delivered"}
+                      disabled={statusMutation.isPending || order.status === "delivered" || order.status === "cancelled"}
                     >
                       <SelectTrigger className="w-[130px] h-8">
                         <SelectValue>
@@ -355,6 +355,9 @@ export default function AdminOrders() {
                         )}
                         {order.status === "delivered" && (
                           <SelectItem value="delivered" disabled>Delivered</SelectItem>
+                        )}
+                        {order.status === "cancelled" && (
+                          <SelectItem value="cancelled" disabled>Cancelled</SelectItem>
                         )}
                       </SelectContent>
                     </Select>

@@ -259,7 +259,7 @@ export class DatabaseStorage implements IStorage {
               await tx.update(products).set({ variations }).where(eq(products.id, product.id));
               // Log stock restoration
               await tx.insert(auditLogs).values({
-                action: `Stock Restored: ${product.name} (${item.storage || item.color}) x${item.quantity}`,
+                action: `Stock Restored (${nextStatus === 'cancelled' ? 'Cancellation' : 'Revert'}): ${product.name} (${item.storage || item.color}) x${item.quantity}`,
                 adminEmail: "system",
                 actionType: "stock_restoration",
                 targetType: "Product",
