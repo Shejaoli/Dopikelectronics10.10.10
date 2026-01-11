@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag, Minus, Plus as PlusIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -31,6 +32,8 @@ export default function ProductDetails() {
     { name: "Sierra Blue", value: "#9FB1C3" },
   ];
 
+  const { toast } = useToast();
+
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-background text-primary">Loading...</div>;
   if (error || !product) return (
     <div className="flex h-screen flex-col items-center justify-center bg-background text-foreground">
@@ -38,6 +41,28 @@ export default function ProductDetails() {
        <Link href="/shop" className="text-primary hover:underline mt-4">Back to Shop</Link>
     </div>
   );
+
+  const handleAddToCart = () => {
+    const cartItem = {
+      productId: product.id,
+      name: product.name,
+      price: totalPrice / quantity, // Base price with offset but without quantity multiplier
+      totalPrice: totalPrice,
+      quantity,
+      storage: selectedStorage,
+      color: selectedColor,
+      imageUrl: product.imageUrl,
+    };
+
+    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const updatedCart = [...existingCart, cartItem];
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    toast({
+      title: "Added to cart",
+      description: `${quantity}x ${product.name} added to your cart.`,
+    });
+  };
 
   const currentPriceOffset = storageOptions.find(s => s.label === selectedStorage)?.priceOffset || 0;
   const totalPrice = (product.price + currentPriceOffset) * quantity;
@@ -191,6 +216,14 @@ export default function ProductDetails() {
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 Buy Now (Direct)
+              </Button>
+              <Button 
+                onClick={handleAddToCart}
+                variant="outline"
+                className="flex w-full items-center justify-center rounded-xl border-2 border-primary bg-transparent px-8 py-6 text-lg font-bold text-primary transition-all hover:scale-[1.02] active:scale-[0.98] hover:bg-primary/5"
+              >
+                <ShoppingBag className="mr-2 h-5 w-5" />
+                Add to Cart
               </Button>
               <a 
                 href={whatsappUrl}
