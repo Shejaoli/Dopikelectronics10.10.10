@@ -14,6 +14,10 @@ export const products = pgTable("products", {
   stockStatus: text("stock_status").notNull().default("in_stock"), // in_stock, out_of_stock, pre_order
   isFeatured: boolean("is_featured").default(false),
   specs: jsonb("specs").$type<Record<string, string>>(), // Key-value pairs for specs
+  variations: jsonb("variations").$type<{
+    storage?: { option: string; priceOffset: number }[];
+    colors?: { name: string; value: string }[];
+  }>(),
 });
 
 export const admins = pgTable("admins", {

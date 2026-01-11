@@ -14,6 +14,21 @@ export default function ProductDetails() {
   const id = params ? parseInt(params.id) : 0;
   const { data: product, isLoading, error } = useProduct(id);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [selectedStorage, setSelectedStorage] = useState("256GB");
+  const [selectedColor, setSelectedColor] = useState("");
+
+  const storageOptions = [
+    { label: "256GB", priceOffset: 0 },
+    { label: "512GB", priceOffset: 150000 },
+    { label: "1TB", priceOffset: 300000 },
+  ];
+
+  const colorOptions = [
+    { name: "Silver", value: "#C0C0C0" },
+    { name: "Graphite", value: "#383838" },
+    { name: "Gold", value: "#D4AF37" },
+    { name: "Sierra Blue", value: "#9FB1C3" },
+  ];
 
   if (isLoading) return <div className="flex h-screen items-center justify-center bg-background text-primary">Loading...</div>;
   if (error || !product) return (
@@ -23,11 +38,14 @@ export default function ProductDetails() {
     </div>
   );
 
+  const currentPriceOffset = storageOptions.find(s => s.label === selectedStorage)?.priceOffset || 0;
+  const totalPrice = product.price + currentPriceOffset;
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF' }).format(price);
   };
 
-  const whatsappMessage = `Hello DOPIK ELECTRONICS, I’m interested in buying the ${product.name} priced at ${formatPrice(product.price)}. Is it available?`;
+  const whatsappMessage = `Hello DOPIK ELECTRONICS, I’m interested in buying the ${product.name} (${selectedStorage}${selectedColor ? `, ${selectedColor}` : ""}) priced at ${formatPrice(totalPrice)}. Is it available?`;
   const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(whatsappMessage)}`;
 
   // Parse specs if they are stored as JSON, otherwise use empty object
@@ -77,8 +95,47 @@ export default function ProductDetails() {
             
             <h1 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">{product.name}</h1>
             
-            <div className="mb-8 text-3xl font-bold text-primary">
-              {formatPrice(product.price)}
+            <div className="mb-6 text-3xl font-bold text-primary">
+              {formatPrice(totalPrice)}
+            </div>
+
+            {/* Variations */}
+            <div className="mb-8 space-y-6">
+              {/* Storage Selection */}
+              <div>
+                <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-primary">Storage Capacity</h3>
+                <div className="flex flex-wrap gap-2">
+                  {storageOptions.map((option) => (
+                    <Button
+                      key={option.label}
+                      variant={selectedStorage === option.label ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedStorage(option.label)}
+                      className="rounded-lg font-semibold"
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Color Selection */}
+              <div>
+                <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-primary">Color</h3>
+                <div className="flex flex-wrap gap-3">
+                  {colorOptions.map((color) => (
+                    <button
+                      key={color.name}
+                      onClick={() => setSelectedColor(color.name)}
+                      className={`h-8 w-8 rounded-full border-2 transition-all hover:scale-110 ${
+                        selectedColor === color.name ? "border-primary scale-110 shadow-md" : "border-transparent"
+                      }`}
+                      style={{ backgroundColor: color.value }}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
 
             <p className="mb-8 text-lg leading-relaxed text-muted-foreground">
@@ -124,7 +181,7 @@ export default function ProductDetails() {
 
             {/* Checkout Modal */}
             <CheckoutModal 
-              product={product} 
+              product={{...product, price: totalPrice}} 
               open={isCheckoutOpen} 
               onOpenChange={setIsCheckoutOpen} 
             />
