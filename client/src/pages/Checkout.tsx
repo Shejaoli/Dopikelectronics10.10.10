@@ -13,6 +13,7 @@ import { Footer } from "@/components/Footer";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, ChevronRight, CheckCircle2, MessageCircle, Truck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
@@ -232,15 +233,55 @@ export default function Checkout() {
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
                 <CheckCircle2 className="h-12 w-12 text-primary" />
               </div>
-              <h2 className="mb-2 text-3xl font-bold">Order Confirmed!</h2>
-              <p className="mb-8 text-muted-foreground">
-                Thank you for your purchase. We've received your order.
-              </p>
-              <Link href="/shop">
-                <Button className="w-full py-6 text-lg font-bold rounded-2xl">
-                  Continue Shopping
-                </Button>
-              </Link>
+              <h2 className="mb-2 text-3xl font-bold text-foreground">Order Placed Successfully</h2>
+              
+              {createdOrder ? (
+                <div className="mt-8 space-y-6">
+                  <div className="bg-muted/30 rounded-2xl p-6 border border-border/50 text-left">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Order ID</p>
+                        <p className="text-lg font-bold">#{createdOrder.id}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payment Method</p>
+                        <p className="text-lg font-bold">{createdOrder.paymentMethod}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Amount</p>
+                        <p className="text-lg font-bold text-primary">{formatPrice(createdOrder.totalAmount)}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Order Status</p>
+                        <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 font-bold">
+                          {createdOrder.status.toUpperCase()}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-muted-foreground">
+                    Thank you for your purchase. We've received your order and will contact you soon for confirmation.
+                  </p>
+                </div>
+              ) : (
+                <p className="mb-8 text-muted-foreground">
+                  Thank you for your purchase. Your order has been placed successfully.
+                </p>
+              )}
+
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Link href="/" className="flex-1">
+                  <Button className="w-full py-6 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2">
+                    Continue Shopping
+                  </Button>
+                </Link>
+                <Link href="/track-order" className="flex-1">
+                  <Button variant="outline" className="w-full py-6 text-lg font-bold rounded-2xl border-2 hover-elevate active-elevate-2">
+                    Track Order
+                  </Button>
+                </Link>
+              </div>
             </div>
           </motion.div>
         ) : (
