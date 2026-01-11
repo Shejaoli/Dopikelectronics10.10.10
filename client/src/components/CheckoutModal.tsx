@@ -52,6 +52,7 @@ export function CheckoutModal({ product, quantity, open, onOpenChange }: Checkou
       const message = `Hello DOPIK ELECTRONICS, my name is ${order.customerName}. I have placed an order for ${quantity}x ${product.name}. Total amount: ${order.totalAmount} RWF. Order ID: #${order.id}. Thank you.`;
       const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
       
+      localStorage.removeItem("cart"); // Clear cart if single product checkout
       onOpenChange(false);
       form.reset();
 

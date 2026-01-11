@@ -1,0 +1,104 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+STOREFRONT STEP — CHECKOUT FLOW (SHIPPING → PAYMENT → CONFIRMATION)
+
+This step ONLY.
+Do NOT touch Admin pages.
+Do NOT redesign existing UI.
+Do NOT change global styles or routing structure.
+
+========================
+GOAL
+========================
+Create a complete Checkout flow starting from Cart,
+ending with Order Confirmation.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- Checkout pages (new if missing)
+- Order creation logic (frontend-first)
+- Cart → Checkout data flow
+
+========================
+CHECKOUT STEPS
+========================
+
+STEP 1 — SHIPPING
+- Full name
+- Phone number
+- Email
+- Address
+- City / Country
+- Continue button
+
+STEP 2 — PAYMENT
+- Order summary (read-only)
+- Payment method selection:
+  - Pay on Delivery
+  - Pay with WhatsApp (manual confirmation)
+- Place Order button
+
+STEP 3 — CONFIRMATION
+- Order success message
+- Order ID
+- Summary of purchased items
+- Clear Cart after success
+
+========================
+BEHAVIOR RULES
+========================
+
+- User must complete steps in order
+- Validate required fields
+- Cart data must persist through steps
+- Order is created ONLY after payment step
+- Order data saved in existing order structure
+
+========================
+DATA RULES
+========================
+
+Order MUST store:
+- Customer details
+- Order items (from cart)
+- Total amount
+- Payment method
+- Order status (default: Pending)
+
+========================
+UI RULES
+========================
+
+- Keep existing layout style
+- Reuse buttons, inputs, spacing
+- Mobile-friendly
+- No external UI libraries
+
+========================
+ERROR HANDLING
+========================
+
+- Prevent checkout if cart is empty
+- Show inline validation errors
+- Fail gracefully (no crashes)
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Checkout steps work correctly
+- Orders are created successfully
+- Cart clears after confirmation
+- No console or runtime errors
+
+STOP immediately after this step.
