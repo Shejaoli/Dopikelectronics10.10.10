@@ -75,16 +75,6 @@ export function CartDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <button className="relative p-2 text-muted-foreground hover:text-primary hover:bg-accent/50 rounded-full transition-all active:scale-90">
-          <ShoppingBag className="h-5 w-5" />
-          {cart.length > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-              {cart.length}
-            </span>
-          )}
-        </button>
-      </SheetTrigger>
       <SheetContent className="flex w-full flex-col sm:max-w-md">
         <SheetHeader className="flex flex-row items-center justify-between border-b pb-4">
           <SheetTitle className="text-xl font-bold">Your Cart</SheetTitle>

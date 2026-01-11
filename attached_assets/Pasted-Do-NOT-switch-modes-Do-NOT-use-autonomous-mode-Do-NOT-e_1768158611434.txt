@@ -1,0 +1,110 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+STOREFRONT STEP — CART PAGE (CORE FLOW)
+
+This step ONLY.
+Do NOT touch Admin pages.
+Do NOT redesign existing components.
+Do NOT change global styles.
+
+========================
+GOAL
+========================
+Create a functional Cart page and redirect users
+to it when clicking "Add to Cart".
+
+The Cart page should FOLLOW your current design system
+(not copy Reebelo UI exactly).
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- Cart page (new if missing)
+- Cart state / context / store
+- Add-to-Cart button behavior
+
+========================
+CART PAGE REQUIREMENTS
+========================
+
+Cart page must display:
+
+LEFT SIDE:
+- List of cart items
+  - Product image
+  - Product name
+  - Selected storage
+  - Selected color
+  - Selected condition (if exists)
+  - Quantity selector (+ / -)
+  - Remove item action
+
+RIGHT SIDE (SUMMARY):
+- Subtotal
+- Shipping (static or calculated if exists)
+- Total price
+- Primary "Checkout" button
+
+========================
+BEHAVIOR RULES
+========================
+
+- Clicking "Add to Cart":
+  - Adds product with selected variations
+  - Redirects user to Cart page
+- Quantity changes update totals instantly
+- Removing item updates totals
+- Empty cart shows a clean empty state
+
+========================
+DATA RULES
+========================
+
+Each cart item MUST store:
+- productId
+- productName
+- image
+- storage
+- color
+- condition
+- quantity
+- pricePerItem
+
+========================
+UI RULES
+========================
+
+- KEEP your existing design system
+- Same fonts, spacing, buttons
+- No external UI libraries
+- Responsive (desktop first is OK)
+- Clean, modern layout (no clutter)
+
+========================
+NAVIGATION RULES
+========================
+
+- Cart page must be accessible via:
+  - Redirect after Add to Cart
+  - Cart icon (if exists)
+- Do NOT break existing routes
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Cart page renders correctly
+- Add to Cart redirects to Cart
+- Totals calculate correctly
+- No console or runtime errors
+
+STOP immediately after this step.

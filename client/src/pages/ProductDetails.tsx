@@ -61,30 +61,6 @@ export default function ProductDetails() {
   const isOutOfStock = (currentStorage?.stock === 0) || (currentColor?.stock === 0);
   const maxStock = Math.min(currentStorage?.stock ?? 99, currentColor?.stock ?? 99);
 
-  const handleAddToCart = () => {
-    const currentPriceOffset = currentStorage?.priceOffset || 0;
-    const itemTotalPrice = (product.price + currentPriceOffset) * quantity;
-
-    const cartItem = {
-      productId: product.id,
-      name: product.name,
-      price: itemTotalPrice / quantity,
-      totalPrice: itemTotalPrice,
-      quantity,
-      storage: selectedStorage,
-      color: selectedColor,
-      imageUrl: product.imageUrl,
-    };
-
-    const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const updatedCart = [...existingCart, cartItem];
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-    toast({
-      title: "Added to cart",
-      description: `${quantity}x ${product.name} added to your cart.`,
-    });
-  };
 
   const currentPriceOffset = currentStorage?.priceOffset || 0;
   const totalPrice = (product.price + currentPriceOffset) * quantity;
