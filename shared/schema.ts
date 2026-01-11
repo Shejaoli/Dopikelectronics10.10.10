@@ -39,9 +39,11 @@ export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
   customerName: text("customer_name").notNull(),
   customerPhone: text("customer_phone").notNull(),
+  deliveryLocation: text("delivery_location"),
+  paymentMethod: text("payment_method"),
   totalAmount: integer("total_amount").notNull(),
   status: text("status").notNull().default("pending"),
-  items: jsonb("items").$type<{ productId: number; name: string; quantity: number; price: number }[]>().notNull().default([]),
+  items: jsonb("items").$type<{ productId: number; name: string; quantity: number; price: number; storage?: string; color?: string }[]>().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

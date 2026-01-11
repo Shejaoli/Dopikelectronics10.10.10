@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { ShoppingBag, X, Plus, Minus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ interface CartItem {
 }
 
 export function CartDrawer() {
+  const [, setLocation] = useLocation();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -154,7 +156,15 @@ export function CartDrawer() {
                 Final price including delivery. Taxes included where applicable.
               </p>
               <div className="grid gap-2">
-                <Button className="w-full py-6 text-lg font-bold">Checkout Now</Button>
+                <Button 
+                  className="w-full py-6 text-lg font-bold"
+                  onClick={() => {
+                    setIsOpen(false);
+                    setLocation("/checkout");
+                  }}
+                >
+                  Checkout Now
+                </Button>
                 <Button variant="outline" onClick={() => setIsOpen(false)} className="w-full">
                   Continue Shopping
                 </Button>
