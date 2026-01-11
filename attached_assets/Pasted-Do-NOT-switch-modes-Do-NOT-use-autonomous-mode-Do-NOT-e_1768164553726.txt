@@ -1,0 +1,117 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+CHECKOUT STEP — REAL PAYMENTS (CARD + PAYPAL)
+
+This step ONLY.
+Do NOT touch product pages.
+Do NOT redesign checkout UI.
+Do NOT change layout or styles.
+Do NOT add placeholder logic.
+
+========================
+GOAL
+========================
+Make Card payments and PayPal payments work as REAL ecommerce payments,
+like production stores.
+
+Users must be able to:
+- Enter real card details
+- Pay with PayPal
+- Complete a real transaction
+
+========================
+PAYMENT PROVIDERS
+========================
+
+1️⃣ CARD PAYMENTS
+- Use Stripe (official SDK)
+- Use Stripe Elements (NOT custom card handling)
+- Card number, expiry, CVC handled by Stripe securely
+
+2️⃣ PAYPAL
+- Use official PayPal SDK
+- Redirect / popup flow
+- Confirm payment before order success
+
+========================
+SCOPE (STRICT)
+========================
+Frontend:
+- Checkout / Payment page logic
+- Payment method selection logic
+- Payment submission handling
+
+Backend (if exists):
+- Create payment intent (Stripe)
+- Create PayPal order
+- Confirm payment success
+- Return payment status
+
+If backend does NOT exist:
+- Create minimal secure API routes for payments ONLY
+
+========================
+SECURITY RULES
+========================
+- NEVER store raw card details
+- NEVER log card numbers or CVC
+- Use environment variables for keys
+- Use test keys only (Stripe + PayPal sandbox)
+
+========================
+BEHAVIOR RULES
+========================
+
+When Card is selected:
+- Show Stripe card input
+- Validate card before submit
+- Disable Pay button while processing
+- Show Stripe errors inline
+
+When PayPal is selected:
+- Show PayPal button
+- Redirect or popup correctly
+- Confirm payment success before order completion
+
+========================
+ORDER FLOW
+========================
+
+On successful payment:
+- Mark order as PAID
+- Save:
+  - Payment method
+  - Transaction ID
+  - Payment status
+- Redirect to Order Success page
+
+On failure:
+- Show clear error message
+- Do NOT create paid order
+
+========================
+UI RULES
+========================
+- Keep current UI exactly the same
+- No new styling
+- No layout changes
+- Only wire functionality
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Stripe card payment works with test cards
+- PayPal sandbox payment completes successfully
+- Orders only complete after confirmed payment
+- No console errors
+
+STOP immediately after this step.
