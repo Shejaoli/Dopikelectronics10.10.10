@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { Order } from "@shared/schema";
+import type { Order, Product } from "@shared/schema";
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +20,14 @@ import { Search, X, Calendar as CalendarIcon, ChevronUp, ChevronDown, ChevronLef
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("en-RW", {
+    style: "currency",
+    currency: "RWF",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
 
 type SortField = "id" | "customerName" | "totalAmount" | "status" | "createdAt";
 type SortOrder = "asc" | "desc";
@@ -440,7 +448,7 @@ export default function AdminOrders() {
                     </TableHeader>
                     <TableBody>
                       {selectedOrder.items && selectedOrder.items.length > 0 ? (
-                        selectedOrder.items.map((item, index) => (
+                        selectedOrder.items.map((item: any, index: number) => (
                           <TableRow key={`${item.productId}-${index}`}>
                             <TableCell className="font-medium">{item.name}</TableCell>
                             <TableCell>{item.storage || "-"}</TableCell>

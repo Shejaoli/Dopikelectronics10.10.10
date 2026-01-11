@@ -219,7 +219,8 @@ export async function registerRoutes(
       const data = insertOrderSchema.parse(req.body);
       
       // Calculate total amount from items to ensure accuracy
-      const calculatedTotal = data.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const items = data.items || [];
+      const calculatedTotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
       
       const order = await storage.createOrder({
         ...data,

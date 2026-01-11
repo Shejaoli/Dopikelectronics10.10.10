@@ -57,12 +57,12 @@ export class DatabaseStorage implements IStorage {
     return product;
   }
 
-  async createProduct(product: InsertProduct): Promise<Product> {
+  async createProduct(product: any): Promise<Product> {
     const [newProduct] = await db.insert(products).values(product).returning();
     return newProduct;
   }
 
-  async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product> {
+  async updateProduct(id: number, product: any): Promise<Product> {
     const [updatedProduct] = await db
       .update(products)
       .set(product)
@@ -116,10 +116,16 @@ export class DatabaseStorage implements IStorage {
       searchConditions.push(like(orders.customerPhone, `%${filters.search}%`));
     }
 
-    if (filters?.status) {
-      conditions.push(eq(orders.status, filters.status));
+    let finalConditions = [];
+    if (filters?.search) {
+      finalConditions.push(or(
+        like(orders.customerName, `%${filters.search}%`),
+        like(orders.customerPhone, `%${filters.search}%`)
+      ));
     }
-
+    if (filters?.status) {
+      finalConditions.push(eq(orders.status, filters.status));
+    }
     if (filters?.startDate) {
       finalConditions.push(gte(orders.createdAt, new Date(filters.startDate)));
     }
@@ -134,12 +140,12 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders).orderBy(desc(orders.createdAt));
   }
 
-  async createOrder(order: InsertOrder): Promise<Order> {
+  async createOrder(order: any): Promise<Order> {
     const [newOrder] = await db.insert(orders).values({
       customerName: order.customerName,
       customerPhone: order.customerPhone,
-      deliveryLocation: order.deliveryLocation,
-      paymentMethod: order.paymentMethod,
+      deliveryLocation: order.deliveryLocation || null,
+      paymentMethod: order.paymentMethod || null,
       totalAmount: order.totalAmount,
       status: order.status || "pending",
       items: order.items || [],
