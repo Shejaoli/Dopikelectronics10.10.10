@@ -1,0 +1,91 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+STOREFRONT STEP — PAYMENT METHODS (EXTENSION)
+
+This step ONLY.
+Do NOT remove existing payment options.
+Do NOT redesign UI.
+Do NOT change layout, spacing, or styles.
+
+========================
+GOAL
+========================
+Add Card and PayPal payment options to the existing
+Payment page, alongside existing methods,
+while keeping the current design intact.
+
+========================
+PAYMENT METHODS TO ADD
+========================
+
+Add TWO additional options:
+
+1️⃣ Card Payment
+- Radio selectable
+- Card number input
+- Expiry date input (MM/YY)
+- CVC input
+- Card icons (Visa / MasterCard visual only)
+- Inputs are UI-only (NO real payment processing)
+
+2️⃣ PayPal
+- Radio selectable
+- No form fields
+- UI-only placeholder
+
+========================
+BEHAVIOR RULES
+========================
+
+- Only ONE payment method selectable at a time
+- Existing methods must still work (COD, WhatsApp)
+- "Pay Now" / "Place Order" button:
+  - Card / PayPal → simulate success
+  - Create order
+  - Redirect to /order-success
+
+========================
+DATA RULES
+========================
+
+- Do NOT integrate real gateways
+- Do NOT store card data
+- Treat Card & PayPal as simulated payments
+- Save selected payment method in order data
+
+========================
+UI RULES (STRICT)
+========================
+
+- Reuse existing components & styles
+- Inputs must visually match Shipping form inputs
+- No new global CSS
+- No layout shifts
+- Keep right-side Order Summary unchanged
+
+========================
+SECURITY NOTICE (UI ONLY)
+========================
+
+Add small text below button:
+"Payments are simulated for demo purposes"
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Card option renders correctly
+- PayPal option renders correctly
+- Existing payment methods still work
+- Order success flow works
+- No console or runtime errors
+
+STOP immediately after this step.
