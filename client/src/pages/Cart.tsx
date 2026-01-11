@@ -184,7 +184,7 @@ export default function Cart() {
                 <div className="mt-8 space-y-3">
                   <Button 
                     className="w-full py-6 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-[0.98]"
-                    onClick={() => setLocation("/checkout")}
+                    onClick={() => setLocation("/checkout/shipping")}
                   >
                     Proceed to Checkout
                   </Button>

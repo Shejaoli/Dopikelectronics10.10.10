@@ -1,0 +1,121 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+STOREFRONT STEP — CHECKOUT (SHIPPING PAGE)
+
+This step ONLY.
+Do NOT touch Admin pages.
+Do NOT redesign UI.
+Do NOT change global styles.
+
+========================
+GOAL
+========================
+Create a Checkout Shipping page that appears
+AFTER clicking "Checkout" from the Cart page,
+while keeping the current site design.
+
+========================
+ROUTING RULES
+========================
+
+- Cart page → /cart
+- Checkout Shipping page → /checkout/shipping
+- Checkout button must redirect to /checkout/shipping
+
+========================
+PAGE STRUCTURE (STRICT)
+========================
+
+Layout must follow:
+- LEFT: Shipping form
+- RIGHT: Order summary card
+
+Keep existing layout spacing, fonts, and colors.
+
+========================
+LEFT SIDE — SHIPPING FORM
+========================
+
+Create a form with these fields:
+
+CONTACT
+- Email (required)
+- Checkbox: "Send me order updates"
+
+DELIVERY
+- Country (default: Rwanda, disabled)
+- First Name (required)
+- Last Name (required)
+- Shipping Address (required)
+- Apartment / Unit (optional)
+- City (required)
+- Province / State (required)
+- Postal Code (required)
+- Phone Number (required)
+
+BUTTON
+- "Continue to Payment"
+
+========================
+FORM VALIDATION RULES
+========================
+
+- Required fields show inline error text
+- Invalid fields show red border
+- Do NOT use alert()
+- Do NOT change input styles globally
+
+========================
+RIGHT SIDE — ORDER SUMMARY
+========================
+
+Show:
+- List of cart items
+  - Product image
+  - Product name
+  - Selected storage
+  - Selected color
+  - Quantity
+  - Price per item
+- Subtotal (calculated)
+- Shipping: FREE
+- Total (calculated)
+
+========================
+DATA RULES
+========================
+
+- Read cart items from existing cart state
+- Do NOT duplicate cart logic
+- Totals must update correctly
+- No hardcoded prices
+
+========================
+DESIGN RULES
+========================
+
+- Keep current card styles
+- Rounded corners only
+- No layout redesign
+- Mobile responsive
+- Clean, minimal UI
+
+========================
+STOP CONDITIONS
+========================
+
+When:
+- Checkout redirects correctly
+- Shipping form validates properly
+- Order summary shows correct cart data
+- Total price is accurate
+- No console errors
+
+STOP immediately after this step.

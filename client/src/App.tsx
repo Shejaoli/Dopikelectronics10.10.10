@@ -23,7 +23,7 @@ function Router() {
       <Route path="/shop" component={Shop} />
       <Route path="/product/:id" component={ProductDetails} />
       <Route path="/cart" component={Cart} />
-      <Route path="/checkout" component={Checkout} />
+      <Route path="/checkout/shipping" component={Checkout} />
       <Route path="/track" component={TrackOrder} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />

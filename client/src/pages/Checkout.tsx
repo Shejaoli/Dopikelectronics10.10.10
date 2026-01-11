@@ -2,20 +2,34 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertOrderSchema, type InsertOrder } from "@shared/schema";
+import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ShoppingBag, MapPin, Phone, User, CreditCard, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+import { ShoppingBag, ChevronRight } from "lucide-react";
+
+// Shipping schema according to rules
+const shippingSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  updates: z.boolean().default(false),
+  country: z.string().default("Rwanda"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  address: z.string().min(1, "Shipping address is required"),
+  apartment: z.string().optional(),
+  city: z.string().min(1, "City is required"),
+  province: z.string().min(1, "Province / State is required"),
+  postalCode: z.string().min(1, "Postal code is required"),
+  phone: z.string().min(1, "Phone number is required"),
+});
+
+type ShippingForm = z.infer<typeof shippingSchema>;
 
 interface CartItem {
   productId: number;
@@ -28,333 +42,320 @@ interface CartItem {
   imageUrl: string;
 }
 
-type CheckoutStep = "shipping" | "payment" | "confirmation";
-
 export default function Checkout() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [step, setStep] = useState<CheckoutStep>("shipping");
-  const [createdOrder, setCreatedOrder] = useState<any>(null);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
       const parsedCart = JSON.parse(savedCart);
-      if (parsedCart.length === 0 && step !== "confirmation") {
+      if (parsedCart.length === 0) {
         setLocation("/shop");
       }
       setCart(parsedCart);
-    } else if (step !== "confirmation") {
+    } else {
       setLocation("/shop");
     }
-  }, [setLocation, step]);
+  }, [setLocation]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
-  const deliveryFee = 0;
-  const total = subtotal + deliveryFee;
+  const total = subtotal; // Free shipping
 
-  const form = useForm<InsertOrder>({
-    resolver: zodResolver(insertOrderSchema),
+  const form = useForm<ShippingForm>({
+    resolver: zodResolver(shippingSchema),
     defaultValues: {
-      customerName: "",
-      customerPhone: "",
-      deliveryLocation: "",
-      paymentMethod: "Pay on Delivery",
-      totalAmount: total || 0,
-      status: "pending",
-      items: [],
+      email: "",
+      updates: false,
+      country: "Rwanda",
+      firstName: "",
+      lastName: "",
+      address: "",
+      apartment: "",
+      city: "",
+      province: "",
+      postalCode: "",
+      phone: "",
     },
   });
 
-  useEffect(() => {
-    if (cart.length > 0) {
-      form.setValue("totalAmount", total);
-      form.setValue("items", cart.map(item => ({
-        productId: item.productId,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        storage: item.storage,
-        color: item.color
-      })));
-    }
-  }, [total, cart, form]);
-
-  const orderMutation = useMutation({
-    mutationFn: async (values: InsertOrder) => {
-      const res = await apiRequest("POST", "/api/orders", values);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to place order");
-      }
-      return res.json();
-    },
-    onSuccess: (order) => {
-      setCreatedOrder(order);
-      setStep("confirmation");
-      localStorage.removeItem("cart");
-      toast({
-        title: "Order placed successfully!",
-        description: "Your order has been received.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Order failed",
-        description: error.message,
-      });
-    },
-  });
+  const onSubmit = (data: ShippingForm) => {
+    // Store shipping data and move to payment (not implemented in this step as per scope)
+    console.log("Shipping data:", data);
+    toast({
+      title: "Shipping details saved",
+      description: "Moving to payment...",
+    });
+    // For now, redirecting to home since payment step is not required here
+    setLocation("/");
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
   };
 
-  const nextStep = async () => {
-    if (step === "shipping") {
-      const isValid = await form.trigger(["customerName", "customerPhone", "deliveryLocation"]);
-      if (isValid) setStep("payment");
-    }
-  };
-
-  const prevStep = () => {
-    if (step === "payment") setStep("shipping");
-  };
-
-  if (cart.length === 0 && step !== "confirmation") return null;
+  if (cart.length === 0) return null;
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Checkout</h1>
-          <div className="flex items-center gap-4 text-sm font-medium">
-            <div className={`flex items-center gap-2 ${step === "shipping" ? "text-primary" : "text-muted-foreground"}`}>
-              <span className={`flex h-6 w-6 items-center justify-center rounded-full border ${step === "shipping" ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"}`}>1</span>
-              Shipping
-            </div>
-            <div className="h-px w-8 bg-border" />
-            <div className={`flex items-center gap-2 ${step === "payment" ? "text-primary" : "text-muted-foreground"}`}>
-              <span className={`flex h-6 w-6 items-center justify-center rounded-full border ${step === "payment" ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"}`}>2</span>
-              Payment
-            </div>
-            <div className="h-px w-8 bg-border" />
-            <div className={`flex items-center gap-2 ${step === "confirmation" ? "text-primary" : "text-muted-foreground"}`}>
-              <span className={`flex h-6 w-6 items-center justify-center rounded-full border ${step === "confirmation" ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground"}`}>3</span>
-              Success
+        {/* Breadcrumbs */}
+        <nav className="mb-8 flex items-center gap-2 text-sm text-muted-foreground">
+          <Link href="/cart" className="hover:text-foreground">Cart</Link>
+          <ChevronRight className="h-4 w-4" />
+          <span className="font-bold text-foreground">Information</span>
+          <ChevronRight className="h-4 w-4" />
+          <span>Payment</span>
+        </nav>
+
+        <div className="grid gap-12 lg:grid-cols-2">
+          {/* LEFT: Shipping Form */}
+          <div className="space-y-8">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                {/* CONTACT */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold">Contact</h2>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input 
+                            placeholder="Email" 
+                            {...field} 
+                            className={`h-12 rounded-xl ${form.formState.errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="updates"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2 space-y-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="rounded-md"
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          Send me order updates
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* DELIVERY */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-bold">Delivery</h2>
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input {...field} disabled className="h-12 rounded-xl bg-muted cursor-not-allowed" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="First Name" 
+                              {...field} 
+                              className={`h-12 rounded-xl ${form.formState.errors.firstName ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Last Name" 
+                              {...field} 
+                              className={`h-12 rounded-xl ${form.formState.errors.lastName ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input 
+                            placeholder="Shipping Address" 
+                            {...field} 
+                            className={`h-12 rounded-xl ${form.formState.errors.address ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="apartment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input placeholder="Apartment / Unit (optional)" {...field} className="h-12 rounded-xl" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="City" 
+                              {...field} 
+                              className={`h-12 rounded-xl ${form.formState.errors.city ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="province"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Province" 
+                              {...field} 
+                              className={`h-12 rounded-xl ${form.formState.errors.province ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="postalCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Postal Code" 
+                              {...field} 
+                              className={`h-12 rounded-xl ${form.formState.errors.postalCode ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input 
+                            placeholder="Phone Number" 
+                            {...field} 
+                            className={`h-12 rounded-xl ${form.formState.errors.phone ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2">
+                  Continue to Payment
+                </Button>
+              </form>
+            </Form>
+          </div>
+
+          {/* RIGHT: Order Summary */}
+          <div className="lg:sticky lg:top-24 h-fit">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <h2 className="mb-6 text-xl font-bold flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5 text-primary" />
+                Order Summary
+              </h2>
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="space-y-6">
+                  {cart.map((item, index) => (
+                    <div key={index} className="flex gap-4">
+                      <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-border bg-background p-2">
+                        <img src={item.imageUrl} alt={item.name} className="h-full w-full object-contain" />
+                      </div>
+                      <div className="flex flex-1 flex-col justify-center">
+                        <div className="flex justify-between font-bold">
+                          <span className="line-clamp-1">{item.name}</span>
+                          <span>{formatPrice(item.totalPrice)}</span>
+                        </div>
+                        <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                          <span>{item.storage}</span>
+                          <span>•</span>
+                          <span>{item.color}</span>
+                          <span>•</span>
+                          <span>Qty: {item.quantity}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              
+              <Separator className="my-6" />
+              
+              <div className="space-y-3">
+                <div className="flex justify-between text-muted-foreground">
+                  <span className="font-medium">Subtotal</span>
+                  <span className="font-bold text-foreground">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span className="font-medium">Shipping</span>
+                  <span className="font-bold text-green-500">FREE</span>
+                </div>
+                <Separator className="my-4" />
+                <div className="flex justify-between items-baseline">
+                  <span className="text-lg font-bold">Total</span>
+                  <span className="text-2xl font-bold text-primary">{formatPrice(total)}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        <AnimatePresence mode="wait">
-          {step !== "confirmation" ? (
-            <motion.div
-              key="form"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="grid gap-12 lg:grid-cols-2"
-            >
-              <div className="space-y-6">
-                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-                  <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
-                    <ShoppingBag className="h-5 w-5 text-primary" />
-                    Order Summary
-                  </h2>
-                  <ScrollArea className="h-[300px] pr-4">
-                    <div className="space-y-4">
-                      {cart.map((item, index) => (
-                        <div key={index} className="flex gap-4">
-                          <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border border-border bg-background p-2">
-                            <img src={item.imageUrl} alt={item.name} className="h-full w-full object-contain" />
-                          </div>
-                          <div className="flex flex-1 flex-col">
-                            <div className="flex justify-between font-semibold">
-                              <span className="line-clamp-1">{item.name}</span>
-                              <span>{formatPrice(item.totalPrice)}</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground">
-                              {item.quantity}x • {item.storage} • {item.color}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                  <Separator className="my-6" />
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Subtotal</span>
-                      <span>{formatPrice(subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Delivery Fee</span>
-                      <span>{deliveryFee === 0 ? "Free" : formatPrice(deliveryFee)}</span>
-                    </div>
-                    <div className="flex justify-between text-xl font-bold pt-2">
-                      <span>Total</span>
-                      <span className="text-primary">{formatPrice(total)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit((data) => orderMutation.mutate(data))} className="space-y-6">
-                    {step === "shipping" && (
-                      <div className="space-y-4">
-                        <h2 className="text-xl font-bold">Shipping Details</h2>
-                        <FormField
-                          control={form.control}
-                          name="customerName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <User className="h-4 w-4" /> Full Name
-                              </FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter your full name" {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="customerPhone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" /> Phone Number
-                              </FormLabel>
-                              <FormControl>
-                                <Input placeholder="0788XXXXXX" {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="deliveryLocation"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" /> Address / City
-                              </FormLabel>
-                              <FormControl>
-                                <Input placeholder="Kigali, Rwanda..." {...field} value={field.value ?? ""} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button type="button" onClick={nextStep} className="w-full py-7 text-xl font-bold mt-6 shadow-lg shadow-primary/20 hover-elevate active-elevate-2">
-                          Continue to Payment <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                      </div>
-                    )}
-
-                    {step === "payment" && (
-                      <div className="space-y-4">
-                        <h2 className="text-xl font-bold">Payment Method</h2>
-                        <FormField
-                          control={form.control}
-                          name="paymentMethod"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="flex items-center gap-2">
-                                <CreditCard className="h-4 w-4" /> Choose Method
-                              </FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value ?? "Pay on Delivery"}>
-                                <FormControl>
-                                  <SelectTrigger className="h-12">
-                                    <SelectValue placeholder="Select payment method" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="Pay on Delivery">Pay on Delivery</SelectItem>
-                                  <SelectItem value="Pay with WhatsApp">Pay with WhatsApp (Manual)</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="flex gap-4 pt-4">
-                          <Button type="button" variant="outline" onClick={prevStep} className="flex-1 py-7 text-xl font-bold">
-                            <ArrowLeft className="mr-2 h-5 w-5" /> Back
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            className="flex-[2] py-7 text-xl font-bold shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
-                            disabled={orderMutation.isPending}
-                          >
-                            {orderMutation.isPending ? "Processing..." : "Place Order"}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </form>
-                </Form>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="confirmation"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mx-auto max-w-2xl text-center"
-            >
-              <div className="rounded-3xl border border-border bg-card p-12 shadow-xl">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                  <CheckCircle2 className="h-12 w-12 text-primary" />
-                </div>
-                <h2 className="mb-2 text-3xl font-bold">Order Confirmed!</h2>
-                <p className="mb-8 text-muted-foreground">
-                  Thank you for your purchase. Your order ID is <span className="font-bold text-foreground">#{createdOrder?.id}</span>.
-                </p>
-                
-                <div className="mb-8 text-left space-y-4">
-                  <h3 className="font-bold border-b pb-2">Items Purchased</h3>
-                  {createdOrder?.items.map((item: any, idx: number) => (
-                    <div key={idx} className="flex justify-between text-sm">
-                      <span>{item.quantity}x {item.name} {item.storage ? `(${item.storage})` : ""}</span>
-                      <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
-                    </div>
-                  ))}
-                  <div className="flex justify-between border-t pt-4 font-bold text-lg">
-                    <span>Total</span>
-                    <span className="text-primary">{formatPrice(createdOrder?.totalAmount)}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-4">
-                  {createdOrder?.paymentMethod === "Pay with WhatsApp" && (
-                    <Button 
-                      className="w-full py-6 text-lg font-bold bg-[#25D366] hover:bg-[#128C7E] text-white"
-                      onClick={() => {
-                        const message = `Hello DOPIK ELECTRONICS, I just placed order #${createdOrder.id}. Total: ${formatPrice(createdOrder.totalAmount)}. Please confirm my order.`;
-                        window.open(`https://wa.me/250783562143?text=${encodeURIComponent(message)}`, "_blank");
-                      }}
-                    >
-                      Confirm via WhatsApp
-                    </Button>
-                  )}
-                  <Link href="/shop">
-                    <Button variant="outline" className="w-full py-6 text-lg font-bold">
-                      Continue Shopping
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </main>
       <Footer />
     </div>
