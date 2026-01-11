@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag, Minus, Plus as PlusIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
@@ -16,6 +16,7 @@ export default function ProductDetails() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [selectedStorage, setSelectedStorage] = useState("256GB");
   const [selectedColor, setSelectedColor] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
   const storageOptions = [
     { label: "256GB", priceOffset: 0 },
@@ -39,13 +40,13 @@ export default function ProductDetails() {
   );
 
   const currentPriceOffset = storageOptions.find(s => s.label === selectedStorage)?.priceOffset || 0;
-  const totalPrice = product.price + currentPriceOffset;
+  const totalPrice = (product.price + currentPriceOffset) * quantity;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF' }).format(price);
   };
 
-  const whatsappMessage = `Hello DOPIK ELECTRONICS, I’m interested in buying the ${product.name} (${selectedStorage}${selectedColor ? `, ${selectedColor}` : ""}) priced at ${formatPrice(totalPrice)}. Is it available?`;
+  const whatsappMessage = `Hello DOPIK ELECTRONICS, I’m interested in buying ${quantity}x ${product.name} (${selectedStorage}${selectedColor ? `, ${selectedColor}` : ""}) priced at ${formatPrice(totalPrice)}. Is it available?`;
   const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(whatsappMessage)}`;
 
   // Parse specs if they are stored as JSON, otherwise use empty object
@@ -159,6 +160,31 @@ export default function ProductDetails() {
 
             {/* Actions */}
             <div className="mt-auto space-y-4 pt-6">
+              {/* Quantity Selector */}
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-bold uppercase tracking-widest text-primary">Quantity</span>
+                <div className="flex items-center rounded-lg border border-border bg-card p-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-md"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-12 text-center font-bold">{quantity}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-md"
+                    onClick={() => setQuantity(quantity + 1)}
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
               <Button 
                 onClick={() => setIsCheckoutOpen(true)}
                 className="flex w-full items-center justify-center rounded-xl bg-primary px-8 py-6 text-lg font-bold text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary/20"
@@ -182,6 +208,7 @@ export default function ProductDetails() {
             {/* Checkout Modal */}
             <CheckoutModal 
               product={{...product, price: totalPrice}} 
+              quantity={quantity}
               open={isCheckoutOpen} 
               onOpenChange={setIsCheckoutOpen} 
             />

@@ -12,11 +12,12 @@ import { useMutation } from "@tanstack/react-query";
 
 interface CheckoutModalProps {
   product: Product;
+  quantity: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function CheckoutModal({ product, open, onOpenChange }: CheckoutModalProps) {
+export function CheckoutModal({ product, quantity, open, onOpenChange }: CheckoutModalProps) {
   const { toast } = useToast();
 
   const form = useForm<InsertOrder>({
@@ -48,7 +49,7 @@ export function CheckoutModal({ product, open, onOpenChange }: CheckoutModalProp
         return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
       };
 
-      const message = `Hello DOPIK ELECTRONICS, my name is ${order.customerName}. I have placed an order for ${product.name}. Total amount: ${order.totalAmount} RWF. Order ID: #${order.id}. Thank you.`;
+      const message = `Hello DOPIK ELECTRONICS, my name is ${order.customerName}. I have placed an order for ${quantity}x ${product.name}. Total amount: ${order.totalAmount} RWF. Order ID: #${order.id}. Thank you.`;
       const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
       
       onOpenChange(false);
@@ -74,7 +75,7 @@ export function CheckoutModal({ product, open, onOpenChange }: CheckoutModalProp
         <DialogHeader>
           <DialogTitle>Complete Your Order</DialogTitle>
           <DialogDescription>
-            Buying: <span className="font-semibold text-foreground">{product.name}</span> for {" "}
+            Buying: <span className="font-semibold text-foreground">{quantity}x {product.name}</span> for {" "}
             <span className="font-bold text-primary">
               {new Intl.NumberFormat("en-RW", { style: "currency", currency: "RWF", maximumFractionDigits: 0 }).format(product.price)}
             </span>
