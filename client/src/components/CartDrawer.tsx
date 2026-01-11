@@ -52,6 +52,8 @@ export function CartDrawer() {
   };
 
   const subtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
+  const deliveryFee = 0; // Default delivery fee
+  const total = subtotal + deliveryFee;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
@@ -133,12 +135,23 @@ export function CartDrawer() {
             </ScrollArea>
 
             <div className="border-t pt-6 space-y-4">
-              <div className="flex justify-between text-lg font-bold">
-                <span>Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Subtotal</span>
+                  <span>{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Delivery Fee</span>
+                  <span>{deliveryFee === 0 ? "Free" : formatPrice(deliveryFee)}</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total</span>
+                  <span>{formatPrice(total)}</span>
+                </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                Shipping and taxes calculated at checkout.
+                Final price including delivery. Taxes included where applicable.
               </p>
               <div className="grid gap-2">
                 <Button className="w-full py-6 text-lg font-bold">Checkout Now</Button>
