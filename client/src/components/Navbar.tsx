@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Menu, X, ShoppingBag, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
+import { CartDrawer } from "./CartDrawer";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,11 +57,7 @@ export function Navbar() {
               <Search className="h-5 w-5" />
             </button>
           </Link>
-          <Link href="/shop">
-            <button className="relative p-2 text-muted-foreground hover:text-primary hover:bg-accent/50 rounded-full transition-all active:scale-90">
-              <ShoppingBag className="h-5 w-5" />
-            </button>
-          </Link>
+          <CartDrawer />
           
           {/* Mobile Menu Button */}
           <button 
