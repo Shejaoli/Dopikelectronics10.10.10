@@ -61,6 +61,18 @@ export function CartDrawer() {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
   };
 
+  const generateWhatsAppUrl = () => {
+    const message = `Hello DOPIK ELECTRONICS, I would like to order the following items:\n\n${cart
+      .map(
+        (item) =>
+          `*${item.name}*\nStorage: ${item.storage}\nColor: ${item.color}\nQuantity: ${item.quantity}\nPrice: ${formatPrice(
+            item.totalPrice
+          )}\n`
+      )
+      .join("\n")}\n*Total Amount: ${formatPrice(total)}*\n\nPlease confirm availability. Thank you.`;
+    return `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
@@ -165,6 +177,19 @@ export function CartDrawer() {
                 >
                   Checkout Now
                 </Button>
+                <a 
+                  href={generateWhatsAppUrl()} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="w-full"
+                >
+                  <Button 
+                    variant="outline" 
+                    className="w-full py-6 text-lg font-bold border-2 border-[#25D366] text-[#25D366] hover:bg-[#25D366]/5"
+                  >
+                    Checkout via WhatsApp
+                  </Button>
+                </a>
                 <Button variant="outline" onClick={() => setIsOpen(false)} className="w-full">
                   Continue Shopping
                 </Button>
