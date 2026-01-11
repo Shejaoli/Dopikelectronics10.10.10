@@ -20,6 +20,277 @@ import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { insertOrderSchema } from "@shared/schema";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+function CheckoutForm({ 
+  cart, 
+  shippingData, 
+  total, 
+  formatPrice, 
+  setLocation, 
+  setCreatedOrder 
+}: { 
+  cart: any[], 
+  shippingData: any, 
+  total: number, 
+  formatPrice: (p: number) => string,
+  setLocation: (l: string) => void,
+  setCreatedOrder: (o: any) => void
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const { toast } = useToast();
+
+  const paymentForm = useForm({
+    defaultValues: {
+      paymentMethod: "Cash on Delivery",
+    },
+  });
+
+  const watchPaymentMethod = paymentForm.watch("paymentMethod");
+
+  const orderMutation = useMutation({
+    mutationFn: async (values: any) => {
+      const res = await apiRequest("POST", "/api/orders", values);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to place order");
+      }
+      return res.json();
+    },
+    onSuccess: (order, variables) => {
+      setCreatedOrder(order);
+      if (variables.paymentMethod === "WhatsApp Order Confirmation") {
+        const message = `Hello DOPIK ELECTRONICS, my name is ${shippingData?.firstName} ${shippingData?.lastName}. I've placed order #${order.id} via WhatsApp.\n\nItems:\n${cart.map((item: any) => `- ${item.quantity}x ${item.name} (${item.storage}, ${item.color}) - ${formatPrice(item.price)}`).join("\n")}\n\nTotal: ${formatPrice(total)}\n\nShipping Address: ${shippingData?.address}, ${shippingData?.city}, ${shippingData?.province}\nPhone: ${shippingData?.phone}`;
+        const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank");
+      }
+      localStorage.removeItem("cart");
+      localStorage.removeItem("checkout_shipping");
+      setLocation("/order-success");
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Order failed",
+        description: error.message,
+      });
+    },
+  });
+
+  const onPaymentSubmit = async (data: any) => {
+    if (!shippingData) {
+      setLocation("/checkout/shipping");
+      return;
+    }
+
+    try {
+      let paymentStatus = "pending";
+
+      if (data.paymentMethod === "Card Payment") {
+        if (!stripe || !elements) return;
+
+        const res = await apiRequest("POST", "/api/payments/stripe/create-intent", {
+          amount: total,
+        });
+        const { clientSecret } = await res.json();
+
+        const cardElement = elements.getElement(CardElement);
+        if (!cardElement) return;
+
+        const result = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: `${shippingData.firstName} ${shippingData.lastName}`,
+              email: shippingData.email,
+              phone: shippingData.phone,
+            },
+          },
+        });
+
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
+
+        if (result.paymentIntent.status === "succeeded") {
+          paymentStatus = "paid";
+        }
+      }
+
+      const orderData = {
+        customerName: `${shippingData.firstName} ${shippingData.lastName}`,
+        customerPhone: shippingData.phone,
+        deliveryLocation: `${shippingData.address}, ${shippingData.city}, ${shippingData.province}`,
+        paymentMethod: data.paymentMethod,
+        totalAmount: total,
+        status: paymentStatus,
+        items: cart.map(item => ({
+          productId: item.productId,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          storage: item.storage,
+          color: item.color
+        })),
+      };
+
+      orderMutation.mutate(orderData);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Payment failed",
+        description: error.message,
+      });
+    }
+  };
+
+  return (
+    <Form {...paymentForm}>
+      <form onSubmit={paymentForm.handleSubmit(onPaymentSubmit)} className="space-y-8">
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold">Payment</h2>
+          <p className="text-sm text-muted-foreground">All transactions are secure and encrypted.</p>
+          
+          <FormField
+            control={paymentForm.control}
+            name="paymentMethod"
+            render={({ field }) => (
+              <FormItem className="space-y-3">
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-col gap-4"
+                  >
+                    <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
+                      <FormControl>
+                        <RadioGroupItem value="Cash on Delivery" className="mt-1" />
+                      </FormControl>
+                      <div className="space-y-1">
+                        <FormLabel className="font-bold text-lg flex items-center gap-2">
+                          <Truck className="h-5 w-5 text-primary" />
+                          Cash on Delivery
+                        </FormLabel>
+                        <p className="text-sm text-muted-foreground">Pay with cash when your order is delivered to your doorstep.</p>
+                      </div>
+                    </FormItem>
+
+                    <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
+                      <FormControl>
+                        <RadioGroupItem value="WhatsApp Order Confirmation" className="mt-1" />
+                      </FormControl>
+                      <div className="space-y-1">
+                        <FormLabel className="font-bold text-lg flex items-center gap-2">
+                          <MessageCircle className="h-5 w-5 text-[#25D366]" />
+                          WhatsApp Order Confirmation
+                        </FormLabel>
+                        <p className="text-sm text-muted-foreground">Send your order details to us on WhatsApp for manual confirmation and payment instructions.</p>
+                      </div>
+                    </FormItem>
+
+                    <FormItem className="flex flex-col rounded-2xl border border-border overflow-hidden cursor-pointer hover:bg-accent/5 transition-colors">
+                      <div className="flex items-start space-x-4 p-6">
+                        <FormControl>
+                          <RadioGroupItem value="Card Payment" className="mt-1" />
+                        </FormControl>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <FormLabel className="font-bold text-lg flex items-center gap-2">
+                              <CardIcon className="h-5 w-5 text-primary" />
+                              Card Payment
+                            </FormLabel>
+                            <div className="flex gap-2">
+                              <SiVisa className="h-5 w-8 text-[#1A1F71]" />
+                              <SiMastercard className="h-5 w-8 text-[#EB001B]" />
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground">Secure payment using your credit or debit card.</p>
+                        </div>
+                      </div>
+
+                      <AnimatePresence>
+                        {watchPaymentMethod === "Card Payment" && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="bg-muted/30 border-t border-border"
+                          >
+                            <div className="p-6">
+                              <div className="p-3 bg-background rounded-xl border border-border min-h-[3rem] flex items-center">
+                                <CardElement options={{
+                                  style: {
+                                    base: {
+                                      fontSize: '16px',
+                                      color: '#424770',
+                                      '::placeholder': {
+                                        color: '#aab7c4',
+                                      },
+                                    },
+                                    invalid: {
+                                      color: '#9e2146',
+                                    },
+                                  },
+                                }} className="w-full" />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </FormItem>
+
+                    <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
+                      <FormControl>
+                        <RadioGroupItem value="PayPal" className="mt-1" />
+                      </FormControl>
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center justify-between">
+                          <FormLabel className="font-bold text-lg flex items-center gap-2">
+                            <Wallet className="h-5 w-5 text-[#003087]" />
+                            PayPal
+                          </FormLabel>
+                          <SiPaypal className="h-5 w-8 text-[#003087]" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">You will be redirected to PayPal to complete your purchase securely.</p>
+                      </div>
+                    </FormItem>
+                  </RadioGroup>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => setLocation("/checkout/shipping")}
+              className="flex-1 py-7 text-lg font-bold rounded-2xl"
+            >
+              Back to Shipping
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={orderMutation.isPending || (watchPaymentMethod === "Card Payment" && !stripe)}
+              className="flex-[2] py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
+            >
+              {orderMutation.isPending ? "Processing..." : (watchPaymentMethod === "WhatsApp Order Confirmation" ? "Complete on WhatsApp" : "Pay Now")}
+            </Button>
+          </div>
+          <p className="text-center text-xs text-muted-foreground">
+            Payments are simulated for demo purposes
+          </p>
+        </div>
+      </form>
+    </Form>
+  );
+}
 
 // Shipping schema
 const shippingSchema = z.object({
@@ -74,9 +345,6 @@ export default function Checkout() {
     }
   }, [location, setLocation]);
 
-  const subtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
-  const total = subtotal;
-
   // Shipping Form
   const shippingForm = useForm<ShippingForm>({
     resolver: zodResolver(shippingSchema),
@@ -95,79 +363,14 @@ export default function Checkout() {
     },
   });
 
-  // Payment Form
-  const paymentForm = useForm({
-    defaultValues: {
-      paymentMethod: "Cash on Delivery",
-      cardNumber: "",
-      cardExpiry: "",
-      cardCvc: "",
-    },
-  });
-
-  const watchPaymentMethod = paymentForm.watch("paymentMethod");
-
-  const orderMutation = useMutation({
-    mutationFn: async (values: any) => {
-      const res = await apiRequest("POST", "/api/orders", values);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to place order");
-      }
-      return res.json();
-    },
-    onSuccess: (order) => {
-      setCreatedOrder(order);
-      const paymentMethod = paymentForm.getValues("paymentMethod");
-      if (paymentMethod === "WhatsApp Order Confirmation") {
-        const message = `Hello DOPIK ELECTRONICS, my name is ${shippingData?.firstName} ${shippingData?.lastName}. I've placed order #${order.id} via WhatsApp.\n\nItems:\n${cart.map(item => `- ${item.quantity}x ${item.name} (${item.storage}, ${item.color}) - ${formatPrice(item.price)}`).join("\n")}\n\nTotal: ${formatPrice(total)}\n\nShipping Address: ${shippingData?.address}, ${shippingData?.city}, ${shippingData?.province}\nPhone: ${shippingData?.phone}`;
-        const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, "_blank");
-      }
-      localStorage.removeItem("cart");
-      localStorage.removeItem("checkout_shipping");
-      setLocation("/order-success");
-    },
-    onError: (error: Error) => {
-      toast({
-        variant: "destructive",
-        title: "Order failed",
-        description: error.message,
-      });
-    },
-  });
-
   const onShippingSubmit = (data: ShippingForm) => {
     setShippingData(data);
     localStorage.setItem("checkout_shipping", JSON.stringify(data));
     setLocation("/checkout/payment");
   };
 
-  const onPaymentSubmit = (data: any) => {
-    if (!shippingData) {
-      setLocation("/checkout/shipping");
-      return;
-    }
-
-    const orderData = {
-      customerName: `${shippingData.firstName} ${shippingData.lastName}`,
-      customerPhone: shippingData.phone,
-      deliveryLocation: `${shippingData.address}, ${shippingData.city}, ${shippingData.province}`,
-      paymentMethod: data.paymentMethod,
-      totalAmount: total,
-      status: "pending",
-      items: cart.map(item => ({
-        productId: item.productId,
-        name: item.name,
-        quantity: item.quantity,
-        price: item.price,
-        storage: item.storage,
-        color: item.color
-      })),
-    };
-
-    orderMutation.mutate(orderData);
-  };
+  const subtotal = cart.reduce((sum, item) => sum + item.totalPrice, 0);
+  const total = subtotal;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
@@ -452,168 +655,16 @@ export default function Checkout() {
                     </form>
                   </Form>
                 ) : (
-                  <Form {...paymentForm}>
-                    <form onSubmit={paymentForm.handleSubmit(onPaymentSubmit)} className="space-y-8">
-                      <div className="space-y-6">
-                        <h2 className="text-xl font-bold">Payment</h2>
-                        <p className="text-sm text-muted-foreground">All transactions are secure and encrypted.</p>
-                        
-                        <FormField
-                          control={paymentForm.control}
-                          name="paymentMethod"
-                          render={({ field }) => (
-                            <FormItem className="space-y-3">
-                              <FormControl>
-                                <RadioGroup
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  className="flex flex-col gap-4"
-                                >
-                                  <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
-                                    <FormControl>
-                                      <RadioGroupItem value="Cash on Delivery" className="mt-1" />
-                                    </FormControl>
-                                    <div className="space-y-1">
-                                      <FormLabel className="font-bold text-lg flex items-center gap-2">
-                                        <Truck className="h-5 w-5 text-primary" />
-                                        Cash on Delivery
-                                      </FormLabel>
-                                      <p className="text-sm text-muted-foreground">Pay with cash when your order is delivered to your doorstep.</p>
-                                    </div>
-                                  </FormItem>
-
-                                  <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
-                                    <FormControl>
-                                      <RadioGroupItem value="WhatsApp Order Confirmation" className="mt-1" />
-                                    </FormControl>
-                                    <div className="space-y-1">
-                                      <FormLabel className="font-bold text-lg flex items-center gap-2">
-                                        <MessageCircle className="h-5 w-5 text-[#25D366]" />
-                                        WhatsApp Order Confirmation
-                                      </FormLabel>
-                                      <p className="text-sm text-muted-foreground">Send your order details to us on WhatsApp for manual confirmation and payment instructions.</p>
-                                    </div>
-                                  </FormItem>
-
-                                  <FormItem className="flex flex-col rounded-2xl border border-border overflow-hidden cursor-pointer hover:bg-accent/5 transition-colors">
-                                    <div className="flex items-start space-x-4 p-6">
-                                      <FormControl>
-                                        <RadioGroupItem value="Card Payment" className="mt-1" />
-                                      </FormControl>
-                                      <div className="flex-1">
-                                        <div className="flex items-center justify-between mb-1">
-                                          <FormLabel className="font-bold text-lg flex items-center gap-2">
-                                            <CardIcon className="h-5 w-5 text-primary" />
-                                            Card Payment
-                                          </FormLabel>
-                                          <div className="flex gap-2">
-                                            <SiVisa className="h-5 w-8 text-[#1A1F71]" />
-                                            <SiMastercard className="h-5 w-8 text-[#EB001B]" />
-                                          </div>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">Secure payment using your credit or debit card.</p>
-                                      </div>
-                                    </div>
-
-                                    <AnimatePresence>
-                                      {watchPaymentMethod === "Card Payment" && (
-                                        <motion.div
-                                          initial={{ height: 0, opacity: 0 }}
-                                          animate={{ height: "auto", opacity: 1 }}
-                                          exit={{ height: 0, opacity: 0 }}
-                                          className="bg-muted/30 border-t border-border"
-                                        >
-                                          <div className="p-6 space-y-4">
-                                            <FormField
-                                              control={paymentForm.control}
-                                              name="cardNumber"
-                                              render={({ field }) => (
-                                                <FormItem>
-                                                  <FormControl>
-                                                    <Input placeholder="Card number" {...field} className="h-12 rounded-xl bg-background" />
-                                                  </FormControl>
-                                                  <FormMessage />
-                                                </FormItem>
-                                              )}
-                                            />
-                                            <div className="grid gap-4 grid-cols-2">
-                                              <FormField
-                                                control={paymentForm.control}
-                                                name="cardExpiry"
-                                                render={({ field }) => (
-                                                  <FormItem>
-                                                    <FormControl>
-                                                      <Input placeholder="Expiry date (MM/YY)" {...field} className="h-12 rounded-xl bg-background" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                  </FormItem>
-                                                )}
-                                              />
-                                              <FormField
-                                                control={paymentForm.control}
-                                                name="cardCvc"
-                                                render={({ field }) => (
-                                                  <FormItem>
-                                                    <FormControl>
-                                                      <Input placeholder="CVC" {...field} className="h-12 rounded-xl bg-background" />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                  </FormItem>
-                                                )}
-                                              />
-                                            </div>
-                                          </div>
-                                        </motion.div>
-                                      )}
-                                    </AnimatePresence>
-                                  </FormItem>
-
-                                  <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
-                                    <FormControl>
-                                      <RadioGroupItem value="PayPal" className="mt-1" />
-                                    </FormControl>
-                                    <div className="space-y-1 flex-1">
-                                      <div className="flex items-center justify-between">
-                                        <FormLabel className="font-bold text-lg flex items-center gap-2">
-                                          <Wallet className="h-5 w-5 text-[#003087]" />
-                                          PayPal
-                                        </FormLabel>
-                                        <SiPaypal className="h-5 w-8 text-[#003087]" />
-                                      </div>
-                                      <p className="text-sm text-muted-foreground">You will be redirected to PayPal to complete your purchase securely.</p>
-                                    </div>
-                                  </FormItem>
-                                </RadioGroup>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="space-y-4">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            onClick={() => setLocation("/checkout/shipping")}
-                            className="flex-1 py-7 text-lg font-bold rounded-2xl"
-                          >
-                            Back to Shipping
-                          </Button>
-                          <Button 
-                            type="submit" 
-                            disabled={orderMutation.isPending}
-                            className="flex-[2] py-7 text-xl font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
-                          >
-                            {orderMutation.isPending ? "Processing..." : (watchPaymentMethod === "WhatsApp Order Confirmation" ? "Complete on WhatsApp" : "Pay Now")}
-                          </Button>
-                        </div>
-                        <p className="text-center text-xs text-muted-foreground">
-                          Payments are simulated for demo purposes
-                        </p>
-                      </div>
-                    </form>
-                  </Form>
+                  <Elements stripe={stripePromise}>
+                    <CheckoutForm 
+                      cart={cart}
+                      shippingData={shippingData}
+                      total={total}
+                      formatPrice={formatPrice}
+                      setLocation={setLocation}
+                      setCreatedOrder={setCreatedOrder}
+                    />
+                  </Elements>
                 )}
               </div>
               <OrderSummary />

@@ -8,6 +8,11 @@ import { insertProductSchema, insertOrderSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import express from "express";
+import Stripe from "stripe";
+
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 
 const storage_config = multer.diskStorage({
   destination: "./public/uploads/products/",
@@ -343,6 +348,32 @@ export async function registerRoutes(
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Stripe Payment Intent Route
+  app.post("/api/payments/stripe/create-intent", async (req, res) => {
+    if (!stripe) {
+      return res.status(500).json({ message: "Stripe is not configured" });
+    }
+
+    try {
+      const { amount, currency = "rwf" } = req.body;
+
+      if (!amount || typeof amount !== "number") {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency,
+        metadata: { integration_check: "accept_a_payment" },
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error("Stripe error:", error);
+      res.status(500).json({ message: error.message || "Failed to create payment intent" });
     }
   });
 
