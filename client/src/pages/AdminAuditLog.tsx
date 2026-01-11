@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 import type { AuditLog } from "@shared/schema";
 
 export default function AdminAuditLog() {
