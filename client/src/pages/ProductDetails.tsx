@@ -10,6 +10,8 @@ import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag, Minus, Plus as Pl
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 export default function ProductDetails() {
   const [match, params] = useRoute("/product/:id");
   const id = params ? parseInt(params.id) : 0;
@@ -289,6 +291,37 @@ export default function ProductDetails() {
                 <Check className="mb-2 h-6 w-6 text-primary" />
                 <span className="text-xs font-medium text-foreground">Genuine Product</span>
               </div>
+            </div>
+
+            {/* FAQ Section */}
+            <div className="mt-12 border-t border-border pt-12">
+              <h3 className="mb-6 text-xs font-bold uppercase tracking-widest text-primary">Frequently Asked Questions</h3>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1" className="border-border">
+                  <AccordionTrigger className="text-sm font-semibold hover:text-primary transition-colors">Is this product brand new?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    We offer both brand new and certified refurbished electronics. Refurbished items undergo rigorous testing and are restored to like-new condition with genuine parts. Check the product specifications for individual item condition.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2" className="border-border">
+                  <AccordionTrigger className="text-sm font-semibold hover:text-primary transition-colors">Does it have warranty?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    Yes, all our electronics come with a 1-year limited warranty covering hardware defects. Our dedicated service center in Kigali handles all warranty claims promptly.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-3" className="border-border">
+                  <AccordionTrigger className="text-sm font-semibold hover:text-primary transition-colors">How long does delivery take?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    Delivery within Kigali typically takes 2-4 hours. For orders outside Kigali, delivery takes 24-48 hours depending on your location.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-4" className="border-border">
+                  <AccordionTrigger className="text-sm font-semibold hover:text-primary transition-colors">Can I pay on delivery?</AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    Yes, we support Cash on Delivery and Momo Pay on Delivery for all orders within Kigali. For orders outside Kigali, we require payment before shipping.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
           </motion.div>
         </div>
