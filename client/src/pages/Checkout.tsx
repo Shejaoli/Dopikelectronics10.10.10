@@ -308,7 +308,7 @@ function CheckoutForm({
                               }}>
                                 <PayPalButtons
                                   style={{ layout: "vertical", shape: "pill" }}
-                                  createOrder: async () => {
+                                  createOrder={async () => {
                                     try {
                                       const response = await apiRequest("POST", "/api/payments/paypal/create-order", {
                                         amount: total,
@@ -360,7 +360,10 @@ function CheckoutForm({
                                         };
 
                                         const orderRes = await apiRequest("POST", "/api/orders/create", orderData);
-                                        if (!orderRes.ok) throw new Error("Failed to save order");
+                                        if (!orderRes.ok) {
+                                          const errorData = await orderRes.json();
+                                          throw new Error(errorData.message || "Failed to save order");
+                                        }
                                         const order = await orderRes.json();
 
                                         toast({
