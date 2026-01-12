@@ -13,7 +13,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: "All Items", onClick: () => setIsMenuOpen(true) },
-    { name: "Deals 🔥", href: "/shop?deals=true" },
+    { name: "Deals 🔥", href: "/deals" },
     { name: "iPhones", href: "/shop?brand=Apple&category=Smartphones" },
     { name: "Samsung Phones", href: "/shop?brand=Samsung&category=Smartphones" },
     { name: "Laptops", href: "/shop?category=Laptops" },
@@ -222,10 +222,10 @@ export function Navbar() {
                     {link.name}
                   </button>
                 ) : (
-                  <Link key={link.name} href={link.href!}>
+                  <Link key={link.name} href={link.href}>
                     <span 
                       className={`cursor-pointer text-sm font-semibold transition-all hover:text-primary active:scale-95 whitespace-nowrap ${
-                        isActive(link.href!) ? "text-primary" : "text-muted-foreground"
+                        isActive(link.href) ? "text-primary" : "text-muted-foreground"
                       }`}
                     >
                       {link.name}

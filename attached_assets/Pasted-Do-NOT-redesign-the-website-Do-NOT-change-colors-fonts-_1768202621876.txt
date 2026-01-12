@@ -1,0 +1,147 @@
+Do NOT redesign the website.
+Do NOT change colors, fonts, spacing scale, or branding.
+Do NOT modify header, footer, or navigation layout.
+
+Work ONLY on the “Deals” page behavior and layout.
+
+================================
+GOAL
+================================
+When clicking “Deals” in the navigation,
+open a FULL DEALS PAGE exactly like Reebelo’s Deals page.
+
+================================
+PAGE BEHAVIOR
+================================
+
+- Clicking “Deals” routes to /deals
+- This is a full page (NOT a modal, NOT a popup)
+- Page scrolls normally
+- Header remains visible
+- Footer remains unchanged
+
+================================
+PAGE STRUCTURE
+================================
+
+TOP SECTION (Hero Deals Banner):
+- Full-width banner
+- Dark gradient background
+- Title: “Hot Deals”
+- Subtitle: “Limited time offers on refurbished tech”
+- Multiple featured deal cards inside the banner
+- Each card includes:
+  - Product image
+  - Discount badge (e.g. “Save 40%”)
+  - Old price crossed
+  - New price bold
+  - “Shop Now” button
+
+================================
+FILTER BAR (Below Banner)
+================================
+
+- Horizontal filter chips:
+  - All Deals (active by default)
+  - Smartphones
+  - Laptops
+  - Tablets
+  - Smartwatches
+  - Accessories
+- Active chip highlighted
+- Clicking a chip filters products instantly
+- No page reload
+
+================================
+MAIN CONTENT LAYOUT
+================================
+
+2-column layout:
+
+LEFT SIDEBAR (Sticky on desktop):
+- Section title: “Categories”
+- Checkbox filters:
+  - Smartphones
+  - Laptops
+  - Tablets
+  - Smartwatches
+  - Accessories
+- Brand filter:
+  - Apple
+  - Samsung
+  - Google
+  - Others
+- Price range slider
+- Condition:
+  - New
+  - Refurbished
+  - Used
+
+RIGHT SIDE (Product Grid):
+- Grid layout:
+  - Desktop: 4 columns
+  - Tablet: 2 columns
+  - Mobile: 1 column
+- Product card includes:
+  - Image
+  - Product name
+  - Condition badge
+  - Discount badge
+  - Old price (strikethrough)
+  - New price (bold)
+  - “View Deal” or “Add to Cart” button
+
+================================
+TRUST SECTION
+================================
+
+Mid-page banner:
+- Light background
+- Text: “Premium Refurbished. Trusted Quality.”
+- Icons with labels:
+  - Warranty Included
+  - Quality Tested
+  - Fast Delivery
+  - Money-Back Guarantee
+
+================================
+MOBILE BEHAVIOR
+================================
+
+- Sidebar becomes slide-in filter drawer
+- Filter button visible above product grid
+- Smooth open/close
+- Independent scroll inside filter drawer
+
+================================
+STYLING RULES
+================================
+
+- Match existing typography exactly
+- Match existing button styles
+- No new colors
+- No new fonts
+- Consistent spacing with product pages
+
+================================
+TECH RULES
+================================
+
+- Use existing Tailwind / CSS system
+- No new libraries
+- No route restructuring
+- Filters handled via state
+- SEO-friendly markup
+
+================================
+STOP CONDITION
+================================
+
+Once:
+- Deals page loads
+- Filters work
+- Product grid updates
+- Layout matches Reebelo behavior
+
+STOP. Do NOT add extra sections.
+BEGIN IMPLEMENTATION NOW.

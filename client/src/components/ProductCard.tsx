@@ -5,9 +5,10 @@ import { motion } from "framer-motion";
 
 interface ProductCardProps {
   product: Product;
+  isDeal?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, isDeal }: ProductCardProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF' }).format(price);
   };
@@ -24,16 +25,23 @@ export function ProductCard({ product }: ProductCardProps) {
       className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-500 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5"
     >
       {/* Badge */}
-      {product.stockStatus === 'out_of_stock' && (
-        <div className="absolute left-3 top-3 z-10 rounded-full bg-red-500/90 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
-          Sold Out
-        </div>
-      )}
-      {product.isFeatured && product.stockStatus !== 'out_of_stock' && (
-        <div className="absolute left-3 top-3 z-10 rounded-full bg-primary/90 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground backdrop-blur-md">
-          Featured
-        </div>
-      )}
+      <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+        {isDeal && (
+          <div className="rounded-full bg-primary/90 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground backdrop-blur-md">
+            Save 40%
+          </div>
+        )}
+        {product.stockStatus === 'out_of_stock' && (
+          <div className="rounded-full bg-red-500/90 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
+            Sold Out
+          </div>
+        )}
+        {product.isFeatured && product.stockStatus !== 'out_of_stock' && !isDeal && (
+          <div className="rounded-full bg-primary/90 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground backdrop-blur-md">
+            Featured
+          </div>
+        )}
+      </div>
 
       {/* Image Container */}
       <Link href={`/product/${product.id}`}>
@@ -63,9 +71,14 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
         </Link>
         
-        <div className="mt-auto flex items-center justify-between">
-          <div className="text-lg font-bold tracking-tight text-foreground">
-            {formatPrice(product.price)}
+        <div className="mt-auto flex items-center justify-between gap-2">
+          <div className="flex flex-col">
+            {isDeal && (
+              <span className="text-[10px] font-medium text-muted-foreground line-through decoration-primary/50">{(product.price * 1.4).toLocaleString()} RWF</span>
+            )}
+            <div className="text-lg font-bold tracking-tight text-foreground">
+              {formatPrice(product.price)}
+            </div>
           </div>
           
           <a 
