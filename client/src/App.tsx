@@ -42,7 +42,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <PayPalScriptProvider options={{ 
-        "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
+        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
         currency: "USD",
         intent: "capture"
       }}>
