@@ -22,6 +22,7 @@ import { useMutation } from "@tanstack/react-query";
 import { insertOrderSchema } from "@shared/schema";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 // Safe initialization of Stripe
 const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
@@ -247,20 +248,74 @@ function CheckoutForm({
                       </AnimatePresence>
                     </FormItem>
 
-                    <FormItem className="flex items-start space-x-4 space-y-0 rounded-2xl border border-border p-6 cursor-pointer hover:bg-accent/5 transition-colors">
-                      <FormControl>
-                        <RadioGroupItem value="PayPal" className="mt-1" />
-                      </FormControl>
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center justify-between">
-                          <FormLabel className="font-bold text-lg flex items-center gap-2">
-                            <Wallet className="h-5 w-5 text-[#003087]" />
-                            PayPal
-                          </FormLabel>
-                          <SiPaypal className="h-5 w-8 text-[#003087]" />
+                    <FormItem className="flex flex-col rounded-2xl border border-border overflow-hidden cursor-pointer hover:bg-accent/5 transition-colors">
+                      <div className="flex items-start space-x-4 p-6">
+                        <FormControl>
+                          <RadioGroupItem value="PayPal" className="mt-1" />
+                        </FormControl>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <FormLabel className="font-bold text-lg flex items-center gap-2">
+                              <Wallet className="h-5 w-5 text-[#003087]" />
+                              PayPal
+                            </FormLabel>
+                            <SiPaypal className="h-5 w-8 text-[#003087]" />
+                          </div>
+                          <p className="text-sm text-muted-foreground">You will be redirected to PayPal to complete your purchase securely.</p>
                         </div>
-                        <p className="text-sm text-muted-foreground">You will be redirected to PayPal to complete your purchase securely.</p>
                       </div>
+
+                      <AnimatePresence>
+                        {watchPaymentMethod === "PayPal" && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="bg-muted/30 border-t border-border"
+                          >
+                            <div className="p-6">
+                              <PayPalButtons
+                                style={{ layout: "vertical", shape: "pill" }}
+                                createOrder={async () => {
+                                  const response = await apiRequest("POST", "/api/payments/paypal/create-order", {
+                                    amount: total,
+                                  });
+                                  const order = await response.json();
+                                  return order.id;
+                                }}
+                                onApprove={async (data) => {
+                                  const response = await apiRequest("POST", "/api/payments/paypal/capture-order", {
+                                    orderID: data.orderID,
+                                  });
+                                  const details = await response.json();
+                                  if (details.status === "COMPLETED") {
+                                    toast({
+                                      title: "Payment Successful",
+                                      description: "Your payment has been captured successfully.",
+                                    });
+                                    // According to instructions: Show payment success state, do NOT create order records yet.
+                                    setCreatedOrder({
+                                      id: "PAYPAL-" + data.orderID,
+                                      paymentMethod: "PayPal",
+                                      totalAmount: total,
+                                      status: "paid"
+                                    });
+                                    setLocation("/order-success");
+                                  }
+                                }}
+                                onError={(err) => {
+                                  console.error("PayPal Error:", err);
+                                  toast({
+                                    variant: "destructive",
+                                    title: "PayPal Error",
+                                    description: "Something went wrong with the PayPal checkout.",
+                                  });
+                                }}
+                              />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </FormItem>
                   </RadioGroup>
                 </FormControl>

@@ -9,6 +9,20 @@ import multer from "multer";
 import path from "path";
 import express from "express";
 import Stripe from "stripe";
+import { Buffer } from "buffer";
+
+async function getPayPalAccessToken() {
+  const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString("base64");
+  const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
+    method: "POST",
+    body: "grant_type=client_credentials",
+    headers: {
+      Authorization: `Basic ${auth}`,
+    },
+  });
+  const data: any = await response.json();
+  return data.access_token;
+}
 
 const stripe = process.env.STRIPE_SECRET_KEY 
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -374,6 +388,55 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Stripe error:", error);
       res.status(500).json({ message: error.message || "Failed to create payment intent" });
+    }
+  });
+
+  app.post("/api/payments/paypal/create-order", async (req, res) => {
+    try {
+      const { amount } = req.body;
+      const accessToken = await getPayPalAccessToken();
+      const response = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "USD",
+                value: (amount / 1200).toFixed(2), // Sandbox testing conversion
+              },
+            },
+          ],
+        }),
+      });
+      const data: any = await response.json();
+      res.json({ id: data.id });
+    } catch (error: any) {
+      console.error("PayPal create error:", error);
+      res.status(500).json({ message: error.message || "Failed to create PayPal order" });
+    }
+  });
+
+  app.post("/api/payments/paypal/capture-order", async (req, res) => {
+    try {
+      const { orderID } = req.body;
+      const accessToken = await getPayPalAccessToken();
+      const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}/capture`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const data: any = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      console.error("PayPal capture error:", error);
+      res.status(500).json({ message: error.message || "Failed to capture PayPal order" });
     }
   });
 
