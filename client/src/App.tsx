@@ -10,6 +10,7 @@ import Iphones from "@/pages/Iphones";
 import Laptops from "@/pages/Laptops";
 import Electronics from "@/pages/Electronics";
 import HomeKitchen from "@/pages/HomeKitchen";
+import ToolsHomeImprovement from "@/pages/ToolsHomeImprovement";
 import Deals from "@/pages/Deals";
 import ProductDetails from "@/pages/ProductDetails";
 import Cart from "@/pages/Cart";
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/laptops" component={Laptops} />
       <Route path="/electronics" component={Electronics} />
       <Route path="/home-kitchen" component={HomeKitchen} />
+      <Route path="/tools-home-improvement" component={ToolsHomeImprovement} />
       <Route path="/deals" component={Deals} />
       <Route path="/product/:id" component={ProductDetails} />
       <Route path="/cart" component={Cart} />

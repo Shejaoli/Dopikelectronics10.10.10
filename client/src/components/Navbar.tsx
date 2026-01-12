@@ -19,7 +19,7 @@ export function Navbar() {
     { name: "Electronics", href: "/electronics" },
     { name: "Samsung Phones", href: "/shop?brand=Samsung&category=Smartphones" },
     { name: "Home", href: "/home-kitchen" },
-    { name: "Tools", href: "/shop?category=Tools" },
+    { name: "Tools", href: "/tools-home-improvement" },
     { name: "Gaming", href: "/shop?category=Gaming" },
   ];
 
@@ -110,7 +110,7 @@ export function Navbar() {
                         { name: "Electronics", icon: ElectronicsIcon, href: "/shop?category=Electronics" },
                         { name: "Home & Kitchen", icon: HomeIcon, href: "/shop?category=Home" },
                         { name: "Gaming", icon: Gamepad2, href: "/shop?category=Gaming" },
-                        { name: "Tools", icon: Wrench, href: "/shop?category=Tools" },
+                        { name: "Tools", icon: Wrench, href: "/tools-home-improvement" },
                         { name: "Others", icon: Layers, href: "/shop" },
                       ].map((item) => (
                         <Link key={item.name} href={item.href} onClick={() => setIsMenuOpen(false)}>
