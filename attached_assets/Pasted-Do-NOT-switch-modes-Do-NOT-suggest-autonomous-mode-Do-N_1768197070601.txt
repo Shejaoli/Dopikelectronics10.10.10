@@ -1,0 +1,111 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT describe complexity.
+Do NOT redesign UI.
+Do NOT modify payment, stock, or admin logic.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Allow customers to VIEW their past orders
+in a "My Orders" page.
+
+This is READ-ONLY.
+This is STEP 9 ONLY.
+
+========================
+STEP 9 — CUSTOMER ORDER HISTORY
+========================
+
+SCOPE (STRICT):
+- Customer-facing ONLY
+- Read-only order history
+- Do NOT allow edits or cancellations
+- Do NOT touch checkout or cart
+- Do NOT change admin pages
+
+========================
+BACKEND IMPLEMENTATION
+========================
+
+1) Create customer-protected route:
+GET /api/orders/my
+
+- Requires customer authentication
+- Returns orders belonging ONLY to logged-in customer
+- Sorted by newest first
+
+Order fields returned:
+- Order ID
+- Created date
+- Payment provider
+- Total amount
+- Currency
+- Order status
+- Order items summary
+
+========================
+FRONTEND IMPLEMENTATION
+========================
+
+1) Create page:
+- /my-orders
+
+2) Display orders in a list or table:
+- Order ID
+- Date
+- Total
+- Status
+- Payment method
+
+3) Expand / details view:
+- Show order items:
+  - Product name
+  - Storage
+  - Color
+  - Quantity
+  - Price per item
+
+========================
+STYLE RULES
+========================
+
+- Use existing storefront design system
+- No redesign
+- Clean and readable
+- Mobile-friendly
+- Dark / light compatible
+
+========================
+ABSOLUTE RULES
+========================
+
+- NO reorder button
+- NO cancel button
+- NO refunds
+- NO emails
+- NO stock changes
+
+========================
+VALIDATION
+========================
+
+After STEP 9:
+- Customer sees ONLY their orders
+- Orders display correct data
+- Status updates reflect admin changes
+- Storefront and checkout unaffected
+- No console or runtime errors
+
+========================
+STOP CONDITION
+========================
+
+Once customer order history works:
+- STOP
+- Do NOT continue
+- Do NOT add features
+
+START IMPLEMENTING STEP 9 NOW.
