@@ -394,6 +394,10 @@ export async function registerRoutes(
   app.post("/api/payments/paypal/create-order", async (req, res) => {
     try {
       const { amount } = req.body;
+      if (!amount || typeof amount !== "number") {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
       const accessToken = await getPayPalAccessToken();
       const response = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
         method: "POST",
@@ -407,12 +411,18 @@ export async function registerRoutes(
             {
               amount: {
                 currency_code: "USD",
-                value: (amount / 1200).toFixed(2), // Sandbox testing conversion
+                value: (amount / 1200).toFixed(2), // Sandbox testing conversion RWF to USD
               },
             },
           ],
         }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "PayPal order creation failed");
+      }
+
       const data: any = await response.json();
       res.json({ id: data.id });
     } catch (error: any) {
@@ -424,6 +434,10 @@ export async function registerRoutes(
   app.post("/api/payments/paypal/capture-order", async (req, res) => {
     try {
       const { orderID } = req.body;
+      if (!orderID) {
+        return res.status(400).json({ message: "Order ID is required" });
+      }
+
       const accessToken = await getPayPalAccessToken();
       const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}/capture`, {
         method: "POST",
@@ -432,6 +446,12 @@ export async function registerRoutes(
           Authorization: `Bearer ${accessToken}`,
         },
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "PayPal payment capture failed");
+      }
+
       const data: any = await response.json();
       res.json(data);
     } catch (error: any) {

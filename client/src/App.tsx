@@ -16,6 +16,8 @@ import AdminLogin from "@/pages/AdminLogin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import NotFound from "@/pages/not-found";
 
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+
 function Router() {
   return (
     <Switch>
@@ -39,10 +41,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <PayPalScriptProvider options={{ 
+        "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
+        currency: "USD",
+        intent: "capture"
+      }}>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </PayPalScriptProvider>
     </QueryClientProvider>
   );
 }

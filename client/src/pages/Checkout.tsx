@@ -277,30 +277,59 @@ function CheckoutForm({
                               <PayPalButtons
                                 style={{ layout: "vertical", shape: "pill" }}
                                 createOrder={async () => {
-                                  const response = await apiRequest("POST", "/api/payments/paypal/create-order", {
-                                    amount: total,
-                                  });
-                                  const order = await response.json();
-                                  return order.id;
+                                  try {
+                                    const response = await apiRequest("POST", "/api/payments/paypal/create-order", {
+                                      amount: total,
+                                    });
+                                    if (!response.ok) {
+                                      const error = await response.json();
+                                      throw new Error(error.message || "Failed to create PayPal order");
+                                    }
+                                    const order = await response.json();
+                                    return order.id;
+                                  } catch (error: any) {
+                                    toast({
+                                      variant: "destructive",
+                                      title: "PayPal Error",
+                                      description: error.message,
+                                    });
+                                    throw error;
+                                  }
                                 }}
                                 onApprove={async (data) => {
-                                  const response = await apiRequest("POST", "/api/payments/paypal/capture-order", {
-                                    orderID: data.orderID,
-                                  });
-                                  const details = await response.json();
-                                  if (details.status === "COMPLETED") {
+                                  try {
+                                    const response = await apiRequest("POST", "/api/payments/paypal/capture-order", {
+                                      orderID: data.orderID,
+                                    });
+                                    if (!response.ok) {
+                                      const error = await response.json();
+                                      throw new Error(error.message || "Failed to capture PayPal order");
+                                    }
+                                    const details = await response.json();
+                                    if (details.status === "COMPLETED") {
+                                      toast({
+                                        title: "Payment Successful",
+                                        description: "Your payment has been captured successfully.",
+                                      });
+                                      
+                                      setCreatedOrder({
+                                        id: "PAYPAL-" + data.orderID,
+                                        paymentMethod: "PayPal",
+                                        totalAmount: total,
+                                        status: "paid",
+                                        customerName: `${shippingData?.firstName} ${shippingData?.lastName}`,
+                                      });
+                                      
+                                      localStorage.removeItem("cart");
+                                      localStorage.removeItem("checkout_shipping");
+                                      setLocation("/order-success");
+                                    }
+                                  } catch (error: any) {
                                     toast({
-                                      title: "Payment Successful",
-                                      description: "Your payment has been captured successfully.",
+                                      variant: "destructive",
+                                      title: "Payment failed",
+                                      description: error.message,
                                     });
-                                    // According to instructions: Show payment success state, do NOT create order records yet.
-                                    setCreatedOrder({
-                                      id: "PAYPAL-" + data.orderID,
-                                      paymentMethod: "PayPal",
-                                      totalAmount: total,
-                                      status: "paid"
-                                    });
-                                    setLocation("/order-success");
                                   }
                                 }}
                                 onError={(err) => {

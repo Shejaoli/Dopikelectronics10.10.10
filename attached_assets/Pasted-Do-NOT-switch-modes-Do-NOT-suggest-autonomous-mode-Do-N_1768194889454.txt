@@ -1,0 +1,109 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT describe complexity.
+Do NOT redesign UI.
+Do NOT refactor existing Stripe code.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Integrate REAL PayPal payments (SANDBOX MODE ONLY).
+
+This is NOT full order logic.
+This is NOT Stripe.
+This is STEP 2 ONLY.
+
+========================
+STEP 2 — PAYPAL SANDBOX PAYMENTS
+========================
+
+SCOPE (STRICT):
+- Implement PayPal payments ONLY
+- Sandbox mode ONLY
+- Do NOT touch Stripe implementation
+- Do NOT change checkout layout or design
+- Existing PayPal option must become functional
+- Visual appearance must remain EXACTLY the same
+
+========================
+BACKEND IMPLEMENTATION (ONLY THESE)
+========================
+
+1) Use PayPal REST API (Sandbox)
+
+2) Create route:
+POST /api/payments/paypal/create-order
+
+- Read PayPal credentials from environment variables
+- Create PayPal order
+- Return orderID
+
+3) Create route:
+POST /api/payments/paypal/capture-order
+
+- Accept orderID
+- Capture PayPal payment
+- Return success response
+
+========================
+ENVIRONMENT VARIABLES (ASSUME EXIST)
+========================
+
+Backend:
+- PAYPAL_CLIENT_ID
+- PAYPAL_CLIENT_SECRET
+
+Frontend:
+- VITE_PAYPAL_CLIENT_ID
+
+You MUST read them from env.
+You MUST NOT ask me for values.
+
+========================
+FRONTEND IMPLEMENTATION
+========================
+
+1) Load PayPal JS SDK using sandbox client ID
+
+2) Connect existing PayPal checkout option to:
+- createOrder → calls backend create-order
+- onApprove → calls backend capture-order
+
+3) On successful capture:
+- Show payment success state
+- Do NOT create order records yet
+- Do NOT redirect unless already implemented
+
+========================
+SECURITY RULES
+========================
+
+- Client secret stays backend-only
+- Sandbox endpoints ONLY
+- No hardcoded credentials
+
+========================
+VALIDATION
+========================
+
+After STEP 2:
+- PayPal sandbox popup opens
+- User can log in with sandbox buyer account
+- Payment is approved and captured
+- Transaction visible in PayPal sandbox dashboard
+- Checkout UI unchanged
+- No console or runtime errors
+
+========================
+STOP CONDITION
+========================
+
+When PayPal sandbox payment works:
+- STOP
+- Do NOT connect to orders
+- Do NOT refactor
+- Do NOT continue to next step
+
+START IMPLEMENTING STEP 2 NOW.
