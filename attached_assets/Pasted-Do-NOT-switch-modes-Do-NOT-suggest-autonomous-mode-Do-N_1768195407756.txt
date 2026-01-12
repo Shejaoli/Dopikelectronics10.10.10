@@ -1,0 +1,110 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT describe complexity.
+Do NOT redesign global UI.
+Do NOT refactor payment or order logic.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Show a proper Order Confirmation / Success page
+AFTER an order is successfully created.
+
+This is UI + data display ONLY.
+This is STEP 4 ONLY.
+
+========================
+STEP 4 — ORDER CONFIRMATION PAGE
+========================
+
+SCOPE (STRICT):
+- Show confirmation ONLY after successful order creation
+- Do NOT change checkout UI
+- Do NOT touch Stripe or PayPal logic
+- Do NOT change cart logic
+- Do NOT touch admin pages
+
+========================
+PAGE REQUIREMENTS
+========================
+
+Create or complete a page:
+- /order/success
+
+This page must display:
+- Success message
+- Order ID
+- Payment method (Stripe or PayPal)
+- Total amount
+- Currency
+- Order items list:
+  - Product name
+  - Selected storage
+  - Selected color
+  - Quantity
+  - Price per item
+
+========================
+DATA SOURCE RULES
+========================
+
+- Order data comes from:
+  - Response of /api/orders/create
+  OR
+  - Fetch order by ID if already implemented
+
+- Do NOT refetch payment providers
+- Do NOT recalculate totals
+
+========================
+NAVIGATION RULES
+========================
+
+- Redirect to /order/success ONLY after:
+  - Payment success
+  - Order creation success
+
+- Prevent direct access to success page without order data
+
+========================
+STYLE RULES
+========================
+
+- Use existing design system
+- Same fonts, spacing, colors
+- Clean, calm success UI
+- No animations required
+- Dark / light compatible
+
+========================
+ABSOLUTE RULES
+========================
+
+- NO new logic
+- NO business rules
+- NO admin features
+- NO stock changes
+
+========================
+VALIDATION
+========================
+
+After STEP 4:
+- User sees confirmation page after payment
+- Correct order details displayed
+- Cart is already cleared
+- Refresh does not create duplicate orders
+- No console or runtime errors
+
+========================
+STOP CONDITION
+========================
+
+Once confirmation page works:
+- STOP
+- Do NOT continue
+- Do NOT add features
+
+START IMPLEMENTING STEP 4 NOW.

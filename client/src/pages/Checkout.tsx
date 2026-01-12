@@ -148,7 +148,7 @@ function CheckoutForm({
           setCreatedOrder(order);
           localStorage.removeItem("cart");
           localStorage.removeItem("checkout_shipping");
-          setLocation("/order-success");
+          setLocation("/order/success");
         }
       }
 
@@ -364,7 +364,7 @@ function CheckoutForm({
                                       setCreatedOrder(order);
                                       localStorage.removeItem("cart");
                                       localStorage.removeItem("checkout_shipping");
-                                      setLocation("/order-success");
+                                      setLocation("/order/success");
                                     }
                                   } catch (error: any) {
                                     toast({
@@ -461,11 +461,11 @@ export default function Checkout() {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
       const parsedCart = JSON.parse(savedCart);
-      if (parsedCart.length === 0 && location !== "/order-success") {
+      if (parsedCart.length === 0 && location !== "/order/success" && location !== "/order-success") {
         setLocation("/shop");
       }
       setCart(parsedCart);
-    } else if (location !== "/order-success") {
+    } else if (location !== "/order/success" && location !== "/order-success") {
       setLocation("/shop");
     }
 
@@ -506,7 +506,7 @@ export default function Checkout() {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
   };
 
-  if (cart.length === 0 && location !== "/order-success") return null;
+  if (cart.length === 0 && location !== "/order/success" && location !== "/order-success") return null;
 
   const OrderSummary = () => (
     <div className="lg:sticky lg:top-24 h-fit">
@@ -563,11 +563,11 @@ export default function Checkout() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        {location === "/order-success" ? (
+        {(location === "/order/success" || location === "/order-success") ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mx-auto max-w-2xl text-center"
+            className="mx-auto max-w-3xl text-center"
           >
             <div className="rounded-3xl border border-border bg-card p-12 shadow-xl">
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
@@ -576,16 +576,16 @@ export default function Checkout() {
               <h2 className="mb-2 text-3xl font-bold text-foreground">Order Placed Successfully</h2>
               
               {createdOrder ? (
-                <div className="mt-8 space-y-6">
+                <div className="mt-8 space-y-8">
                   <div className="bg-muted/30 rounded-2xl p-6 border border-border/50 text-left">
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-6 sm:grid-cols-2">
                       <div className="space-y-1">
                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Order ID</p>
                         <p className="text-lg font-bold">#{createdOrder.id}</p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payment Method</p>
-                        <p className="text-lg font-bold">{createdOrder.paymentMethod}</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payment Provider</p>
+                        <p className="text-lg font-bold uppercase">{createdOrder.paymentProvider || createdOrder.paymentMethod}</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Amount</p>
@@ -593,35 +593,68 @@ export default function Checkout() {
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Order Status</p>
-                        <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 font-bold">
+                        <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 font-bold">
                           {createdOrder.status.toUpperCase()}
                         </Badge>
                       </div>
                     </div>
                   </div>
+
+                  <div className="text-left space-y-4">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <ShoppingBag className="h-5 w-5 text-primary" />
+                      Ordered Items
+                    </h3>
+                    <div className="rounded-2xl border border-border bg-background/50 overflow-hidden">
+                      <div className="divide-y divide-border">
+                        {createdOrder.items?.map((item: any, idx: number) => (
+                          <div key={idx} className="p-4 flex justify-between items-center bg-card/50">
+                            <div className="space-y-1">
+                              <p className="font-bold">{item.name}</p>
+                              <div className="flex gap-2 text-xs text-muted-foreground font-medium uppercase tracking-tighter">
+                                {item.storage && <span>{item.storage}</span>}
+                                {item.storage && item.color && <span>•</span>}
+                                {item.color && <span>{item.color}</span>}
+                                <span>•</span>
+                                <span>Qty: {item.quantity}</span>
+                              </div>
+                            </div>
+                            <p className="font-bold">{formatPrice(item.price * item.quantity)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                   
-                  <p className="text-muted-foreground">
-                    Thank you for your purchase. We've received your order and will contact you soon for confirmation.
-                  </p>
+                  <div className="pt-4 flex flex-col sm:flex-row gap-4">
+                    <Button 
+                      onClick={() => setLocation("/shop")}
+                      className="flex-1 py-6 text-lg font-bold rounded-2xl"
+                    >
+                      Continue Shopping
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => setLocation("/track-order")}
+                      className="flex-1 py-6 text-lg font-bold rounded-2xl"
+                    >
+                      Track Order
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                <p className="mb-8 text-muted-foreground">
-                  Thank you for your purchase. Your order has been placed successfully.
-                </p>
+                <div className="mt-8">
+                  <p className="text-muted-foreground mb-8">
+                    Thank you for your purchase. Your order is being processed.
+                  </p>
+                  <Button 
+                    onClick={() => setLocation("/shop")}
+                    className="w-full py-6 text-lg font-bold rounded-2xl"
+                  >
+                    Go to Shop
+                  </Button>
+                </div>
               )}
-
-              <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Link href="/" className="flex-1">
-                  <Button className="w-full py-6 text-lg font-bold rounded-2xl shadow-lg shadow-primary/20 hover-elevate active-elevate-2">
-                    Continue Shopping
-                  </Button>
-                </Link>
-                <Link href="/track-order" className="flex-1">
-                  <Button variant="outline" className="w-full py-6 text-lg font-bold rounded-2xl border-2 hover-elevate active-elevate-2">
-                    Track Order
-                  </Button>
-                </Link>
-              </div>
             </div>
           </motion.div>
         ) : (
