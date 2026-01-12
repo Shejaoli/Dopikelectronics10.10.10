@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import Shop from "@/pages/Shop";
 import Iphones from "@/pages/Iphones";
 import Laptops from "@/pages/Laptops";
+import Electronics from "@/pages/Electronics";
 import Deals from "@/pages/Deals";
 import ProductDetails from "@/pages/ProductDetails";
 import Cart from "@/pages/Cart";
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/shop" component={Shop} />
       <Route path="/iphones" component={Iphones} />
       <Route path="/laptops" component={Laptops} />
+      <Route path="/electronics" component={Electronics} />
       <Route path="/deals" component={Deals} />
       <Route path="/product/:id" component={ProductDetails} />
       <Route path="/cart" component={Cart} />
