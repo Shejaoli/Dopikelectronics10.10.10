@@ -10,13 +10,15 @@ export function Navbar() {
   const [location] = useLocation();
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Shop", href: "/shop" },
-    { name: "Track Order", href: "/track-order" },
-    { name: "My Orders", href: "/my-orders" },
-    { name: "Lookup Order", href: "/orders/lookup" },
-    { name: "About Us", href: "/about" },
-    { name: "Contact", href: "/contact" },
+    { name: "All Items", href: "/shop" },
+    { name: "Deals 🔥", href: "/shop?deals=true" },
+    { name: "iPhones", href: "/shop?brand=Apple&category=Smartphones" },
+    { name: "Samsung Phones", href: "/shop?brand=Samsung&category=Smartphones" },
+    { name: "Laptops", href: "/shop?category=Laptops" },
+    { name: "Electronics", href: "/shop?category=Electronics" },
+    { name: "Home", href: "/shop?category=Home" },
+    { name: "Tools", href: "/shop?category=Tools" },
+    { name: "Gaming", href: "/shop?category=Gaming" },
   ];
 
   const isActive = (path: string) => location === path;
@@ -38,11 +40,11 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-6 lg:flex">
           {navLinks.map((link) => (
-            <Link key={link.href} href={link.href}>
+            <Link key={link.name} href={link.href}>
               <span 
-                className={`cursor-pointer text-sm font-semibold transition-all hover:text-primary active:scale-95 ${
+                className={`cursor-pointer text-sm font-semibold transition-all hover:text-primary active:scale-95 whitespace-nowrap ${
                   isActive(link.href) ? "text-primary" : "text-muted-foreground"
                 }`}
               >

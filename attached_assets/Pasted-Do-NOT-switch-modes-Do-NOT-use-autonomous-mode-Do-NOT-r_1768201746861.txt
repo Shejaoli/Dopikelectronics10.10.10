@@ -1,0 +1,97 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT redesign the site.
+Do NOT change branding, colors, or typography.
+Do NOT touch backend logic.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Update the MAIN NAVIGATION to match a Reebelo-style ecommerce navbar.
+
+Minus the "Baby" section.
+
+========================
+STEP — NAVIGATION STRUCTURE ONLY
+========================
+
+SCOPE (STRICT):
+- Header / Navbar component ONLY
+- Desktop navigation ONLY
+- Mobile menu remains unchanged
+- No footer changes
+- No page layout changes
+
+========================
+NAVIGATION ITEMS (EXACT)
+========================
+
+Left side navigation should be:
+
+- All Items
+- Deals 🔥
+- iPhones
+- Samsung Phones
+- Laptops
+- Electronics
+- Home
+- Tools
+- Gaming
+
+❌ Do NOT include:
+- Baby
+
+========================
+BEHAVIOR RULES
+========================
+
+- Navigation is horizontal
+- Items are evenly spaced
+- Hover state only (no dropdowns for now)
+- Click navigates to existing routes
+- If route does not exist, keep link disabled (no crash)
+
+========================
+UI RULES (CRITICAL)
+========================
+
+- Keep existing header height
+- Keep logo position unchanged
+- Keep search, icons, cart unchanged
+- NO color changes
+- NO font changes
+- NO spacing refactor outside nav items
+
+========================
+IMPLEMENTATION RULES
+========================
+
+- Modify ONLY the Navbar / Header component
+- Use existing Tailwind classes
+- Do NOT introduce new UI libraries
+- Do NOT refactor unrelated code
+
+========================
+VALIDATION
+========================
+
+After this step:
+- Navigation matches Reebelo-style layout
+- Baby section is removed
+- Header looks clean and balanced
+- No console errors
+- Mobile view unaffected
+
+========================
+STOP CONDITION
+========================
+
+Once navigation renders correctly:
+- STOP
+- Do NOT add dropdowns
+- Do NOT add mega menus
+- Do NOT continue to next feature
+
+BEGIN IMPLEMENTATION NOW.
