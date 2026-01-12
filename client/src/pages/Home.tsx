@@ -36,7 +36,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const heroImg = "/images/iphone-17-pro-max-1.png";
 
 const HomeHero = () => null;
-const ContinueShopping = () => null;
+const ContinueShopping = () => {
+  const { data: products } = useProducts({ featured: "true" });
+  
+  if (!products || products.length === 0) return null;
+
+  return (
+    <section className="py-12 border-b">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-bold mb-8">Pick up where you left off</h2>
+        <Carousel className="w-full">
+          <CarouselContent className="-ml-4">
+            {products.slice(0, 6).map((product) => (
+              <CarouselItem key={product.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                <ProductCard product={product} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <div className="hidden md:block">
+            <CarouselPrevious className="-left-12" />
+            <CarouselNext className="-right-12" />
+          </div>
+        </Carousel>
+      </div>
+    </section>
+  );
+};
 const PopularCategories = () => {
   const categories = [
     { name: "Smartphones", icon: Smartphone, href: "/shop?category=Smartphones" },
