@@ -181,10 +181,21 @@ export default function AdminOrders() {
       case "paid": return "default";
       case "processing": return "secondary";
       case "shipped": return "outline";
-      case "completed": return "default"; // or any other appropriate variant
+      case "completed": return "default";
       case "cancelled": return "destructive";
       default: return "secondary";
     }
+  };
+
+  const getValidNextStatuses = (currentStatus: string) => {
+    const transitions: Record<string, string[]> = {
+      "paid": ["processing", "cancelled"],
+      "processing": ["shipped", "cancelled"],
+      "shipped": ["completed", "cancelled"],
+      "completed": [],
+      "cancelled": [],
+    };
+    return transitions[currentStatus] || [];
   };
 
   return (
@@ -422,9 +433,31 @@ export default function AdminOrders() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Status</p>
-                  <Badge variant={getStatusColor(selectedOrder.status) as any}>
-                    {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
-                  </Badge>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant={getStatusColor(selectedOrder.status) as any}>
+                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                    </Badge>
+                    
+                    {getValidNextStatuses(selectedOrder.status).length > 0 && (
+                      <Select 
+                        onValueChange={(value) => {
+                          statusMutation.mutate({ id: selectedOrder.id, status: value });
+                          setSelectedOrder(prev => prev ? { ...prev, status: value } : null);
+                        }}
+                      >
+                        <SelectTrigger className="h-7 w-[130px] text-xs">
+                          <SelectValue placeholder="Update Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getValidNextStatuses(selectedOrder.status).map((s) => (
+                            <SelectItem key={s} value={s} className="text-xs">
+                              {s.charAt(0).toUpperCase() + s.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
                 </div>
               </div>
 
