@@ -178,9 +178,10 @@ export default function AdminOrders() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "pending": return "secondary";
       case "paid": return "default";
-      case "delivered": return "outline";
+      case "processing": return "secondary";
+      case "shipped": return "outline";
+      case "completed": return "default"; // or any other appropriate variant
       case "cancelled": return "destructive";
       default: return "secondary";
     }
@@ -215,9 +216,10 @@ export default function AdminOrders() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="shipped">Shipped</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>

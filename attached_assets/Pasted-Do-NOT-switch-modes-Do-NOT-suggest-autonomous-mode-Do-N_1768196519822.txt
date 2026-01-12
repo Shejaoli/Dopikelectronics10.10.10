@@ -1,0 +1,100 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT describe complexity.
+Do NOT redesign UI.
+Do NOT modify payment or stock logic.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Introduce a REAL order status lifecycle
+without changing existing UI behavior.
+
+This is NOT fulfillment UI.
+This is NOT notifications.
+This is STEP 7 ONLY.
+
+========================
+STEP 7 — ORDER STATUS LIFECYCLE
+========================
+
+SCOPE (STRICT):
+- Add order status transitions ONLY
+- Default status remains "paid"
+- Do NOT add UI controls yet
+- Do NOT add emails or notifications
+- Do NOT touch checkout, cart, or payments
+
+========================
+ORDER STATUS RULES
+========================
+
+Allowed statuses:
+- paid
+- processing
+- shipped
+- completed
+- cancelled
+
+Rules:
+- Orders are created as "paid"
+- Status can only move forward
+- Cancelled is terminal
+- Completed is terminal
+
+========================
+BACKEND IMPLEMENTATION
+========================
+
+1) Update Order model to support status enum
+
+2) Create admin-protected route:
+PATCH /api/admin/orders/:orderId/status
+
+- Accept new status
+- Validate transition is allowed
+- Save updated status
+- Return updated order
+
+========================
+FRONTEND IMPLEMENTATION
+========================
+
+1) Update Admin Order Details view:
+- Display current status clearly
+- Do NOT add buttons yet
+- Read-only display only
+
+========================
+ABSOLUTE RULES
+========================
+
+- NO status UI controls yet
+- NO refunds
+- NO payment changes
+- NO stock rollback
+- NO customer-facing changes
+
+========================
+VALIDATION
+========================
+
+After STEP 7:
+- Orders have valid lifecycle statuses
+- Status updates work via API
+- Invalid transitions are blocked
+- Existing orders unaffected
+- No console or runtime errors
+
+========================
+STOP CONDITION
+========================
+
+Once lifecycle logic works:
+- STOP
+- Do NOT continue
+- Do NOT add features
+
+START IMPLEMENTING STEP 7 NOW.

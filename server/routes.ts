@@ -308,11 +308,11 @@ export async function registerRoutes(
       
       // Strict transition rules
       const validTransitions: Record<string, string[]> = {
-        "pending": ["confirmed", "cancelled"],
-        "confirmed": ["paid", "cancelled"],
-        "paid": ["delivered"],
-        "delivered": [], // Locked
-        "cancelled": [], // Locked (terminal status)
+        "paid": ["processing", "cancelled"],
+        "processing": ["shipped", "cancelled"],
+        "shipped": ["completed", "cancelled"],
+        "completed": [], // Terminal
+        "cancelled": [], // Terminal
       };
 
       const allowedNext = validTransitions[currentStatus] || [];
