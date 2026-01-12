@@ -1,0 +1,178 @@
+Do NOT redesign the website.
+Do NOT change colors, fonts, spacing scale, or branding.
+Do NOT modify header, footer, or global navigation.
+
+Work ONLY on the “iPhone” category page behavior and layout.
+
+================================
+GOAL
+================================
+When clicking “iPhones” in the navigation,
+open a FULL CATEGORY PAGE exactly like Reebelo’s iPhone listing page.
+
+================================
+ROUTING
+================================
+
+- Clicking “iPhones” navigates to /iphones
+- This is a full page (NOT modal, NOT overlay)
+- Page scrolls normally
+- Header remains fixed
+- Footer remains unchanged
+
+================================
+TOP SECTION (CATEGORY HERO)
+================================
+
+- Full-width dark banner
+- Title: “Certified Refurbished iPhones”
+- Subtext line:
+  - “1 Year Warranty”
+  - “30 Days Return”
+  - “500,000+ customers”
+- Trust badge on the right:
+  - “Excellent on Trustpilot” with star rating
+
+================================
+MAIN LAYOUT
+================================
+
+2-column layout:
+
+--------------------------------
+LEFT SIDEBAR (FILTERS)
+--------------------------------
+
+- Sticky sidebar on desktop
+- Scrolls independently from product grid
+
+FILTER GROUPS (collapsible):
+
+1. Price Range
+   - Min price input
+   - Max price input
+   - Range slider
+
+2. Battery Health
+   - 100%
+   - 90%+
+   - 80%+
+
+3. Carrier
+   - Fully Unlocked
+
+4. Color
+   - Black
+   - White
+   - Gold
+   - Blue
+   - Green
+   - Graphite
+   - Other Apple colors
+
+5. Condition
+   - Premium
+   - Excellent
+   - Good
+   - Acceptable
+
+6. SIM Slot
+   - Dual SIM
+   - Single SIM + eSIM
+
+7. Storage
+   - 64GB
+   - 128GB
+   - 256GB
+   - 512GB
+   - 1TB
+
+--------------------------------
+RIGHT SIDE (PRODUCT GRID)
+--------------------------------
+
+- Grid layout:
+  - Desktop: 4 columns
+  - Tablet: 2 columns
+  - Mobile: 1 column
+
+Each product card includes:
+- Product image
+- Model name (e.g. iPhone 14 Pro Max)
+- “From RF xxx,xxx” price
+- Color variants preview (if available)
+- Clickable card navigates to product page
+
+================================
+SORTING
+================================
+
+- Dropdown on top-right of grid:
+  - Best Selling (default)
+  - Price: Low to High
+  - Price: High to Low
+  - Newest
+
+================================
+MID-PAGE TRUST BANNER
+================================
+
+- Light background banner
+- Text: “Premium Refurbished. Trusted Quality.”
+- Icons with labels:
+  - Save up to 70%
+  - 12 Month Warranty
+  - Quality Tested by Experts
+  - Risk-Free 30-Day Trial
+
+================================
+SEO CONTENT SECTION
+================================
+
+Below product grid:
+- Long-form descriptive content about buying iPhones
+- FAQs-style headings and paragraphs
+- Improves SEO (static content)
+
+================================
+MOBILE BEHAVIOR
+================================
+
+- Filters hidden by default
+- “Filter” button above grid
+- Clicking opens slide-in filter drawer from LEFT
+- Drawer scrolls independently
+- Apply & Close buttons visible
+
+================================
+STYLING RULES
+================================
+
+- Match existing typography exactly
+- Match existing buttons and spacing
+- No new colors
+- No new fonts
+- Product cards reuse existing card styles
+
+================================
+TECH RULES
+================================
+
+- Use existing Tailwind / CSS system
+- No new libraries
+- Filters handled via state
+- No page reload on filter change
+- SEO-friendly markup
+
+================================
+STOP CONDITION
+================================
+
+Once:
+- iPhone page loads
+- Filters work
+- Grid updates dynamically
+- Layout matches Reebelo behavior
+
+STOP. Do NOT add extra sections.
+BEGIN IMPLEMENTATION NOW.

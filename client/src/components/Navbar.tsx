@@ -14,7 +14,7 @@ export function Navbar() {
   const navLinks = [
     { name: "All Items", onClick: () => setIsMenuOpen(true) },
     { name: "Deals 🔥", href: "/deals" },
-    { name: "iPhones", href: "/shop?brand=Apple&category=Smartphones" },
+    { name: "iPhones", href: "/iphones" },
     { name: "Samsung Phones", href: "/shop?brand=Samsung&category=Smartphones" },
     { name: "Laptops", href: "/shop?category=Laptops" },
     { name: "Electronics", href: "/shop?category=Electronics" },
