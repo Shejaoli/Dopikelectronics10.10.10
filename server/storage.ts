@@ -141,19 +141,85 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createOrder(order: any): Promise<Order> {
-    const [newOrder] = await db.insert(orders).values({
-      customerName: order.customerName,
-      customerPhone: order.customerPhone,
-      deliveryLocation: order.deliveryLocation || null,
-      paymentMethod: order.paymentMethod || null,
-      paymentProvider: order.paymentProvider || null,
-      paymentReference: order.paymentReference || null,
-      totalAmount: order.totalAmount,
-      currency: order.currency || "RWF",
-      status: order.status || "pending",
-      items: order.items || [],
-    }).returning();
-    return newOrder;
+    return await db.transaction(async (tx) => {
+      // 1. Validate and Deduct Stock
+      for (const item of order.items || []) {
+        const [product] = await tx.select().from(products).where(eq(products.id, item.productId));
+        if (!product) {
+          throw new Error(`Product ${item.productId} not found`);
+        }
+
+        if (item.storage || item.color) {
+          const variations = { ...(product.variations || {}) };
+          let updated = false;
+          let prevStock: number | undefined;
+          let newStock: number | undefined;
+          let variationLabel = "";
+
+          if (item.storage && variations.storage) {
+            const storageOpt = variations.storage.find((s: any) => s.option === item.storage);
+            if (storageOpt) {
+              if ((storageOpt.stock ?? 0) < item.quantity) {
+                throw new Error(`Insufficient stock for ${product.name} (${item.storage})`);
+              }
+              prevStock = storageOpt.stock;
+              storageOpt.stock = (storageOpt.stock ?? 0) - item.quantity;
+              newStock = storageOpt.stock;
+              variationLabel = item.storage;
+              updated = true;
+            }
+          }
+
+          if (item.color && variations.colors) {
+            const colorOpt = variations.colors.find((c: any) => c.name === item.color);
+            if (colorOpt) {
+              if ((colorOpt.stock ?? 0) < item.quantity) {
+                throw new Error(`Insufficient stock for ${product.name} (${item.color})`);
+              }
+              // If already updated storage, we use the current newStock for prevStock or just rely on the final update
+              prevStock = prevStock ?? colorOpt.stock; 
+              colorOpt.stock = (colorOpt.stock ?? 0) - item.quantity;
+              newStock = colorOpt.stock;
+              variationLabel = variationLabel ? `${variationLabel}, ${item.color}` : item.color;
+              updated = true;
+            }
+          }
+
+          if (updated) {
+            await tx.update(products).set({ variations }).where(eq(products.id, product.id));
+            await tx.insert(auditLogs).values({
+              action: `Stock Deducted (Order Creation): ${product.name} (${variationLabel}) x${item.quantity}`,
+              adminEmail: "system",
+              actionType: "stock_deduction",
+              targetType: "Product",
+              targetId: product.id,
+              previousValue: prevStock?.toString(),
+              newValue: newStock?.toString(),
+            }).catch(err => console.error("Audit log failed:", err));
+          }
+        } else {
+          // If the project doesn't have non-variation stock field yet, we follow the current pattern
+          // but strictly variations are required by the prompt rules
+          console.warn(`Product ${product.name} has no variation stock to deduct.`);
+        }
+      }
+
+      // 2. Create Order
+      const [newOrder] = await tx.insert(orders).values({
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        deliveryLocation: order.deliveryLocation || null,
+        paymentMethod: order.paymentMethod || null,
+        paymentProvider: order.paymentProvider || null,
+        paymentReference: order.paymentReference || null,
+        totalAmount: order.totalAmount,
+        currency: order.currency || "RWF",
+        status: order.status || "pending",
+        items: order.items || [],
+      }).returning();
+
+      return newOrder;
+    });
   }
 
   async updateOrderStatus(id: number, status: string): Promise<Order> {
