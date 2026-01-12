@@ -183,8 +183,28 @@ function CheckoutForm({
     <Form {...paymentForm}>
       <form onSubmit={paymentForm.handleSubmit(onPaymentSubmit)} className="space-y-8">
         <div className="space-y-6">
-          <h2 className="text-xl font-bold">Payment</h2>
-          <p className="text-sm text-muted-foreground">All transactions are secure and encrypted.</p>
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-bold">Delivering to {shippingData?.firstName} {shippingData?.lastName}</h2>
+              </div>
+              <Link href="/checkout/shipping" className="text-sm font-bold underline hover:text-primary transition-colors">
+                Change
+              </Link>
+            </div>
+            <div className="space-y-1 text-sm text-muted-foreground ml-7">
+              <p>{shippingData?.email}</p>
+              <p>{shippingData?.address}{shippingData?.apartment ? `, ${shippingData.apartment}` : ""}, {shippingData?.city} {shippingData?.province} {shippingData?.postalCode}, {shippingData?.country}</p>
+              <p>{shippingData?.phone}</p>
+              <p className="mt-4 text-foreground font-medium">Free shipping, arrives between 15 Jan - 16 Jan</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold">Payment Method</h2>
+            <p className="text-sm text-muted-foreground">All transactions are secure and encrypted.</p>
+          </div>
           
           <FormField
             control={paymentForm.control}
