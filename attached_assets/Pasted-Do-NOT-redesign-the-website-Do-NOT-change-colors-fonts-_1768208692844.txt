@@ -1,0 +1,212 @@
+Do NOT redesign the website.
+Do NOT change colors, fonts, spacing scale, or branding.
+Do NOT modify header, footer, or navigation.
+
+Work ONLY on the “Gaming” category page.
+
+================================
+GOAL
+================================
+When clicking “Gaming” in the navigation,
+load a FULL CATEGORY PAGE matching Reebelo’s
+“Certified Refurbished Gaming” layout and behavior.
+
+================================
+ROUTING
+================================
+
+- Clicking “Gaming” navigates to /gaming
+- Full page load (NOT modal, NOT overlay)
+- Normal page scroll
+- Header remains fixed
+- Footer remains unchanged
+
+================================
+TOP SECTION (CATEGORY HERO)
+================================
+
+- Full-width dark banner
+- Title: “Certified Refurbished Gaming”
+- Subtext row:
+  - “1 Year Warranty”
+  - “30 Days Return”
+  - “500,000+ customers”
+- Trust badge on the right:
+  - “Excellent on Trustpilot” with star rating
+
+================================
+MAIN LAYOUT
+================================
+
+2-column desktop layout:
+
+--------------------------------
+LEFT SIDEBAR (FILTERS)
+--------------------------------
+
+- Sticky on desktop
+- Scrolls independently
+- Collapsible filter groups
+
+FILTER GROUPS:
+
+1. Price Range
+   - Min input
+   - Max input
+   - Slider
+
+2. Category
+   - Gaming Headsets
+   - Gaming Mouse
+   - Gaming Accessories
+   - Gaming Keyboards
+   - Gaming Consoles
+   - PlayStation & Consoles
+   - PC Virtual Reality Headsets
+
+3. Brand
+   - Razer
+   - SteelSeries
+   - Glorious
+   - Dell
+   - RIG
+   - Lexar
+   - SanDisk
+   - Asus
+   - Valve
+   - Microsoft
+
+4. Color
+   - Black
+   - Black (Red Switch)
+   - Black RGB
+   - Black/Green
+   - Carbon Black
+   - Central Red
+   - Chroma (Black)
+   - Clear
+   - Dark Side of the Moon
+
+5. Condition
+   - Acceptable
+   - Brand New
+   - Excellent
+   - Premium
+
+6. Storage
+   - 128GB
+   - 1TB
+   - 256GB
+   - 512GB
+
+--------------------------------
+RIGHT SIDE (PRODUCT GRID)
+--------------------------------
+
+- Grid layout:
+  - Desktop: 4 columns
+  - Tablet: 2 columns
+  - Mobile: 1 column
+
+Each product card includes:
+- Product image
+- Product name
+- “From RF xxx,xxx” price
+- Condition label
+- Click navigates to product detail page
+
+================================
+BRAND QUICK FILTER (TOP)
+================================
+
+- Horizontal brand pills above product grid:
+  - Razer
+  - SteelSeries
+  - Glorious
+  - Dell
+  - RIG
+  - Lexar
+  - SanDisk
+  - Asus
+  - Valve
+  - Microsoft
+
+================================
+SORTING
+================================
+
+Top-right dropdown:
+- Best Selling (default)
+- Price: Low to High
+- Price: High to Low
+- Newest
+
+================================
+MID-PAGE TRUST BANNER
+================================
+
+- Light green / teal banner
+- Title: “Premium Refurbished. Trusted Quality.”
+- Trustpilot badge
+- Bullet points:
+  - Save up to 70%
+  - 12 Months Warranty
+  - Quality Tested by Experts
+  - Risk-Free 30-Day Trial
+  - Save CO₂ vs new
+
+================================
+SEO CONTENT SECTION
+================================
+
+Below product grid:
+- Heading: “Buy Refurbished Gaming Gear in Australia”
+- Long-form SEO text covering:
+  - Refurbished gaming accessories & consoles
+  - Major brands (Razer, SteelSeries, Asus, Valve)
+  - Performance testing & quality control
+  - Warranty & returns
+  - Sustainability benefits
+
+================================
+MOBILE BEHAVIOR
+================================
+
+- Filters hidden by default
+- “Filter” button above product grid
+- Filter drawer slides in from LEFT
+- Drawer scrolls independently
+- Apply & Close buttons fixed at bottom
+
+================================
+STYLING RULES
+================================
+
+- Reuse existing typography
+- Reuse existing product cards
+- No new colors
+- No font changes
+- No spacing changes
+
+================================
+TECH RULES
+================================
+
+- Use existing Tailwind / CSS system
+- No new libraries
+- State-based filtering
+- No full page reloads on filter change
+- SEO-friendly semantic HTML
+
+================================
+STOP CONDITION
+================================
+
+Once:
+- Gaming page loads correctly
+- Filters work
+- Grid updates dynamically
+- Layout matches Reebelo behavior
+
+STOP. Do NOT add new features.
+BEGIN IMPLEMENTATION NOW.

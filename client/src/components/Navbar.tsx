@@ -20,7 +20,7 @@ export function Navbar() {
     { name: "Samsung Phones", href: "/shop?brand=Samsung&category=Smartphones" },
     { name: "Home", href: "/home-kitchen" },
     { name: "Tools", href: "/tools-home-improvement" },
-    { name: "Gaming", href: "/shop?category=Gaming" },
+    { name: "Gaming", href: "/gaming" },
   ];
 
   const isActive = (path: string) => location === path;

@@ -6,10 +6,7 @@ import { useProducts } from "@/hooks/use-products";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { 
-  ChevronDown, 
-  ChevronUp, 
   Filter, 
-  X,
   ShieldCheck,
   RotateCcw,
   Users,
@@ -27,21 +24,27 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
-export default function ToolsHomeImprovement() {
-  const { data: products, isLoading } = useProducts({ category: "Tools & Home Improvement" });
+export default function Gaming() {
+  const { data: products, isLoading } = useProducts({ category: "Gaming" });
   
-  const [priceRange, setPriceRange] = useState([0, 1000000]);
+  const [priceRange, setPriceRange] = useState([0, 2000000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+  const [selectedStorage, setSelectedStorage] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("best-selling");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const categories = ["Power Outlets & Sockets", "Flashlights", "Tools & Home Improvement"];
-  const brands = ["Philips", "Belkin"];
-  const colors = ["Assorted", "Black", "Red", "White"];
-  const conditions = ["Brand New", "Good"];
+  const categories = [
+    "Gaming Headsets", "Gaming Mouse", "Gaming Accessories", 
+    "Gaming Keyboards", "Gaming Consoles", "PlayStation & Consoles", 
+    "PC Virtual Reality Headsets"
+  ];
+  const brands = ["Razer", "SteelSeries", "Glorious", "Dell", "RIG", "Lexar", "SanDisk", "Asus", "Valve", "Microsoft"];
+  const colors = ["Black", "Black (Red Switch)", "Black RGB", "Black/Green", "Carbon Black", "Central Red", "Chroma (Black)", "Clear", "Dark Side of the Moon"];
+  const conditions = ["Acceptable", "Brand New", "Excellent", "Premium"];
+  const storageOptions = ["128GB", "1TB", "256GB", "512GB"];
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];
@@ -49,12 +52,11 @@ export default function ToolsHomeImprovement() {
       const priceMatch = p.price >= priceRange[0] && p.price <= priceRange[1];
       const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(p.category);
       const brandMatch = selectedBrands.length === 0 || selectedBrands.includes(p.brand);
-      // Assuming specs or color property exists, fallback to true if not
       const colorMatch = selectedColors.length === 0 || (p.specs?.Color && selectedColors.includes(p.specs.Color as string));
-      // Assuming stockStatus or condition property
-      const conditionMatch = selectedConditions.length === 0 || selectedConditions.includes(p.stockStatus === "in_stock" ? "Brand New" : "Good");
+      const conditionMatch = selectedConditions.length === 0 || selectedConditions.includes(p.stockStatus === "in_stock" ? "Brand New" : "Excellent");
+      const storageMatch = selectedStorage.length === 0 || (p.specs?.Storage && selectedStorage.includes(p.specs.Storage as string));
       
-      return priceMatch && categoryMatch && brandMatch && colorMatch && conditionMatch;
+      return priceMatch && categoryMatch && brandMatch && colorMatch && conditionMatch && storageMatch;
     });
 
     switch (sortBy) {
@@ -67,7 +69,7 @@ export default function ToolsHomeImprovement() {
       default:
         return filtered;
     }
-  }, [products, priceRange, selectedCategories, selectedBrands, selectedColors, selectedConditions, sortBy]);
+  }, [products, priceRange, selectedCategories, selectedBrands, selectedColors, selectedConditions, selectedStorage, sortBy]);
 
   const FilterSection = () => (
     <div className="space-y-8">
@@ -76,7 +78,7 @@ export default function ToolsHomeImprovement() {
         <h3 className="font-bold text-lg">Price Range</h3>
         <Slider
           value={priceRange}
-          max={1000000}
+          max={2000000}
           step={1000}
           onValueChange={setPriceRange}
           className="py-4"
@@ -113,7 +115,7 @@ export default function ToolsHomeImprovement() {
                   );
                 }}
               />
-              <label htmlFor={`cat-${cat}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label htmlFor={`cat-${cat}`} className="text-sm font-medium leading-none cursor-pointer">
                 {cat}
               </label>
             </div>
@@ -136,7 +138,7 @@ export default function ToolsHomeImprovement() {
                   );
                 }}
               />
-              <label htmlFor={`brand-${brand}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label htmlFor={`brand-${brand}`} className="text-sm font-medium leading-none cursor-pointer">
                 {brand}
               </label>
             </div>
@@ -159,7 +161,7 @@ export default function ToolsHomeImprovement() {
                   );
                 }}
               />
-              <label htmlFor={`color-${color}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label htmlFor={`color-${color}`} className="text-sm font-medium leading-none cursor-pointer">
                 {color}
               </label>
             </div>
@@ -182,8 +184,31 @@ export default function ToolsHomeImprovement() {
                   );
                 }}
               />
-              <label htmlFor={`cond-${cond}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label htmlFor={`cond-${cond}`} className="text-sm font-medium leading-none cursor-pointer">
                 {cond}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Storage */}
+      <div className="space-y-4">
+        <h3 className="font-bold text-lg">Storage</h3>
+        <div className="space-y-2">
+          {storageOptions.map(opt => (
+            <div key={opt} className="flex items-center space-x-2">
+              <Checkbox 
+                id={`storage-${opt}`} 
+                checked={selectedStorage.includes(opt)}
+                onCheckedChange={(checked) => {
+                  setSelectedStorage(prev => 
+                    checked ? [...prev, opt] : prev.filter(o => o !== opt)
+                  );
+                }}
+              />
+              <label htmlFor={`storage-${opt}`} className="text-sm font-medium leading-none cursor-pointer">
+                {opt}
               </label>
             </div>
           ))}
@@ -201,7 +226,7 @@ export default function ToolsHomeImprovement() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="space-y-6 text-center md:text-left">
-              <h1 className="text-3xl md:text-5xl font-bold">Certified Refurbished Tools & Home Improvement</h1>
+              <h1 className="text-3xl md:text-5xl font-bold">Certified Refurbished Gaming</h1>
               <div className="flex flex-wrap justify-center md:justify-start gap-6 text-sm text-slate-300">
                 <span className="flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-primary" /> 1 Year Warranty</span>
                 <span className="flex items-center gap-2"><RotateCcw className="w-4 h-4 text-primary" /> 30 Days Return</span>
@@ -251,11 +276,12 @@ export default function ToolsHomeImprovement() {
                       <div className="sticky bottom-0 bg-background pt-6 border-t mt-8 flex gap-2">
                         <Button className="flex-1" onClick={() => setIsFilterOpen(false)}>Apply Filters</Button>
                         <Button variant="outline" onClick={() => {
-                          setPriceRange([0, 1000000]);
+                          setPriceRange([0, 2000000]);
                           setSelectedCategories([]);
                           setSelectedBrands([]);
                           setSelectedColors([]);
                           setSelectedConditions([]);
+                          setSelectedStorage([]);
                           setIsFilterOpen(false);
                         }}>Reset</Button>
                       </div>
@@ -316,11 +342,12 @@ export default function ToolsHomeImprovement() {
                   variant="ghost" 
                   className="mt-4"
                   onClick={() => {
-                    setPriceRange([0, 1000000]);
+                    setPriceRange([0, 2000000]);
                     setSelectedCategories([]);
                     setSelectedBrands([]);
                     setSelectedColors([]);
                     setSelectedConditions([]);
+                    setSelectedStorage([]);
                   }}
                 >
                   Clear all filters
@@ -369,30 +396,30 @@ export default function ToolsHomeImprovement() {
 
             {/* SEO Content Section */}
             <section className="prose prose-slate dark:prose-invert max-w-none pt-12 border-t">
-              <h2 className="text-3xl font-bold mb-6">Buy Refurbished Tools & Home Improvement in Australia</h2>
+              <h2 className="text-3xl font-bold mb-6">Buy Refurbished Gaming Gear in Australia</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    Discover incredible value on high-quality home tools and electronics with Reebelo's certified refurbished range. 
-                    Whether you're looking for smart home upgrades from Philips or power protection from Belkin, our collection 
-                    offers premium performance at a fraction of the cost.
+                    Level up your gaming setup with premium refurbished gear from the world's leading brands. 
+                    At Reebelo, we offer a vast collection of gaming headsets, mice, keyboards, and consoles 
+                    from Razer, SteelSeries, Asus, and more, all at prices that won't break the bank.
                   </p>
                   <p>
-                    Each item in our Tools & Home Improvement category undergoes a rigorous 70+ point inspection process by our 
-                    expert technicians. We ensure that every power outlet, flashlight, and smart device meets our high standards 
-                    for functionality and safety before it reaches your door.
+                    Whether you're looking for a high-performance PlayStation console or a precision gaming mouse, 
+                    each product undergoes meticulous quality control testing. Our technicians verify everything from 
+                    button responsiveness to sensor accuracy, ensuring your gear is ready for competitive play.
                   </p>
                 </div>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <h3 className="text-xl font-bold text-foreground">Why choose refurbished?</h3>
+                  <h3 className="text-xl font-bold text-foreground">Performance meet Sustainability</h3>
                   <p>
-                    Choosing refurbished isn't just about saving money—it's about making a smarter, more sustainable choice for 
-                    the planet. By extending the life of electronics, you're helping reduce e-waste and carbon emissions associated 
-                    with manufacturing new products.
+                    By choosing refurbished gaming gear, you're not just getting a great deal—you're also making an 
+                    eco-conscious decision. Reducing e-waste is vital, and our mission is to extend the lifecycle of 
+                    high-performance hardware while delivering the same great experience as new.
                   </p>
                   <p>
-                    Shop with complete confidence knowing that every purchase is backed by a minimum 12-month warranty and 
-                    our 30-day risk-free return policy. Join over 500,000 happy customers who have switched to smarter shopping with Reebelo.
+                    All gaming gear is backed by a 12-month warranty and a 30-day risk-free trial. Enjoy fast shipping 
+                    and expert support as you build the ultimate gaming station sustainably.
                   </p>
                 </div>
               </div>
