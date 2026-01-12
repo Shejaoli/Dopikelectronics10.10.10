@@ -319,7 +319,7 @@ function CheckoutForm({
                                         throw new Error(error.message || "Failed to create PayPal order");
                                       }
                                       const order = await response.json();
-                                      return order.orderID;
+                                      return order.id;
                                     } catch (error: any) {
                                       toast({
                                         variant: "destructive",

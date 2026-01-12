@@ -1,0 +1,102 @@
+Do NOT switch modes.
+Do NOT ask questions.
+Do NOT redesign UI.
+Do NOT touch Stripe.
+Do NOT add features.
+
+This is a PayPal Sandbox DEBUG + FIX ONLY.
+
+========================
+GOAL
+========================
+Eliminate PayPal checkout error by fixing
+order creation + capture logic.
+
+========================
+STEP 12.2 — PAYPAL SANDBOX VERIFICATION
+========================
+
+You MUST verify and fix ALL of the following.
+
+========================
+BACKEND — CREATE ORDER (MANDATORY)
+========================
+
+Confirm POST /api/payments/paypal/create-order does EXACTLY this:
+
+- Uses intent: "CAPTURE"
+- amount.value is STRING (example: "1887.18")
+- amount.currency_code is STRING (example: "USD")
+- value has exactly 2 decimals
+- No rounding errors
+- No integers
+- No floats
+
+Return ONLY:
+- order.id
+
+========================
+BACKEND — CAPTURE ORDER (MANDATORY)
+========================
+
+Confirm POST /api/payments/paypal/capture-order does:
+
+- Accepts orderID
+- Calls:
+  paypalClient.execute(
+    new OrdersCaptureRequest(orderID)
+  )
+
+- Reads response.result.status
+- ONLY returns success if status === "COMPLETED"
+
+========================
+FRONTEND — PAYPAL BUTTON FLOW
+========================
+
+Confirm PayPal Buttons do EXACTLY this:
+
+1) createOrder:
+   - Calls backend create-order
+   - Returns order.id ONLY
+
+2) onApprove:
+   - Calls backend capture-order
+   - Waits for response
+   - Shows success ONLY if capture completed
+
+3) onError:
+   - Displays error banner
+
+NO assumptions.
+NO shortcuts.
+
+========================
+ABSOLUTE RULES
+========================
+
+- Do NOT use mock responses
+- Do NOT skip capture
+- Do NOT hardcode values
+- Do NOT mix sandbox/live
+- Do NOT return success early
+
+========================
+VALIDATION
+========================
+
+When done:
+- Sandbox checkout completes
+- PayPal shows COMPLETED
+- Error banner disappears
+- Stripe unaffected
+- UI unchanged
+
+========================
+STOP CONDITION
+========================
+
+STOP immediately after success.
+Do NOT continue to next step.
+
+BEGIN STEP 12.2 NOW.

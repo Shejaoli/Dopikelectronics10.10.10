@@ -455,14 +455,14 @@ export async function registerRoutes(
           {
             amount: {
               currency_code: currency,
-              value: (amount / 1200).toFixed(2), // Conversion for Sandbox USD
+              value: (amount / 1200).toFixed(2).toString(), // Conversion for Sandbox USD, exact 2 decimals
             },
           },
         ],
       });
 
       const order = await paypalClient.execute(request);
-      res.json({ orderID: order.result.id });
+      res.json({ id: order.result.id });
     } catch (error: any) {
       console.error("PayPal create error:", error);
       res.status(500).json({ message: error.message || "Failed to create PayPal order" });
@@ -487,9 +487,9 @@ export async function registerRoutes(
       const capture = await paypalClient.execute(request);
       
       if (capture.result.status === "COMPLETED") {
-        res.json(capture.result);
+        res.json({ status: "COMPLETED", ...capture.result });
       } else {
-        res.status(400).json({ message: `Payment capture failed with status: ${capture.result.status}`, result: capture.result });
+        res.status(400).json({ message: `Payment capture failed with status: ${capture.result.status}`, status: capture.result.status });
       }
     } catch (error: any) {
       console.error("PayPal capture error:", error);
