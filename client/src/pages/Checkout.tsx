@@ -331,7 +331,7 @@ function CheckoutForm({
                                   }}
                                   onApprove={async (data) => {
                                     try {
-                                      const response = await apiRequest("POST", "/api/payments/paypal/capture", {
+                                      const response = await apiRequest("POST", "/api/payments/paypal/capture-order", {
                                         orderID: data.orderID,
                                       });
                                       if (!response.ok) {

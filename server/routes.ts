@@ -455,7 +455,7 @@ export async function registerRoutes(
           {
             amount: {
               currency_code: currency,
-              value: (amount / 1200).toFixed(2), // Sandbox testing conversion RWF to USD
+              value: (amount / 1200).toFixed(2), // Conversion for Sandbox USD
             },
           },
         ],
@@ -469,7 +469,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/payments/paypal/capture", async (req, res) => {
+  app.post("/api/payments/paypal/capture-order", async (req, res) => {
     if (!paypalClient) {
       return res.status(500).json({ message: "PayPal is not configured" });
     }
@@ -485,7 +485,12 @@ export async function registerRoutes(
       request.requestBody({});
 
       const capture = await paypalClient.execute(request);
-      res.json(capture.result);
+      
+      if (capture.result.status === "COMPLETED") {
+        res.json(capture.result);
+      } else {
+        res.status(400).json({ message: `Payment capture failed with status: ${capture.result.status}`, result: capture.result });
+      }
     } catch (error: any) {
       console.error("PayPal capture error:", error);
       res.status(500).json({ message: error.message || "Failed to capture PayPal order" });

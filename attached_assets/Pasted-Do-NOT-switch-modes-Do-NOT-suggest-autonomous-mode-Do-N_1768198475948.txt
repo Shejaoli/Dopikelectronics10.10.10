@@ -1,0 +1,91 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT refactor UI.
+Do NOT redesign checkout.
+Do NOT change Stripe logic.
+
+This is a PayPal BUG FIX ONLY.
+
+========================
+GOAL
+========================
+Fix PayPal Sandbox checkout error
+by correctly creating AND capturing PayPal orders.
+
+========================
+STEP 12.1 — PAYPAL CHECKOUT FIX
+========================
+
+SCOPE (STRICT):
+- Fix PayPal order creation & capture
+- Sandbox mode ONLY
+- Do NOT touch Stripe
+- Do NOT change UI
+- Do NOT add features
+
+========================
+BACKEND FIX (ONLY THESE)
+========================
+
+1) Verify PayPal SDK initialization:
+- Use PAYPAL_CLIENT_ID
+- Use PAYPAL_CLIENT_SECRET
+- Environment = SANDBOX
+
+2) Fix PayPal order creation:
+POST /api/payments/paypal/create-order
+
+- Explicitly set:
+  - intent: "CAPTURE"
+  - currency_code (e.g. "USD")
+  - value (string, 2 decimals)
+
+3) Fix PayPal capture route:
+POST /api/payments/paypal/capture-order
+
+- Capture the order server-side
+- Verify status === "COMPLETED"
+
+4) Return capture result to frontend
+- Only return success if capture is completed
+
+========================
+FRONTEND FIX (MINIMAL)
+========================
+
+- Ensure PayPal success handler:
+  - Calls backend capture endpoint
+  - Does NOT assume payment success before capture
+- Show error ONLY if backend returns failure
+
+========================
+COMMON BUGS TO AVOID
+========================
+
+- Do NOT skip capture
+- Do NOT rely on frontend success alone
+- Do NOT omit currency
+- Do NOT hardcode amounts
+- Do NOT mix live + sandbox credentials
+
+========================
+VALIDATION
+========================
+
+After fix:
+- PayPal Sandbox checkout completes
+- No red error banner
+- Payment shows COMPLETED in PayPal dashboard
+- Stripe still works
+- UI unchanged
+
+========================
+STOP CONDITION
+========================
+
+STOP immediately when:
+- PayPal checkout succeeds
+- Error banner no longer appears
+- No regressions introduced
+
+BEGIN FIX NOW.
