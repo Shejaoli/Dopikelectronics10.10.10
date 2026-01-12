@@ -33,7 +33,18 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import heroImg from "/images/iphone-17-pro-max-1.png";
+const heroImg = "/images/iphone-17-pro-max-1.png";
+
+const HomeHero = () => null;
+const ContinueShopping = () => null;
+const PopularCategories = () => null;
+const CustomerFavorites = () => null;
+const TopDeals = () => null;
+const TrustBanner = () => null;
+const HomeProducts = () => null;
+const GamingPreview = () => null;
+const CircularEconomy = () => null;
+const AudioPreview = () => null;
 
 export default function Home() {
   const { data: featuredProducts, isLoading: featuredLoading } = useProducts({ featured: "true" });
@@ -63,6 +74,17 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Navbar />
       <WhatsAppFloat />
+
+      <HomeHero />
+      <ContinueShopping />
+      <PopularCategories />
+      <CustomerFavorites />
+      <TopDeals />
+      <TrustBanner />
+      <HomeProducts />
+      <GamingPreview />
+      <CircularEconomy />
+      <AudioPreview />
 
       {/* Hero Section */}
       <section className="relative bg-slate-950 text-white overflow-hidden py-16 lg:py-24">
