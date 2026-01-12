@@ -1,0 +1,96 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT describe complexity.
+Do NOT redesign UI.
+Do NOT modify checkout or admin UI.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Reduce product stock ONLY after a successful order is created.
+
+This is NOT UI work.
+This is NOT admin management.
+This is STEP 6 ONLY.
+
+========================
+STEP 6 — STOCK REDUCTION
+========================
+
+SCOPE (STRICT):
+- Reduce stock AFTER order creation
+- Support product VARIATIONS
+- Do NOT allow negative stock
+- Do NOT change product UI
+- Do NOT add restock logic
+
+========================
+STOCK LOGIC RULES
+========================
+
+For each order item:
+- Match productId
+- Match selectedStorage
+- Match selectedColor
+- Reduce stock by quantity ordered
+
+If stock would go below 0:
+- Abort operation
+- Do NOT create order
+- Return error
+
+========================
+BACKEND IMPLEMENTATION
+========================
+
+1) Update product data model (if required) to support:
+- variations[]
+  - storage
+  - color
+  - stock
+
+2) During /api/orders/create:
+- Validate stock for each order item
+- Reduce stock atomically
+- Save updated product stock
+
+========================
+DATA SAFETY RULES
+========================
+
+- Stock reduction must be atomic
+- Partial updates are NOT allowed
+- If one item fails, entire order fails
+
+========================
+ABSOLUTE RULES
+========================
+
+- NO UI changes
+- NO admin stock editing
+- NO cron jobs
+- NO background workers
+
+========================
+VALIDATION
+========================
+
+After STEP 6:
+- Stock reduces correctly per variation
+- Orders fail if stock is insufficient
+- No negative stock possible
+- Existing orders unaffected
+- No runtime or console errors
+
+========================
+STOP CONDITION
+========================
+
+Once stock reduction works:
+- STOP
+- Do NOT continue
+- Do NOT add features
+
+START IMPLEMENTING STEP 6 NOW.
