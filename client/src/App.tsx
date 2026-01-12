@@ -10,6 +10,7 @@ import Iphones from "@/pages/Iphones";
 import Laptops from "@/pages/Laptops";
 import Electronics from "@/pages/Electronics";
 import HomeKitchen from "@/pages/HomeKitchen";
+import Audio from "@/pages/Audio";
 import ToolsHomeImprovement from "@/pages/ToolsHomeImprovement";
 import Gaming from "@/pages/Gaming";
 import Deals from "@/pages/Deals";
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/laptops" component={Laptops} />
       <Route path="/electronics" component={Electronics} />
       <Route path="/home-kitchen" component={HomeKitchen} />
+      <Route path="/audio" component={Audio} />
       <Route path="/tools-home-improvement" component={ToolsHomeImprovement} />
       <Route path="/gaming" component={Gaming} />
       <Route path="/deals" component={Deals} />

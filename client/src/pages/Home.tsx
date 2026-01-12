@@ -24,6 +24,7 @@ import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { useProducts } from "@/hooks/use-products";
+import { Button } from "@/components/ui/button";
 import { 
   Carousel, 
   CarouselContent, 
