@@ -1,0 +1,104 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT describe complexity.
+Do NOT redesign UI.
+Do NOT refactor existing logic.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Verify payments using webhooks so orders remain correct
+even if the browser closes or network fails.
+
+This is HARDENING ONLY.
+This is STEP 10 ONLY.
+
+========================
+STEP 10 — PAYMENT WEBHOOKS
+========================
+
+SCOPE (STRICT):
+- Implement Stripe + PayPal webhooks ONLY
+- Do NOT change checkout flow
+- Do NOT change cart logic
+- Do NOT change UI
+- Do NOT create new order flows
+
+========================
+STRIPE WEBHOOK
+========================
+
+1) Create endpoint:
+POST /api/webhooks/stripe
+
+2) Verify webhook signature using:
+- STRIPE_WEBHOOK_SECRET (env var)
+
+3) Handle events:
+- payment_intent.succeeded
+- payment_intent.payment_failed
+
+4) On success:
+- Verify order exists
+- Ensure order status is "paid"
+- Do NOT create duplicate orders
+
+========================
+PAYPAL WEBHOOK
+========================
+
+1) Create endpoint:
+POST /api/webhooks/paypal
+
+2) Verify webhook authenticity
+(Sandbox verification)
+
+3) Handle events:
+- PAYMENT.CAPTURE.COMPLETED
+- PAYMENT.CAPTURE.DENIED
+
+4) On success:
+- Verify order exists
+- Ensure order status is "paid"
+- Prevent duplicates
+
+========================
+SECURITY RULES
+========================
+
+- Webhook secrets read from env ONLY
+- Reject invalid signatures
+- Idempotent handling (no duplicates)
+
+========================
+ABSOLUTE RULES
+========================
+
+- NO UI changes
+- NO emails
+- NO refunds
+- NO stock changes
+- NO admin features
+
+========================
+VALIDATION
+========================
+
+After STEP 10:
+- Orders remain correct if browser closes
+- Webhooks update order status safely
+- Duplicate events do NOT create duplicates
+- No console or runtime errors
+
+========================
+STOP CONDITION
+========================
+
+Once webhooks work:
+- STOP
+- Do NOT continue
+- Do NOT add features
+
+START IMPLEMENTING STEP 10 NOW.

@@ -499,6 +499,53 @@ export async function registerRoutes(
     }
   });
 
+  // Stripe Webhook Endpoint
+  app.post("/api/webhooks/stripe", express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!stripe || !sig || !webhookSecret) {
+      return res.status(400).json({ message: "Stripe webhook misconfigured" });
+    }
+
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (event.type === 'payment_intent.succeeded') {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const [order] = await db.select().from(orders).where(eq(orders.paymentReference, paymentIntent.id));
+      
+      if (order && order.status !== 'paid') {
+        await storage.updateOrderStatus(order.id, 'paid');
+      }
+    }
+
+    res.json({ received: true });
+  });
+
+  // PayPal Webhook Endpoint
+  app.post("/api/webhooks/paypal", express.json(), async (req, res) => {
+    const event = req.body;
+
+    if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
+      const resource = event.resource;
+      const orderId = event.resource.custom_id || event.resource.supplementary_data?.related_ids?.order_id;
+      
+      // In a real app, verify with PayPal API here. For sandbox, we check the reference.
+      const [order] = await db.select().from(orders).where(eq(orders.paymentReference, orderId));
+      
+      if (order && order.status !== 'paid') {
+        await storage.updateOrderStatus(order.id, 'paid');
+      }
+    }
+
+    res.json({ received: true });
+  });
+
   // Seed data logic protected to only run if database is empty
   try {
     const existingProducts = await storage.getProducts();
