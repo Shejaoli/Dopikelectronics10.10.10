@@ -308,17 +308,18 @@ function CheckoutForm({
                               }}>
                                 <PayPalButtons
                                   style={{ layout: "vertical", shape: "pill" }}
-                                  createOrder={async () => {
+                                  createOrder: async () => {
                                     try {
                                       const response = await apiRequest("POST", "/api/payments/paypal/create-order", {
                                         amount: total,
+                                        currency: "USD",
                                       });
                                       if (!response.ok) {
                                         const error = await response.json();
                                         throw new Error(error.message || "Failed to create PayPal order");
                                       }
                                       const order = await response.json();
-                                      return order.id;
+                                      return order.orderID;
                                     } catch (error: any) {
                                       toast({
                                         variant: "destructive",
@@ -330,7 +331,7 @@ function CheckoutForm({
                                   }}
                                   onApprove={async (data) => {
                                     try {
-                                      const response = await apiRequest("POST", "/api/payments/paypal/capture-order", {
+                                      const response = await apiRequest("POST", "/api/payments/paypal/capture", {
                                         orderID: data.orderID,
                                       });
                                       if (!response.ok) {

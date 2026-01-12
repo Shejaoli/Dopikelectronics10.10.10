@@ -30,19 +30,6 @@ function getPayPalClient() {
 
 const paypalClient = getPayPalClient();
 
-async function getPayPalAccessToken() {
-  const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString("base64");
-  const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
-    method: "POST",
-    body: "grant_type=client_credentials",
-    headers: {
-      Authorization: `Basic ${auth}`,
-    },
-  });
-  const data: any = await response.json();
-  return data.access_token;
-}
-
 const stripe = process.env.STRIPE_SECRET_KEY 
   ? new Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
@@ -455,7 +442,7 @@ export async function registerRoutes(
     }
 
     try {
-      const { amount } = req.body;
+      const { amount, currency = "USD" } = req.body;
       if (!amount || typeof amount !== "number") {
         return res.status(400).json({ message: "Invalid amount" });
       }
@@ -467,7 +454,7 @@ export async function registerRoutes(
         purchase_units: [
           {
             amount: {
-              currency_code: "USD",
+              currency_code: currency,
               value: (amount / 1200).toFixed(2), // Sandbox testing conversion RWF to USD
             },
           },
@@ -475,14 +462,14 @@ export async function registerRoutes(
       });
 
       const order = await paypalClient.execute(request);
-      res.json({ id: order.result.id });
+      res.json({ orderID: order.result.id });
     } catch (error: any) {
       console.error("PayPal create error:", error);
       res.status(500).json({ message: error.message || "Failed to create PayPal order" });
     }
   });
 
-  app.post("/api/payments/paypal/capture-order", async (req, res) => {
+  app.post("/api/payments/paypal/capture", async (req, res) => {
     if (!paypalClient) {
       return res.status(500).json({ message: "PayPal is not configured" });
     }
@@ -494,7 +481,6 @@ export async function registerRoutes(
       }
 
       const request = new paypal.orders.OrdersCaptureRequest(orderID);
-      // @ts-ignore - The SDK types might be outdated, but requestBody({}) is often used
       request.requestBody({});
 
       const capture = await paypalClient.execute(request);
