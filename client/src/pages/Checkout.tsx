@@ -312,7 +312,6 @@ function CheckoutForm({
                                     try {
                                       const response = await apiRequest("POST", "/api/payments/paypal/create-order", {
                                         amount: total,
-                                        currency: "USD",
                                       });
                                       if (!response.ok) {
                                         const error = await response.json();

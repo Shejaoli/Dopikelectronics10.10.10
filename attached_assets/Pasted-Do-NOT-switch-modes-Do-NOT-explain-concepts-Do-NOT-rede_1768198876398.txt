@@ -1,0 +1,117 @@
+Do NOT switch modes.
+Do NOT explain concepts.
+Do NOT redesign UI.
+Do NOT touch Stripe.
+Do NOT add features.
+
+This is a PayPal Sandbox HARD FIX.
+
+========================
+GOAL
+========================
+Fix PayPal popup closing immediately after opening.
+
+========================
+STEP 12.3 — PAYPAL ORDER PAYLOAD LOCK
+========================
+
+You MUST correct the PayPal Orders API payload
+to EXACTLY match PayPal v2 requirements.
+
+========================
+BACKEND — CREATE ORDER (REWRITE STRICTLY)
+========================
+
+Route:
+POST /api/payments/paypal/create-order
+
+The payload sent to PayPal MUST be EXACTLY:
+
+{
+  intent: "CAPTURE",
+  purchase_units: [
+    {
+      amount: {
+        currency_code: "USD",
+        value: "1887.18"
+      }
+    }
+  ]
+}
+
+MANDATORY RULES:
+- value MUST be string
+- value MUST have 2 decimals
+- NO extra fields
+- NO breakdown
+- NO shipping
+- NO description
+- NO reference_id
+
+Return ONLY:
+{
+  id: orderID
+}
+
+Nothing else.
+
+========================
+BACKEND — CAPTURE ORDER (VERIFY)
+========================
+
+Route:
+POST /api/payments/paypal/capture-order
+
+- Accept orderID
+- Call OrdersCaptureRequest(orderID)
+- Return success ONLY if:
+  response.result.status === "COMPLETED"
+
+========================
+FRONTEND — PAYPAL BUTTON (VERIFY)
+========================
+
+PayPal Buttons MUST:
+
+createOrder:
+- fetch /create-order
+- return order.id ONLY
+
+onApprove:
+- fetch /capture-order
+- wait for response
+- show success only after COMPLETED
+
+onError:
+- show red error banner
+
+========================
+ABSOLUTE PROHIBITIONS
+========================
+
+- NO numbers for amount
+- NO floats
+- NO totals from frontend
+- NO mock responses
+- NO early success
+- NO UI changes
+
+========================
+VALIDATION
+========================
+
+When fixed:
+- PayPal popup stays open
+- User logs into Sandbox account
+- Payment completes
+- Order shows COMPLETED in PayPal Dashboard
+- No red error banner
+
+========================
+STOP CONDITION
+========================
+
+STOP immediately after success.
+Do NOT proceed further.
+
+BEGIN STEP 12.3 NOW.

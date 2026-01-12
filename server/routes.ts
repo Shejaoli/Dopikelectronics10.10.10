@@ -442,7 +442,7 @@ export async function registerRoutes(
     }
 
     try {
-      const { amount, currency = "USD" } = req.body;
+      const { amount } = req.body;
       if (!amount || typeof amount !== "number") {
         return res.status(400).json({ message: "Invalid amount" });
       }
@@ -454,8 +454,8 @@ export async function registerRoutes(
         purchase_units: [
           {
             amount: {
-              currency_code: currency,
-              value: (amount / 1200).toFixed(2).toString(), // Conversion for Sandbox USD, exact 2 decimals
+              currency_code: "USD",
+              value: (amount / 1200).toFixed(2).toString(),
             },
           },
         ],
