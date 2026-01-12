@@ -203,7 +203,38 @@ const TopDeals = () => {
     </section>
   );
 };
-const TrustBanner = () => null;
+const TrustBanner = () => {
+  return (
+    <section className="py-12 bg-teal-50 dark:bg-teal-950/20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row gap-8 items-center justify-between">
+          <div className="space-y-4 text-center md:text-left">
+            <h2 className="text-2xl font-bold text-teal-900 dark:text-teal-400">Premium Refurbished. Trusted Quality.</h2>
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <div className="bg-green-500 p-0.5 rounded-sm">
+                <Star className="w-3 h-3 fill-white text-white" />
+              </div>
+              <span className="font-bold text-teal-900 dark:text-white">Trustpilot</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {[
+              { title: "Save up to 70%", icon: Star },
+              { title: "12 Months Warranty", icon: ShieldCheck },
+              { title: "30-Day Returns", icon: RotateCcw },
+              { title: "Quality Checked", icon: Star },
+              { title: "Save CO₂ vs new", icon: Star }
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col items-center text-center gap-2">
+                <p className="font-bold text-teal-900 dark:text-teal-400 text-sm leading-tight">{item.title}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 const HomeProducts = () => null;
 const GamingPreview = () => null;
 const CircularEconomy = () => null;
