@@ -14,6 +14,7 @@ export function Navbar() {
     { name: "Shop", href: "/shop" },
     { name: "Track Order", href: "/track-order" },
     { name: "My Orders", href: "/my-orders" },
+    { name: "Lookup Order", href: "/orders/lookup" },
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
