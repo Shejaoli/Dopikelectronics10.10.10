@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Package, Calendar, CreditCard, ShoppingBag } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { format } from "date-fns";
 
 const lookupSchema = z.object({
