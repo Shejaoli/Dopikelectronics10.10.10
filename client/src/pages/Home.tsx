@@ -37,7 +37,40 @@ const heroImg = "/images/iphone-17-pro-max-1.png";
 
 const HomeHero = () => null;
 const ContinueShopping = () => null;
-const PopularCategories = () => null;
+const PopularCategories = () => {
+  const categories = [
+    { name: "Smartphones", icon: Smartphone, href: "/shop?category=Smartphones" },
+    { name: "Laptops", icon: Laptop, href: "/shop?category=Laptops" },
+    { name: "Tablets", icon: Tablet, href: "/shop?category=Tablets" },
+    { name: "Smartwatches", icon: Watch, href: "/shop?category=Smartwatches" },
+    { name: "Gaming", icon: Gamepad2, href: "/gaming" },
+    { name: "Audio", icon: Headphones, href: "/shop?category=Audio" },
+    { name: "Accessories & Bundles", icon: Wrench, href: "/shop?category=Accessories" },
+    { name: "Electronics", icon: Monitor, href: "/shop?category=Electronics" },
+    { name: "Vacuum Cleaners", icon: Trash2, href: "/shop?category=Vacuums" },
+    { name: "Home & Kitchen", icon: Tv, href: "/home-kitchen" },
+  ];
+
+  return (
+    <section className="py-12 bg-muted/30">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-bold mb-8">Popular Categories</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {categories.map((cat) => (
+            <Link key={cat.name} href={cat.href}>
+              <div className="bg-background border border-border rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-center hover:shadow-md transition-all cursor-pointer group">
+                <div className="bg-primary/5 p-4 rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
+                  <cat.icon className="w-8 h-8" />
+                </div>
+                <span className="font-bold text-sm">{cat.name}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 const CustomerFavorites = () => null;
 const TopDeals = () => null;
 const TrustBanner = () => null;
