@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import { 
   ArrowRight, 
   Star, 
@@ -145,7 +146,63 @@ const CustomerFavorites = () => {
     </section>
   );
 };
-const TopDeals = () => null;
+const TopDeals = () => {
+  const { data: deals } = useProducts({ category: "Deals" });
+  const [timeLeft, setTimeLeft] = useState({ hours: 23, minutes: 59, seconds: 59 });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (!deals || deals.length === 0) return null;
+
+  return (
+    <section className="py-12 bg-red-50/30 dark:bg-red-950/10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold italic text-red-600">Today's Top Deals</h2>
+            <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-lg font-mono font-bold">
+              <Timer className="w-4 h-4" />
+              <span>{String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
+            </div>
+          </div>
+          <Link href="/deals">
+            <Button variant="ghost" className="text-red-600 font-bold hover:text-red-700">
+              See all <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </Link>
+        </div>
+        <Carousel className="w-full">
+          <CarouselContent className="-ml-4">
+            {deals.slice(0, 8).map((product) => (
+              <CarouselItem key={product.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 relative">
+                <div className="absolute top-6 left-6 z-10">
+                  <Badge className="bg-red-600 hover:bg-red-700 text-white border-none font-bold uppercase tracking-tighter">
+                    Top Deal
+                  </Badge>
+                </div>
+                <ProductCard product={product} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <div className="hidden md:block">
+            <CarouselPrevious className="-left-12" />
+            <CarouselNext className="-right-12" />
+          </div>
+        </Carousel>
+      </div>
+    </section>
+  );
+};
 const TrustBanner = () => null;
 const HomeProducts = () => null;
 const GamingPreview = () => null;
