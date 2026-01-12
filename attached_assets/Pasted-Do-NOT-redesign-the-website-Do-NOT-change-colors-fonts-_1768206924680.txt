@@ -1,0 +1,228 @@
+Do NOT redesign the website.
+Do NOT change colors, fonts, spacing scale, or branding.
+Do NOT modify header, footer, or navigation structure.
+
+Work ONLY on the “Laptops” category page.
+
+================================
+GOAL
+================================
+When clicking “Laptops” in the navigation,
+open a FULL CATEGORY PAGE that matches Reebelo’s
+“Certified Refurbished Laptops” page behavior and layout.
+
+================================
+ROUTING
+================================
+
+- Clicking “Laptops” navigates to /laptops
+- Full page (NOT modal, NOT overlay)
+- Normal page scroll
+- Header remains fixed
+- Footer remains unchanged
+
+================================
+TOP SECTION (CATEGORY HERO)
+================================
+
+- Full-width dark banner
+- Title: “Certified Refurbished Laptops”
+- Subtext row:
+  - “1 Year Warranty”
+  - “30 Days Return”
+  - “500,000+ customers”
+- Trust badge on the right:
+  - “Excellent on Trustpilot” with star rating
+
+================================
+MAIN LAYOUT
+================================
+
+2-column desktop layout:
+
+--------------------------------
+LEFT SIDEBAR (FILTERS)
+--------------------------------
+
+- Sticky on desktop
+- Scrolls independently
+
+FILTER GROUPS (collapsible):
+
+1. Price Range
+   - Min input
+   - Max input
+   - Slider
+
+2. Brand
+   - Apple
+   - Dell
+   - HP
+   - Lenovo
+   - Microsoft
+   - Acer
+   - Asus
+   - Toshiba
+   - MSI
+   - Samsung
+   - Huawei
+   - Fujitsu
+
+3. Battery Health
+   - 100%
+   - 90%+
+   - 80%+
+
+4. Charger
+   - Included
+   - Not Included
+
+5. Color
+   - Aluminum
+   - Black
+   - Carbon Fiber
+   - Gold
+   - Gray
+   - Matte Black
+
+6. Condition
+   - Premium
+   - Excellent
+   - Good
+   - Acceptable
+
+7. CPU
+   - Apple M1 / M2 / M3
+   - Intel i3 / i5 / i7 / i9
+   - AMD Ryzen
+
+8. RAM
+   - 8GB
+   - 16GB
+   - 32GB
+   - 64GB
+
+9. Screen Size
+   - 12”
+   - 13”
+   - 14”
+   - 15”
+   - 16”
+
+10. Storage
+    - 128GB
+    - 256GB
+    - 512GB
+    - 1TB
+    - 2TB
+
+11. Touch Bar
+    - Touch Bar
+    - No Touch Bar
+
+--------------------------------
+RIGHT SIDE (PRODUCT GRID)
+--------------------------------
+
+- Grid layout:
+  - Desktop: 4 columns
+  - Tablet: 2 columns
+  - Mobile: 1 column
+
+Each product card includes:
+- Laptop image
+- Model name (e.g. MacBook Pro 14-inch M1)
+- “From RF xxx,xxx” price
+- Condition label
+- Click navigates to product detail page
+
+================================
+BRAND QUICK FILTER (TOP)
+================================
+
+- Horizontal brand pills above product grid:
+  - Apple
+  - Dell
+  - HP
+  - Lenovo
+  - Microsoft
+  - Acer
+  - Asus
+  - Toshiba
+  - MSI
+  - Samsung
+
+================================
+SORTING
+================================
+
+Top-right dropdown:
+- Best Selling (default)
+- Price: Low to High
+- Price: High to Low
+- Newest
+
+================================
+MID-PAGE TRUST BANNER
+================================
+
+- Light background banner
+- Title: “Premium Refurbished. Trusted Quality.”
+- Icon list:
+  - Save up to 70%
+  - 12 Month Warranty
+  - Quality Tested by Experts
+  - Risk-Free 30-Day Trial
+
+================================
+SEO CONTENT SECTION
+================================
+
+Below product grid:
+- Long-form content about buying refurbished laptops
+- Brand comparisons
+- Buying guide paragraphs
+- FAQ-style headings
+
+================================
+MOBILE BEHAVIOR
+================================
+
+- Filters hidden by default
+- “Filter” button above grid
+- Filter drawer slides in from LEFT
+- Drawer scrolls independently
+- Apply & Close buttons fixed at bottom
+
+================================
+STYLING RULES
+================================
+
+- Reuse existing typography
+- Reuse existing card components
+- No new colors
+- No new fonts
+- No spacing changes
+
+================================
+TECH RULES
+================================
+
+- Use existing Tailwind / CSS system
+- No new libraries
+- State-based filtering
+- No page reloads on filter change
+- SEO-friendly markup
+
+================================
+STOP CONDITION
+================================
+
+Once:
+- Laptops page loads
+- Filters work
+- Product grid updates dynamically
+- Layout matches Reebelo behavior
+
+STOP. Do NOT add extra sections.
+BEGIN IMPLEMENTATION NOW.
