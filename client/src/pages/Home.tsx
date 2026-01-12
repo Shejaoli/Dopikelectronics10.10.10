@@ -96,7 +96,55 @@ const PopularCategories = () => {
     </section>
   );
 };
-const CustomerFavorites = () => null;
+const CustomerFavorites = () => {
+  const { data: smartphones } = useProducts({ category: "Smartphones" });
+  const { data: laptops } = useProducts({ category: "Laptops" });
+  const { data: tablets } = useProducts({ category: "Tablets" });
+  const { data: audio } = useProducts({ category: "Audio" });
+  const { data: home } = useProducts({ category: "Home" });
+
+  const tabs = [
+    { id: "smartphones", label: "Smartphones", products: smartphones },
+    { id: "laptops", label: "Laptops", products: laptops },
+    { id: "tablets", label: "Tablets", products: tablets },
+    { id: "audio", label: "Audio", products: audio },
+    { id: "home", label: "Home", products: home },
+  ];
+
+  return (
+    <section className="py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-bold mb-8">Customer Favorites</h2>
+        <Tabs defaultValue="smartphones" className="w-full">
+          <TabsList className="mb-8">
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.id}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {tabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.id}>
+              <Carousel className="w-full">
+                <CarouselContent className="-ml-4">
+                  {tab.products?.slice(0, 8).map((product) => (
+                    <CarouselItem key={product.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                      <ProductCard product={product} />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="hidden md:block">
+                  <CarouselPrevious className="-left-12" />
+                  <CarouselNext className="-right-12" />
+                </div>
+              </Carousel>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+    </section>
+  );
+};
 const TopDeals = () => null;
 const TrustBanner = () => null;
 const HomeProducts = () => null;
