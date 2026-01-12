@@ -1,0 +1,103 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT redesign UI.
+Do NOT change layout structure.
+Do NOT change spacing, fonts, or colors.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Add a multi-image product gallery to the product page,
+similar to Reebelo’s product page.
+
+This is IMAGE FUNCTIONALITY ONLY.
+
+========================
+STEP — PRODUCT IMAGE GALLERY
+========================
+
+SCOPE (STRICT):
+- Product page ONLY
+- No checkout changes
+- No payment changes
+- No backend changes
+- No styling redesign
+
+========================
+REQUIRED BEHAVIOR
+========================
+
+1) Display MULTIPLE product images:
+- One MAIN image (large)
+- Vertical thumbnail list on the LEFT side
+
+2) When user clicks a thumbnail:
+- The MAIN image updates instantly
+- No page reload
+
+3) Default:
+- First image is selected on page load
+- Selected thumbnail shows active state (border or highlight)
+
+========================
+DATA HANDLING
+========================
+
+- Product must accept an array of images:
+  product.images = [
+    "image1.jpg",
+    "image2.jpg",
+    "image3.jpg",
+    ...
+  ]
+
+- No backend refactor
+- Use existing product data or mock array if needed
+
+========================
+FRONTEND IMPLEMENTATION
+========================
+
+1) Create image state:
+- selectedImage
+
+2) Render:
+- Left column: vertical thumbnails
+- Right column: main image
+
+3) On thumbnail click:
+- set selectedImage
+
+========================
+STYLE RULES (VERY IMPORTANT)
+========================
+
+- Keep existing page layout
+- Keep existing container sizes
+- Do NOT move product info
+- Do NOT change buttons
+- Only add image thumbnails + logic
+
+========================
+VALIDATION
+========================
+
+- Multiple thumbnails visible
+- Clicking thumbnail updates main image
+- Page looks the same as before, just improved
+- No console errors
+
+========================
+STOP CONDITION
+========================
+
+Once image switching works:
+- STOP
+- Do NOT add zoom
+- Do NOT add carousel
+- Do NOT animate
+- Do NOT refactor
+
+BEGIN IMPLEMENTATION NOW.
