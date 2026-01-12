@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, Shield, Truck, Share2, ShoppingBag, Minus, Plus as PlusIcon, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -39,9 +39,17 @@ export default function ProductDetails() {
     { name: "Sierra Blue", value: "#9FB1C3", stock: 5 },
   ];
 
+  const [selectedImage, setSelectedImage] = useState(product?.imageUrl || "");
   const [selectedStorage, setSelectedStorage] = useState(storageOptions[0]?.option || "");
   const [selectedColor, setSelectedColor] = useState(colorOptions[0]?.name || "");
   const [quantity, setQuantity] = useState(1);
+
+  // Update selected image when product changes
+  useEffect(() => {
+    if (product?.imageUrl) {
+      setSelectedImage(product.imageUrl);
+    }
+  }, [product]);
 
   const { toast } = useToast();
 
@@ -121,16 +129,31 @@ export default function ProductDetails() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-4"
+            className="flex gap-4"
           >
-            <div className="aspect-square overflow-hidden rounded-3xl border border-border bg-card p-8">
+            {/* Thumbnails */}
+            <div className="flex flex-col gap-4">
+              {[product.imageUrl, ...(product.additionalImages || [])].map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedImage(img)}
+                  className={`h-20 w-20 overflow-hidden rounded-xl border-2 transition-all hover:scale-105 ${
+                    selectedImage === img ? "border-primary shadow-md" : "border-border opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <img src={img} alt={`${product.name} thumbnail ${idx}`} className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+
+            {/* Main Image */}
+            <div className="flex-1 aspect-square overflow-hidden rounded-3xl border border-border bg-card p-8">
               <img 
-                src={product.imageUrl} 
+                src={selectedImage} 
                 alt={product.name} 
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain transition-all duration-300"
               />
             </div>
-            {/* Additional images grid would go here */}
           </motion.div>
 
           {/* Details */}
