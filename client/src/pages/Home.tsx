@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -236,7 +237,39 @@ const TrustBanner = () => {
   );
 };
 const HomeProducts = () => null;
-const GamingPreview = () => null;
+const GamingPreview = () => {
+  const { data: products } = useProducts({ category: "Gaming" });
+  
+  if (!products || products.length === 0) return null;
+
+  return (
+    <section className="py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold">Gaming Gear</h2>
+          <Link href="/gaming">
+            <Button variant="ghost" className="text-primary font-bold">
+              See all <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </Link>
+        </div>
+        <Carousel className="w-full">
+          <CarouselContent className="-ml-4">
+            {products.slice(0, 6).map((product) => (
+              <CarouselItem key={product.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+                <ProductCard product={product} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <div className="hidden md:block">
+            <CarouselPrevious className="-left-12" />
+            <CarouselNext className="-right-12" />
+          </div>
+        </Carousel>
+      </div>
+    </section>
+  );
+};
 const CircularEconomy = () => null;
 const AudioPreview = () => null;
 
