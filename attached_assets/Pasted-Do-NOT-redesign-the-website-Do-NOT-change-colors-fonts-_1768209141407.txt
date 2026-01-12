@@ -1,0 +1,184 @@
+Do NOT redesign the website.
+Do NOT change colors, fonts, spacing scale, or branding.
+Do NOT modify header or footer.
+Do NOT add new visual styles.
+
+Work ONLY on the HOME PAGE layout and section structure.
+
+================================
+GOAL
+================================
+Make the Home Page BEHAVE like Reebelo’s homepage
+while KEEPING the current site’s design language.
+
+================================
+GLOBAL RULES
+================================
+
+- Keep existing UI components
+- Keep current typography
+- Keep current color palette
+- Keep spacing system
+- Reuse existing product cards
+- No new animations
+- No new libraries
+
+================================
+HERO SECTION
+================================
+
+- Full-width hero banner
+- Featured category (example: “Refurbished iPads”)
+- Short supporting description
+- Primary CTA button (e.g. “Shop Now”)
+- Trust indicators under hero:
+  - Warranty
+  - Delivery
+  - Returns
+  - Trust rating
+
+================================
+SECTION: PICK UP WHERE YOU LEFT OFF
+================================
+
+- Horizontal product carousel
+- Uses recently viewed products
+- Scroll arrows (desktop)
+- Swipe enabled (mobile)
+- Same product card design
+
+================================
+SECTION: POPULAR CATEGORIES
+================================
+
+- Icon-based category grid
+- Categories to include ONLY:
+  - Smartphones
+  - Laptops
+  - Tablets
+  - Smartwatches
+  - Gaming
+  - Audio
+  - Accessories & Bundles
+  - Electronics
+  - Vacuum Cleaners
+  - Home & Kitchen
+
+DO NOT include:
+- Hair Care
+- Sports
+- Fashion
+
+================================
+SECTION: CUSTOMER FAVORITES
+================================
+
+- Tab-based filter:
+  - Smartphones
+  - Laptops
+  - Tablets
+  - Smartwatches
+  - Audio
+  - Home
+- Product carousel per tab
+- “See all” link per tab
+
+================================
+SECTION: TODAY’S TOP DEALS
+================================
+
+- Countdown timer card
+- Deal product cards
+- Discount badge
+- Horizontal scroll layout
+- Click navigates to Deals page
+
+================================
+MID-PAGE TRUST BANNER
+================================
+
+- Light green / teal background
+- Title:
+  “Premium Refurbished. Trusted Quality.”
+- Trustpilot badge
+- Bullet points:
+  - Save up to 70%
+  - 12 Months Warranty
+  - Quality Tested by Experts
+  - Risk-free 30-Day Trial
+  - Save CO₂ vs new
+
+================================
+SECTION: HOME PRODUCTS
+================================
+
+- Horizontal carousel
+- Products from:
+  - Home & Kitchen
+  - Vacuum Cleaners
+  - Smart Appliances
+- “See all” link → Home category page
+
+================================
+SECTION: GAMING
+================================
+
+- Horizontal product carousel
+- Gaming accessories & consoles
+- “See all” → Gaming category page
+
+================================
+SECTION: JOIN THE CIRCULAR ECONOMY
+================================
+
+- Media cards (image/video thumbnails)
+- Educational content about refurbished products
+- No autoplay
+- Click opens detail page
+
+================================
+SECTION: AUDIO
+================================
+
+- Horizontal carousel
+- Headphones & earbuds
+- “See all” → Audio category page
+
+================================
+FOOTER
+================================
+
+- Footer remains unchanged
+- Do NOT add new links
+- Do NOT modify layout
+
+================================
+MOBILE BEHAVIOR
+================================
+
+- All carousels swipe-enabled
+- Sections stacked vertically
+- Same content order
+- No hidden sections
+
+================================
+SEO RULES
+================================
+
+- Semantic headings (H1–H3)
+- Lazy load images
+- Internal links preserved
+- No duplicate headings
+
+================================
+STOP CONDITION
+================================
+
+Once:
+- Homepage sections match Reebelo behavior
+- Your design remains intact
+- Excluded sections are NOT present
+- Performance is unaffected
+
+STOP. Do NOT add new features.
+BEGIN IMPLEMENTATION NOW.
