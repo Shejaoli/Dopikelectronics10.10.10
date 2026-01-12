@@ -207,6 +207,22 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/orders/my", async (req, res) => {
+    try {
+      const phone = req.query.phone as string;
+      if (!phone) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      const orders = await storage.getOrders({ search: phone });
+      // Only return orders that exactly match the phone number
+      const myOrders = orders.filter(o => o.customerPhone === phone);
+      res.json(myOrders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
   app.get("/api/orders/public/track", async (req, res) => {
     try {
       const { id, phone } = req.query;

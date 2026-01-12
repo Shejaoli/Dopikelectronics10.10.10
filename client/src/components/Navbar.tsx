@@ -13,6 +13,7 @@ export function Navbar() {
     { name: "Home", href: "/" },
     { name: "Shop", href: "/shop" },
     { name: "Track Order", href: "/track-order" },
+    { name: "My Orders", href: "/my-orders" },
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
