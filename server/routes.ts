@@ -13,6 +13,23 @@ import express from "express";
 import Stripe from "stripe";
 import { Buffer } from "buffer";
 
+import paypal from "@paypal/checkout-server-sdk";
+
+// PayPal Environment Setup
+function getPayPalClient() {
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    return null;
+  }
+
+  const environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
+  return new paypal.core.PayPalHttpClient(environment);
+}
+
+const paypalClient = getPayPalClient();
+
 async function getPayPalAccessToken() {
   const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString("base64");
   const response = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
@@ -433,39 +450,32 @@ export async function registerRoutes(
   });
 
   app.post("/api/payments/paypal/create-order", async (req, res) => {
+    if (!paypalClient) {
+      return res.status(500).json({ message: "PayPal is not configured" });
+    }
+
     try {
       const { amount } = req.body;
       if (!amount || typeof amount !== "number") {
         return res.status(400).json({ message: "Invalid amount" });
       }
 
-      const accessToken = await getPayPalAccessToken();
-      const response = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          intent: "CAPTURE",
-          purchase_units: [
-            {
-              amount: {
-                currency_code: "USD",
-                value: (amount / 1200).toFixed(2), // Sandbox testing conversion RWF to USD
-              },
+      const request = new paypal.orders.OrdersCreateRequest();
+      request.prefer("return=representation");
+      request.requestBody({
+        intent: "CAPTURE",
+        purchase_units: [
+          {
+            amount: {
+              currency_code: "USD",
+              value: (amount / 1200).toFixed(2), // Sandbox testing conversion RWF to USD
             },
-          ],
-        }),
+          },
+        ],
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "PayPal order creation failed");
-      }
-
-      const data: any = await response.json();
-      res.json({ id: data.id });
+      const order = await paypalClient.execute(request);
+      res.json({ id: order.result.id });
     } catch (error: any) {
       console.error("PayPal create error:", error);
       res.status(500).json({ message: error.message || "Failed to create PayPal order" });
@@ -473,28 +483,22 @@ export async function registerRoutes(
   });
 
   app.post("/api/payments/paypal/capture-order", async (req, res) => {
+    if (!paypalClient) {
+      return res.status(500).json({ message: "PayPal is not configured" });
+    }
+
     try {
       const { orderID } = req.body;
       if (!orderID) {
         return res.status(400).json({ message: "Order ID is required" });
       }
 
-      const accessToken = await getPayPalAccessToken();
-      const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderID}/capture`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const request = new paypal.orders.OrdersCaptureRequest(orderID);
+      // @ts-ignore - The SDK types might be outdated, but requestBody({}) is often used
+      request.requestBody({});
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "PayPal payment capture failed");
-      }
-
-      const data: any = await response.json();
-      res.json(data);
+      const capture = await paypalClient.execute(request);
+      res.json(capture.result);
     } catch (error: any) {
       console.error("PayPal capture error:", error);
       res.status(500).json({ message: error.message || "Failed to capture PayPal order" });

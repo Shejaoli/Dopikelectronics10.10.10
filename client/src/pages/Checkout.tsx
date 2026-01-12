@@ -300,89 +300,96 @@ function CheckoutForm({
                             className="bg-muted/30 border-t border-border"
                           >
                             <div className="p-6">
-                              <PayPalButtons
-                                style={{ layout: "vertical", shape: "pill" }}
-                                createOrder={async () => {
-                                  try {
-                                    const response = await apiRequest("POST", "/api/payments/paypal/create-order", {
-                                      amount: total,
-                                    });
-                                    if (!response.ok) {
-                                      const error = await response.json();
-                                      throw new Error(error.message || "Failed to create PayPal order");
+                              <PayPalScriptProvider options={{ 
+                                clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
+                                currency: "USD",
+                                intent: "capture",
+                                components: "buttons"
+                              }}>
+                                <PayPalButtons
+                                  style={{ layout: "vertical", shape: "pill" }}
+                                  createOrder={async () => {
+                                    try {
+                                      const response = await apiRequest("POST", "/api/payments/paypal/create-order", {
+                                        amount: total,
+                                      });
+                                      if (!response.ok) {
+                                        const error = await response.json();
+                                        throw new Error(error.message || "Failed to create PayPal order");
+                                      }
+                                      const order = await response.json();
+                                      return order.id;
+                                    } catch (error: any) {
+                                      toast({
+                                        variant: "destructive",
+                                        title: "PayPal Error",
+                                        description: error.message,
+                                      });
+                                      throw error;
                                     }
-                                    const order = await response.json();
-                                    return order.id;
-                                  } catch (error: any) {
+                                  }}
+                                  onApprove={async (data) => {
+                                    try {
+                                      const response = await apiRequest("POST", "/api/payments/paypal/capture-order", {
+                                        orderID: data.orderID,
+                                      });
+                                      if (!response.ok) {
+                                        const error = await response.json();
+                                        throw new Error(error.message || "Failed to capture PayPal order");
+                                      }
+                                      const details = await response.json();
+                                      if (details.status === "COMPLETED") {
+                                        const orderData = {
+                                          customerName: `${shippingData?.firstName} ${shippingData?.lastName}`,
+                                          customerPhone: shippingData?.phone,
+                                          deliveryLocation: `${shippingData?.address}, ${shippingData?.city}, ${shippingData?.province}`,
+                                          paymentMethod: "PayPal",
+                                          paymentProvider: "paypal",
+                                          paymentReference: data.orderID,
+                                          totalAmount: total,
+                                          status: "paid",
+                                          items: cart.map(item => ({
+                                            productId: item.productId,
+                                            name: item.name,
+                                            quantity: item.quantity,
+                                            price: item.price,
+                                            storage: item.storage,
+                                            color: item.color
+                                          })),
+                                        };
+
+                                        const orderRes = await apiRequest("POST", "/api/orders/create", orderData);
+                                        if (!orderRes.ok) throw new Error("Failed to save order");
+                                        const order = await orderRes.json();
+
+                                        toast({
+                                          title: "Payment Successful",
+                                          description: "Your payment has been captured and order saved.",
+                                        });
+                                        
+                                        setCreatedOrder(order);
+                                        localStorage.removeItem("cart");
+                                        localStorage.removeItem("checkout_shipping");
+                                        setLocation("/order/success");
+                                      }
+                                    } catch (error: any) {
+                                      toast({
+                                        variant: "destructive",
+                                        title: "Payment failed",
+                                        description: error.message,
+                                      });
+                                    }
+                                  }}
+                                  onError={(err) => {
+                                    console.error("PayPal Error:", err);
                                     toast({
                                       variant: "destructive",
                                       title: "PayPal Error",
-                                      description: error.message,
+                                      description: "Something went wrong with the PayPal checkout.",
                                     });
-                                    throw error;
-                                  }
-                                }}
-                                onApprove={async (data) => {
-                                  try {
-                                    const response = await apiRequest("POST", "/api/payments/paypal/capture-order", {
-                                      orderID: data.orderID,
-                                    });
-                                    if (!response.ok) {
-                                      const error = await response.json();
-                                      throw new Error(error.message || "Failed to capture PayPal order");
-                                    }
-                                    const details = await response.json();
-                                    if (details.status === "COMPLETED") {
-                                      const orderData = {
-                                        customerName: `${shippingData?.firstName} ${shippingData?.lastName}`,
-                                        customerPhone: shippingData?.phone,
-                                        deliveryLocation: `${shippingData?.address}, ${shippingData?.city}, ${shippingData?.province}`,
-                                        paymentMethod: "PayPal",
-                                        paymentProvider: "paypal",
-                                        paymentReference: data.orderID,
-                                        totalAmount: total,
-                                        status: "paid",
-                                        items: cart.map(item => ({
-                                          productId: item.productId,
-                                          name: item.name,
-                                          quantity: item.quantity,
-                                          price: item.price,
-                                          storage: item.storage,
-                                          color: item.color
-                                        })),
-                                      };
-
-                                      const orderRes = await apiRequest("POST", "/api/orders/create", orderData);
-                                      if (!orderRes.ok) throw new Error("Failed to save order");
-                                      const order = await orderRes.json();
-
-                                      toast({
-                                        title: "Payment Successful",
-                                        description: "Your payment has been captured and order saved.",
-                                      });
-                                      
-                                      setCreatedOrder(order);
-                                      localStorage.removeItem("cart");
-                                      localStorage.removeItem("checkout_shipping");
-                                      setLocation("/order/success");
-                                    }
-                                  } catch (error: any) {
-                                    toast({
-                                      variant: "destructive",
-                                      title: "Payment failed",
-                                      description: error.message,
-                                    });
-                                  }
-                                }}
-                                onError={(err) => {
-                                  console.error("PayPal Error:", err);
-                                  toast({
-                                    variant: "destructive",
-                                    title: "PayPal Error",
-                                    description: "Something went wrong with the PayPal checkout.",
-                                  });
-                                }}
-                              />
+                                  }}
+                                />
+                              </PayPalScriptProvider>
                             </div>
                           </motion.div>
                         )}

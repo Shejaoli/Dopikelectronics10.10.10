@@ -1,0 +1,104 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT refactor UI.
+Do NOT redesign anything.
+Do NOT touch Stripe logic.
+
+This task MUST be incremental.
+
+========================
+GOAL
+========================
+Fix PayPal checkout error and make
+PayPal TEST MODE payment work.
+
+========================
+STEP 12 — PAYPAL FOUNDATION (TEST MODE)
+========================
+
+SCOPE (STRICT):
+- PayPal ONLY
+- TEST MODE ONLY
+- NO Stripe changes
+- NO checkout UI changes
+- NO new flows
+
+========================
+BACKEND CHANGES (ONLY THESE)
+========================
+
+1) Install PayPal SDK:
+@paypal/checkout-server-sdk
+
+2) Load PayPal credentials from env:
+- PAYPAL_CLIENT_ID
+- PAYPAL_CLIENT_SECRET
+(TEST MODE ONLY)
+
+3) Create route:
+POST /api/payments/paypal/create-order
+
+- Accept:
+  - amount
+  - currency
+- Create PayPal order
+- Return orderID
+
+4) Create route:
+POST /api/payments/paypal/capture
+
+- Accept:
+  - orderID
+- Capture PayPal order
+- Return result
+
+========================
+FRONTEND CHANGES (ONLY THESE)
+========================
+
+1) Load PayPal SDK using:
+https://www.paypal.com/sdk/js?client-id=YOUR_TEST_CLIENT_ID&currency=USD
+
+2) Render PayPal Buttons ONLY
+(no styling changes)
+
+3) On createOrder:
+- Call backend create-order
+- Return orderID
+
+4) On approve:
+- Call backend capture route
+- Handle success / error
+
+========================
+CRITICAL RULES
+========================
+
+- Do NOT hardcode order ID
+- Do NOT mock PayPal
+- Do NOT simulate payments
+- Use sandbox accounts ONLY
+- Amount must match backend
+
+========================
+VALIDATION
+========================
+
+After STEP 12:
+- PayPal button opens sandbox checkout
+- Sandbox buyer can approve payment
+- Payment captures successfully
+- No red error banner
+- Console has NO errors
+
+========================
+STOP CONDITION
+========================
+
+Once PayPal test payment works:
+- STOP
+- Do NOT add Stripe logic
+- Do NOT refactor checkout
+- Do NOT continue
+
+BEGIN STEP 12 NOW.

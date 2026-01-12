@@ -46,16 +46,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <PayPalScriptProvider options={{ 
-        clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "sb",
-        currency: "USD",
-        intent: "capture"
-      }}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </PayPalScriptProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Router />
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
