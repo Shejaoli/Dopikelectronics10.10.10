@@ -124,12 +124,12 @@ export default function ProductDetails() {
           </span>
         </Link>
 
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-start">
           {/* Image Gallery */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex gap-4"
+            className="flex gap-4 sticky top-8"
           >
             {/* Thumbnails */}
             <div className="flex flex-col gap-4">

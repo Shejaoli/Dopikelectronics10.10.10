@@ -1,0 +1,92 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT redesign UI.
+Do NOT change spacing, fonts, colors, or layout structure.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Make the product image section STICKY,
+so it stays aligned at the top while product details scroll.
+
+Behavior must match modern ecommerce sites (Reebelo-style).
+
+========================
+STEP — STICKY PRODUCT IMAGE
+========================
+
+SCOPE (STRICT):
+- Product page ONLY
+- Desktop behavior ONLY (mobile unchanged)
+- No checkout changes
+- No payment changes
+- No backend changes
+
+========================
+REQUIRED BEHAVIOR
+========================
+
+1) Product image column:
+- Stays LOCKED at the same vertical level as the first thumbnail
+- Does NOT scroll down into the center
+
+2) Product details (right side):
+- Scroll independently while image stays visible
+
+3) When product details END:
+- Sticky behavior STOPS
+- Page scroll continues normally
+- "You May Also Like" section scrolls into view naturally
+
+========================
+IMPLEMENTATION RULES
+========================
+
+- Use CSS only (position: sticky)
+- NO JavaScript scroll hacks
+- NO layout refactor
+- NO wrapper restructuring beyond what's required
+
+========================
+CSS REQUIREMENTS
+========================
+
+1) Apply `position: sticky`
+2) Set `top` to match the top alignment of thumbnails
+3) Ensure parent container does NOT have:
+   - overflow: hidden
+   - overflow: auto
+
+========================
+STYLE RULES (CRITICAL)
+========================
+
+- Image size MUST NOT change
+- Alignment MUST stay left
+- Thumbnails remain visible
+- Product info layout unchanged
+- Buttons untouched
+
+========================
+VALIDATION
+========================
+
+- Image is visible immediately (no scrolling needed)
+- Image stays fixed while specs scroll
+- "You May Also Like" scrolls normally
+- No layout jump
+- No console errors
+
+========================
+STOP CONDITION
+========================
+
+Once sticky image works:
+- STOP
+- Do NOT add animations
+- Do NOT add zoom
+- Do NOT optimize further
+
+BEGIN IMPLEMENTATION NOW.
