@@ -35,7 +35,7 @@ type SortOrder = "asc" | "desc";
 export default function AdminOrders() {
   const { toast } = useToast();
   const { data: orders, isLoading } = useQuery<Order[]>({
-    queryKey: ["/api/orders"],
+    queryKey: ["/api/admin/orders"],
   });
 
   const [search, setSearch] = useState("");
@@ -285,6 +285,7 @@ export default function AdminOrders() {
                   Customer <SortIndicator field="customerName" />
                 </TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead>Provider</TableHead>
                 <TableHead 
                   className="cursor-pointer hover:text-primary transition-colors"
                   onClick={() => toggleSort("totalAmount")}
@@ -312,6 +313,7 @@ export default function AdminOrders() {
                   <TableCell className="font-mono text-sm">#{order.id}</TableCell>
                   <TableCell className="font-medium">{order.customerName}</TableCell>
                   <TableCell>{order.customerPhone}</TableCell>
+                  <TableCell className="uppercase text-xs font-bold">{order.paymentProvider || order.paymentMethod || "-"}</TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-RW", {
                       style: "currency",
@@ -320,47 +322,9 @@ export default function AdminOrders() {
                     }).format(order.totalAmount)}
                   </TableCell>
                   <TableCell>
-                    <Select
-                      defaultValue={order.status}
-                      onValueChange={(value) => statusMutation.mutate({ id: order.id, status: value })}
-                      disabled={statusMutation.isPending || order.status === "delivered" || order.status === "cancelled"}
-                    >
-                      <SelectTrigger className="w-[130px] h-8">
-                        <SelectValue>
-                          <Badge variant={getStatusColor(order.status) as any}>
-                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                          </Badge>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {order.status === "pending" && (
-                          <>
-                            <SelectItem value="pending" disabled>Pending</SelectItem>
-                            <SelectItem value="confirmed">Confirmed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </>
-                        )}
-                        {order.status === "confirmed" && (
-                          <>
-                            <SelectItem value="confirmed" disabled>Confirmed</SelectItem>
-                            <SelectItem value="paid">Paid</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </>
-                        )}
-                        {order.status === "paid" && (
-                          <>
-                            <SelectItem value="paid" disabled>Paid</SelectItem>
-                            <SelectItem value="delivered">Delivered</SelectItem>
-                          </>
-                        )}
-                        {order.status === "delivered" && (
-                          <SelectItem value="delivered" disabled>Delivered</SelectItem>
-                        )}
-                        {order.status === "cancelled" && (
-                          <SelectItem value="cancelled" disabled>Cancelled</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <Badge variant={getStatusColor(order.status) as any}>
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {format(new Date(order.createdAt), "MMM d, yyyy")}
@@ -445,6 +409,14 @@ export default function AdminOrders() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Order Date</p>
                   <p className="text-base">{format(new Date(selectedOrder.createdAt), "PPpp")}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Payment Provider</p>
+                  <p className="text-base uppercase">{selectedOrder.paymentProvider || selectedOrder.paymentMethod || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Payment Reference</p>
+                  <p className="text-base font-mono text-xs">{selectedOrder.paymentReference || "-"}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Status</p>

@@ -238,7 +238,7 @@ export async function registerRoutes(
     res.json(logs);
   });
 
-  app.get("/api/orders", requireAdminAuth, async (req, res) => {
+  app.get("/api/admin/orders", requireAdminAuth, async (req, res) => {
     try {
       const { search, status, startDate, endDate } = req.query;
       const orders = await storage.getOrders({ 
@@ -247,6 +247,7 @@ export async function registerRoutes(
         startDate: startDate as string, 
         endDate: endDate as string 
       });
+      // Return list with necessary fields for Step 5
       res.json(orders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });

@@ -1,0 +1,111 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT describe complexity.
+Do NOT redesign UI.
+Do NOT modify storefront behavior.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Allow Admin to VIEW orders that were created after payments.
+
+This is READ-ONLY.
+This is NOT order management.
+This is STEP 5 ONLY.
+
+========================
+STEP 5 — ADMIN ORDERS LIST
+========================
+
+SCOPE (STRICT):
+- Admin view ONLY
+- Read-only orders list
+- Do NOT add editing, deleting, or status changes
+- Do NOT touch payment logic
+- Do NOT touch checkout or cart UI
+
+========================
+BACKEND IMPLEMENTATION
+========================
+
+1) Create admin-protected route:
+GET /api/admin/orders
+
+- Requires admin authentication
+- Returns list of orders
+- Sorted by newest first
+
+Order fields returned:
+- Order ID
+- Created date
+- Payment provider
+- Total amount
+- Currency
+- Order status
+
+========================
+FRONTEND IMPLEMENTATION
+========================
+
+1) Create page:
+- /admin/orders
+
+2) Display orders in a table:
+- Order ID
+- Date
+- Payment method
+- Total
+- Status
+
+3) Clickable row or button:
+- Opens Order Details view/modal
+- Shows order items:
+  - Product name
+  - Storage
+  - Color
+  - Quantity
+  - Price per item
+
+========================
+STYLE RULES
+========================
+
+- Use existing admin layout
+- No new design system
+- Simple table
+- Clean spacing
+- Dark / light compatible
+
+========================
+ABSOLUTE RULES
+========================
+
+- NO status updates
+- NO refunds
+- NO stock logic
+- NO exports
+- NO UI redesign
+
+========================
+VALIDATION
+========================
+
+After STEP 5:
+- Admin can see all paid orders
+- Orders match payment records
+- Order details render correctly
+- Storefront remains unaffected
+- No console or runtime errors
+
+========================
+STOP CONDITION
+========================
+
+Once admin orders list works:
+- STOP
+- Do NOT continue
+- Do NOT add features
+
+START IMPLEMENTING STEP 5 NOW.
