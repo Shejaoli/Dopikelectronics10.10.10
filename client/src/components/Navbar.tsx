@@ -40,7 +40,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden items-center gap-6 lg:flex">
+        <div className="hidden items-center gap-6 lg:flex flex-1 justify-center px-4">
           {navLinks.map((link) => (
             <Link key={link.name} href={link.href}>
               <span 
