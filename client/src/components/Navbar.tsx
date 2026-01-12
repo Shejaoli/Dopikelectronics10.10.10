@@ -18,7 +18,7 @@ export function Navbar() {
     { name: "Laptops", href: "/laptops" },
     { name: "Electronics", href: "/electronics" },
     { name: "Samsung Phones", href: "/shop?brand=Samsung&category=Smartphones" },
-    { name: "Home", href: "/shop?category=Home" },
+    { name: "Home", href: "/home-kitchen" },
     { name: "Tools", href: "/shop?category=Tools" },
     { name: "Gaming", href: "/shop?category=Gaming" },
   ];
