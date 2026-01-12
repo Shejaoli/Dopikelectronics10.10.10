@@ -481,6 +481,7 @@ export async function registerRoutes(
       }
 
       const request = new paypal.orders.OrdersCaptureRequest(orderID);
+      // @ts-ignore - The SDK types might be outdated, but requestBody({}) is often used
       request.requestBody({});
 
       const capture = await paypalClient.execute(request);
