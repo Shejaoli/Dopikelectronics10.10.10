@@ -1,16 +1,18 @@
 import { Link, useLocation } from "wouter";
-import { useState } from "react";
-import { Menu, X, ShoppingBag, Search, HelpCircle, Info, User, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, ShoppingBag, Search, HelpCircle, Info, User, MapPin, ChevronRight, Flame, Smartphone, Laptop, Tablet, Watch, Gamepad2, Wrench, Home as HomeIcon, Smartphone as ElectronicsIcon, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "./ThemeToggle";
 import { CartDrawer } from "./CartDrawer";
+import { Button } from "./ui/button";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [location] = useLocation();
 
   const navLinks = [
-    { name: "All Items", href: "/shop" },
+    { name: "All Items", onClick: () => setIsMenuOpen(true) },
     { name: "Deals 🔥", href: "/shop?deals=true" },
     { name: "iPhones", href: "/shop?brand=Apple&category=Smartphones" },
     { name: "Samsung Phones", href: "/shop?brand=Samsung&category=Smartphones" },
@@ -23,8 +25,131 @@ export function Navbar() {
 
   const isActive = (path: string) => location === path;
 
+  // Handle ESC key to close menu
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMenuOpen(false);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
   return (
     <header className="sticky top-0 z-40 w-full">
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)}
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            />
+            {/* Slide-out Menu */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 left-0 z-50 w-full max-w-xs bg-background shadow-2xl overflow-y-auto"
+            >
+              <div className="flex flex-col h-full">
+                {/* Menu Header */}
+                <div className="flex items-center justify-between p-4 border-b">
+                  <Link href="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2">
+                    <img src="/images/logo.png" alt="DOPIK" className="h-6 object-contain" />
+                    <span className="font-bold tracking-tighter">DOPIK</span>
+                  </Link>
+                  <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+
+                <div className="flex-1 p-4 space-y-8">
+                  {/* Section 1: Promo */}
+                  <div className="rounded-2xl bg-primary/5 p-4 border border-primary/10">
+                    <div className="flex items-center gap-2 mb-2 text-primary">
+                      <Flame className="h-5 w-5" />
+                      <span className="font-bold">Hot Deals</span>
+                    </div>
+                    <Link href="/shop?deals=true" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full justify-between group">
+                        Browse Deals
+                        <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* Section 2: Trending */}
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Trending</h3>
+                    <div className="space-y-1">
+                      {[
+                        { name: "Smartphones", icon: Smartphone, href: "/shop?category=Smartphones" },
+                        { name: "Laptops", icon: Laptop, href: "/shop?category=Laptops" },
+                        { name: "Tablets", icon: Tablet, href: "/shop?category=Tablets" },
+                        { name: "Smartwatches", icon: Watch, href: "/shop?category=Smartwatches" },
+                      ].map((item) => (
+                        <Link key={item.name} href={item.href} onClick={() => setIsMenuOpen(false)}>
+                          <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                            <item.icon className="h-5 w-5 text-muted-foreground" />
+                            <span className="font-medium">{item.name}</span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Section 3: Shop by Department */}
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Shop by Department</h3>
+                    <div className="space-y-1">
+                      {[
+                        { name: "Electronics", icon: ElectronicsIcon, href: "/shop?category=Electronics" },
+                        { name: "Home & Kitchen", icon: HomeIcon, href: "/shop?category=Home" },
+                        { name: "Gaming", icon: Gamepad2, href: "/shop?category=Gaming" },
+                        { name: "Tools", icon: Wrench, href: "/shop?category=Tools" },
+                        { name: "Others", icon: Layers, href: "/shop" },
+                      ].map((item) => (
+                        <Link key={item.name} href={item.href} onClick={() => setIsMenuOpen(false)}>
+                          <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer group">
+                            <div className="flex items-center gap-3">
+                              <item.icon className="h-5 w-5 text-muted-foreground" />
+                              <span className="font-medium">{item.name}</span>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Section 4: Help & Settings */}
+                  <div className="pt-4 border-t">
+                    <div className="space-y-1">
+                      <Link href="/contact" onClick={() => setIsMenuOpen(false)}>
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                          <HelpCircle className="h-5 w-5 text-muted-foreground" />
+                          <span className="font-medium">Help</span>
+                        </div>
+                      </Link>
+                      <Link href="/admin/login" onClick={() => setIsMenuOpen(false)}>
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer">
+                          <User className="h-5 w-5 text-muted-foreground" />
+                          <span className="font-medium">Sign In</span>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Top Utility Bar */}
       <div className="hidden border-b border-border bg-muted/30 lg:block">
         <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -88,15 +213,25 @@ export function Navbar() {
           <div className="hidden flex-1 justify-center px-4 lg:flex">
             <div className="flex items-center gap-6">
               {navLinks.map((link) => (
-                <Link key={link.name} href={link.href}>
-                  <span 
-                    className={`cursor-pointer text-sm font-semibold transition-all hover:text-primary active:scale-95 whitespace-nowrap ${
-                      isActive(link.href) ? "text-primary" : "text-muted-foreground"
-                    }`}
+                link.onClick ? (
+                  <button
+                    key={link.name}
+                    onClick={link.onClick}
+                    className="cursor-pointer text-sm font-semibold transition-all hover:text-primary active:scale-95 whitespace-nowrap text-muted-foreground"
                   >
                     {link.name}
-                  </span>
-                </Link>
+                  </button>
+                ) : (
+                  <Link key={link.name} href={link.href!}>
+                    <span 
+                      className={`cursor-pointer text-sm font-semibold transition-all hover:text-primary active:scale-95 whitespace-nowrap ${
+                        isActive(link.href!) ? "text-primary" : "text-muted-foreground"
+                      }`}
+                    >
+                      {link.name}
+                    </span>
+                  </Link>
+                )
               ))}
             </div>
           </div>

@@ -1,0 +1,94 @@
+Do NOT redesign the website.
+Do NOT change colors, fonts, spacing scale, or branding.
+Do NOT touch product pages or footer.
+
+Work ONLY on the Header + Navigation behavior.
+
+================================
+GOAL
+================================
+When clicking “All Items”, open a LEFT SLIDE-OUT MENU
+exactly like Reebelo.
+
+================================
+BEHAVIOR
+================================
+
+- Clicking "All Items" opens a full-height off-canvas panel
+- Panel slides in from LEFT
+- Background page is dimmed with dark overlay
+- Clicking overlay or ❌ closes the menu
+- ESC key closes menu
+
+================================
+PANEL STRUCTURE
+================================
+
+HEADER (Top of panel):
+- Logo on the left
+- Close (X) icon on the right
+
+SECTION 1: PROMO
+- “Hot Deals” card
+- Button: “Browse Deals”
+
+SECTION 2: TRENDING
+- Smartphones
+- Laptops
+- Tablets
+- Smartwatches
+
+SECTION 3: SHOP BY DEPARTMENT
+- Electronics (arrow →)
+- Home & Kitchen (arrow →)
+- Gaming (arrow →)
+- Tools (arrow →)
+- Others (arrow →)
+- See All (expandable)
+
+SECTION 4: HELP & SETTINGS
+- Help
+- Sign In
+
+================================
+INTERACTION RULES
+================================
+
+- Items with arrows open submenus (nested slide)
+- Smooth transitions
+- No page reloads
+- Desktop and mobile supported
+- Z-index higher than header
+
+================================
+STYLING RULES
+================================
+
+- White background
+- Full viewport height
+- Subtle shadow on right edge
+- Same typography as existing site
+- Icons consistent with current icon set
+
+================================
+TECH RULES
+================================
+
+- Use existing Tailwind / CSS system
+- No new libraries
+- No route changes
+- Use state-based toggle (open / close)
+- Component-based implementation
+
+================================
+STOP CONDITION
+================================
+
+Once the slide menu:
+- Opens
+- Closes
+- Scrolls independently
+- Dims background
+
+STOP. Do NOT add animations beyond slide-in.
+BEGIN IMPLEMENTATION NOW.
