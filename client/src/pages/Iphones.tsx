@@ -81,7 +81,7 @@ const FILTER_GROUPS = [
 ];
 
 export default function Iphones() {
-  const { data: products, isLoading } = useProducts({ category: "Smartphones", brand: "Apple" });
+  const { data: products, isLoading } = useProducts({ category: "Smartphones" });
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("best-selling");
   const [priceRange, setPriceRange] = useState([0, 2000000]);
@@ -101,6 +101,9 @@ export default function Iphones() {
     if (!products) return [];
     
     return products.filter(product => {
+      // Filter by brand Apple (since this is the iPhone page)
+      if (product.brand !== "Apple") return false;
+
       // Basic text search
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
       
