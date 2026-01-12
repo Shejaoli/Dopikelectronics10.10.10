@@ -1,0 +1,113 @@
+Do NOT switch modes.
+Do NOT suggest autonomous mode.
+Do NOT describe complexity.
+Do NOT redesign UI.
+Do NOT refactor payment logic.
+
+This task MUST be implemented incrementally.
+
+========================
+GOAL
+========================
+Create REAL orders ONLY after successful payment
+(Stripe OR PayPal).
+
+This is NOT admin work.
+This is NOT analytics.
+This is STEP 3 ONLY.
+
+========================
+STEP 3 — ORDER CREATION (POST-PAYMENT)
+========================
+
+SCOPE (STRICT):
+- Create orders ONLY after payment success
+- Support BOTH Stripe and PayPal
+- Do NOT change checkout UI
+- Do NOT touch cart UI design
+- Do NOT touch payment flows except success hooks
+
+========================
+ORDER DATA REQUIREMENTS
+========================
+
+Each order MUST store:
+- Order ID
+- Payment provider (stripe | paypal)
+- Payment reference (paymentIntentId or paypalOrderId)
+- Order items (array):
+  - productId
+  - productName
+  - selectedStorage
+  - selectedColor
+  - quantity
+  - pricePerItem
+- Subtotal
+- Total amount
+- Currency
+- Order status: "paid"
+- Created timestamp
+
+========================
+BACKEND IMPLEMENTATION
+========================
+
+1) Create Order model / schema (if not exists)
+
+2) Create route:
+POST /api/orders/create
+
+- Called ONLY after payment success
+- Validate payment reference exists
+- Save order to database
+- Return created order
+
+========================
+FRONTEND IMPLEMENTATION
+========================
+
+1) On Stripe success:
+- Call /api/orders/create
+- Pass paymentIntentId + cart data
+
+2) On PayPal success:
+- Call /api/orders/create
+- Pass paypalOrderId + cart data
+
+3) Clear cart AFTER order creation success
+
+========================
+ABSOLUTE RULES
+========================
+
+- NO order creation before payment success
+- NO UI redesign
+- NO admin changes
+- NO stock logic yet
+- NO emails yet
+
+========================
+VALIDATION
+========================
+
+After STEP 3:
+- Orders created ONLY after successful payment
+- Stripe & PayPal orders both saved correctly
+- Order items stored accurately
+- Cart clears after success
+- No duplicate orders
+- No console or runtime errors
+
+========================
+STOP CONDITION
+========================
+
+When:
+- Orders are created correctly
+- Payment-linked references saved
+- Cart clears properly
+
+STOP immediately.
+Do NOT continue further.
+
+START IMPLEMENTING STEP 3 NOW.

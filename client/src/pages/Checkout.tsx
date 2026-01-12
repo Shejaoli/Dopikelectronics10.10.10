@@ -122,7 +122,33 @@ function CheckoutForm({
         }
 
         if (result.paymentIntent.status === "succeeded") {
-          paymentStatus = "paid";
+          const orderData = {
+            customerName: `${shippingData.firstName} ${shippingData.lastName}`,
+            customerPhone: shippingData.phone,
+            deliveryLocation: `${shippingData.address}, ${shippingData.city}, ${shippingData.province}`,
+            paymentMethod: "Card Payment",
+            paymentProvider: "stripe",
+            paymentReference: result.paymentIntent.id,
+            totalAmount: total,
+            status: "paid",
+            items: cart.map(item => ({
+              productId: item.productId,
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              storage: item.storage,
+              color: item.color
+            })),
+          };
+
+          const orderRes = await apiRequest("POST", "/api/orders/create", orderData);
+          if (!orderRes.ok) throw new Error("Failed to save order");
+          const order = await orderRes.json();
+          
+          setCreatedOrder(order);
+          localStorage.removeItem("cart");
+          localStorage.removeItem("checkout_shipping");
+          setLocation("/order-success");
         }
       }
 
@@ -307,19 +333,35 @@ function CheckoutForm({
                                     }
                                     const details = await response.json();
                                     if (details.status === "COMPLETED") {
-                                      toast({
-                                        title: "Payment Successful",
-                                        description: "Your payment has been captured successfully.",
-                                      });
-                                      
-                                      setCreatedOrder({
-                                        id: "PAYPAL-" + data.orderID,
+                                      const orderData = {
+                                        customerName: `${shippingData?.firstName} ${shippingData?.lastName}`,
+                                        customerPhone: shippingData?.phone,
+                                        deliveryLocation: `${shippingData?.address}, ${shippingData?.city}, ${shippingData?.province}`,
                                         paymentMethod: "PayPal",
+                                        paymentProvider: "paypal",
+                                        paymentReference: data.orderID,
                                         totalAmount: total,
                                         status: "paid",
-                                        customerName: `${shippingData?.firstName} ${shippingData?.lastName}`,
+                                        items: cart.map(item => ({
+                                          productId: item.productId,
+                                          name: item.name,
+                                          quantity: item.quantity,
+                                          price: item.price,
+                                          storage: item.storage,
+                                          color: item.color
+                                        })),
+                                      };
+
+                                      const orderRes = await apiRequest("POST", "/api/orders/create", orderData);
+                                      if (!orderRes.ok) throw new Error("Failed to save order");
+                                      const order = await orderRes.json();
+
+                                      toast({
+                                        title: "Payment Successful",
+                                        description: "Your payment has been captured and order saved.",
                                       });
                                       
+                                      setCreatedOrder(order);
                                       localStorage.removeItem("cart");
                                       localStorage.removeItem("checkout_shipping");
                                       setLocation("/order-success");

@@ -146,7 +146,10 @@ export class DatabaseStorage implements IStorage {
       customerPhone: order.customerPhone,
       deliveryLocation: order.deliveryLocation || null,
       paymentMethod: order.paymentMethod || null,
+      paymentProvider: order.paymentProvider || null,
+      paymentReference: order.paymentReference || null,
       totalAmount: order.totalAmount,
+      currency: order.currency || "RWF",
       status: order.status || "pending",
       items: order.items || [],
     }).returning();

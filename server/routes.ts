@@ -271,6 +271,28 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/orders/create", async (req, res) => {
+    try {
+      const data = insertOrderSchema.parse(req.body);
+      
+      if (data.paymentMethod === "Card Payment" || data.paymentMethod === "PayPal") {
+        if (!req.body.paymentReference) {
+          return res.status(400).json({ message: "Payment reference is required for online payments" });
+        }
+      }
+
+      const order = await storage.createOrder({
+        ...data,
+        paymentProvider: req.body.paymentProvider,
+        paymentReference: req.body.paymentReference,
+        status: "paid"
+      });
+      res.status(201).json(order);
+    } catch (error) {
+      res.status(400).json({ message: error instanceof Error ? error.message : "Invalid order data" });
+    }
+  });
+
   app.patch("/api/orders/:id/status", requireAdminAuth, async (req, res) => {
     try {
       const id = Number(req.params.id);

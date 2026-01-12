@@ -46,7 +46,10 @@ export const orders = pgTable("orders", {
   customerPhone: text("customer_phone").notNull(),
   deliveryLocation: text("delivery_location"),
   paymentMethod: text("payment_method"),
+  paymentProvider: text("payment_provider"), // stripe, paypal, manual
+  paymentReference: text("payment_reference"), // stripe intent id or paypal order id
   totalAmount: integer("total_amount").notNull(),
+  currency: text("currency").default("RWF").notNull(),
   status: text("status").notNull().default("pending"),
   items: jsonb("items").$type<{ productId: number; name: string; quantity: number; price: number; storage?: string; color?: string }[]>().notNull().default([]),
   createdAt: timestamp("created_at").defaultNow().notNull(),
