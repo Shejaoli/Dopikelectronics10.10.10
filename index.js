@@ -1,1 +1,1 @@
-import './dist/index.cjs';
+import './dist/index.js';
