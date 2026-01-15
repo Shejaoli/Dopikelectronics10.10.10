@@ -1,0 +1,105 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+WORDPRESS CONVERSION — STEP 6
+Create single product page with variations.
+
+========================
+GOAL
+========================
+Render a product detail page using custom
+product + variation data from the plugin.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- /wp-content/themes/storefront-custom/
+
+Do NOT touch:
+- Plugin logic
+- Database schema
+- Admin UI
+- Cart or checkout logic
+- WooCommerce
+
+========================
+FILES TO CREATE
+========================
+Create:
+- single-product.php
+
+========================
+ROUTING RULES
+========================
+- URL pattern: /product/{slug}
+- Slug matches wp_storefront_products.slug
+- Handle 404 if product not found
+
+========================
+DATA SOURCE
+========================
+- Use StorefrontCore\ProductRepository::get_product_by_slug($slug)
+- Variations must come from repository
+- NO direct SQL in theme
+
+========================
+PAGE CONTENT
+========================
+Display:
+- Product name
+- Full description
+- Base price
+- Variation selectors:
+  - Storage (256GB, 512GB, 1TB)
+  - Color (visual swatches)
+  - Condition (New, Like New, Refurbished)
+
+========================
+VARIATION RULES
+========================
+- Variations rendered from database data
+- Disable options with stock = 0
+- Show price per variation
+- Selected variation visually highlighted
+- No JavaScript price logic yet (PHP render only)
+
+========================
+UI RULES
+========================
+- Clean layout
+- Semantic HTML
+- Minimal CSS allowed
+- No JS frameworks
+- No animations
+- Mobile-friendly
+
+========================
+WORDPRESS RULES
+========================
+- Use get_header() / get_footer()
+- Escape output properly
+- No hardcoded paths
+
+========================
+OUTPUT
+========================
+A working single product page with real
+variation data rendered from the database.
+
+========================
+STOP CONDITIONS
+========================
+When:
+- Product page renders by slug
+- Variations display correctly
+- Out-of-stock options disabled
+- No PHP errors or warnings
+
+STOP immediately after this step.
