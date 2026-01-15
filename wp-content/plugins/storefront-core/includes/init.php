@@ -12,6 +12,7 @@ if (!defined('ABSPATH')) {
 // Load data access layer
 require_once __DIR__ . '/ProductRepository.php';
 require_once __DIR__ . '/Cart.php';
+require_once __DIR__ . '/OrderRepository.php';
 
 function init() {
     \StorefrontCore\Cart::init();

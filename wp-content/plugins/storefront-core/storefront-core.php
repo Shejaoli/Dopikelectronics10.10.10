@@ -52,6 +52,33 @@ function storefront_core_activate() {
 
     dbDelta($sql_variations);
 
+    // Orders table
+    $table_orders = $wpdb->prefix . 'storefront_orders';
+    $sql_orders = "CREATE TABLE $table_orders (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        customer_name varchar(255) NOT NULL,
+        customer_email varchar(255) NOT NULL,
+        customer_phone varchar(50) NOT NULL,
+        total_amount decimal(10,2) NOT NULL,
+        status varchar(50) DEFAULT 'pending' NOT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY  (id)
+    ) $charset_collate;";
+    dbDelta($sql_orders);
+
+    // Order Items table
+    $table_order_items = $wpdb->prefix . 'storefront_order_items';
+    $sql_order_items = "CREATE TABLE $table_order_items (
+        id bigint(20) NOT NULL AUTO_INCREMENT,
+        order_id bigint(20) NOT NULL,
+        product_id bigint(20) NOT NULL,
+        variation_id bigint(20) NOT NULL,
+        quantity int(11) NOT NULL,
+        price decimal(10,2) NOT NULL,
+        PRIMARY KEY  (id)
+    ) $charset_collate;";
+    dbDelta($sql_order_items);
+
     flush_rewrite_rules();
 }
 

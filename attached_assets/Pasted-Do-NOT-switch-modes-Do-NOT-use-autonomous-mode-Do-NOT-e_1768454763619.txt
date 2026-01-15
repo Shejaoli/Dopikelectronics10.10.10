@@ -1,0 +1,116 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+WORDPRESS CONVERSION — STEP 9
+Checkout and order creation.
+
+========================
+GOAL
+========================
+Create a basic checkout page that:
+- Collects customer information
+- Saves an order in the database
+- Clears the cart on success
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- /wp-content/plugins/storefront-core/
+- /wp-content/themes/storefront-custom/
+
+Do NOT touch:
+- Payment gateways
+- Admin order UI
+- Email notifications
+- WooCommerce
+
+========================
+DATABASE TABLES
+========================
+Create on plugin activation (if not exists):
+
+1️⃣ wp_storefront_orders
+- id (BIGINT, PK)
+- customer_name
+- customer_email
+- customer_phone
+- total_amount
+- status
+- created_at
+
+2️⃣ wp_storefront_order_items
+- id (BIGINT, PK)
+- order_id
+- product_id
+- variation_id
+- quantity
+- price
+
+========================
+PLUGIN FILES TO CREATE / MODIFY
+========================
+Create:
+- includes/OrderRepository.php
+
+Modify:
+- storefront-core.php (activation hook)
+- includes/init.php
+
+========================
+ORDER LOGIC
+========================
+- Read cart items from Cart::get_items()
+- Calculate total
+- Insert order
+- Insert order items
+- Clear cart after success
+
+========================
+THEME FILES TO CREATE
+========================
+Create:
+- page-checkout.php
+
+========================
+CHECKOUT PAGE REQUIREMENTS
+========================
+Fields:
+- Name
+- Email
+- Phone
+
+Behavior:
+- POST form submission
+- Nonce protected
+- Show success message
+- Redirect to thank-you state (same page OK)
+
+========================
+SECURITY RULES
+========================
+- Sanitize all inputs
+- Validate cart is not empty
+- Use prepared statements
+
+========================
+OUTPUT
+========================
+A working checkout flow that creates orders
+and clears the cart.
+
+========================
+STOP CONDITIONS
+========================
+When:
+- Orders are saved in database
+- Cart clears after checkout
+- No PHP warnings or errors
+
+STOP immediately after this step.
