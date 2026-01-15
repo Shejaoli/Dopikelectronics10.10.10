@@ -1,0 +1,91 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+WORDPRESS CONVERSION — STEP 15
+Security, performance & production hardening.
+
+========================
+GOAL
+========================
+Prepare the storefront for production by:
+- Improving security
+- Improving performance
+- Preventing common WordPress risks
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- /wp-content/plugins/storefront-core/
+- /wp-content/themes/storefront-custom/
+
+Do NOT touch:
+- Business logic
+- Database schema
+- Migration scripts
+- WooCommerce
+
+========================
+SECURITY HARDENING
+========================
+Implement:
+- Disable direct file access in plugin files
+- Capability checks on all admin pages
+- Strict nonce verification
+- Sanitize all GET/POST inputs
+- Prevent CSRF on cart & checkout actions
+
+========================
+SESSION & CART SAFETY
+========================
+- Ensure session_start() runs only once
+- Regenerate session ID on checkout success
+- Prevent cart poisoning
+
+========================
+PERFORMANCE
+========================
+- Cache product queries (transients)
+- Cache product listings
+- Avoid duplicate DB queries per request
+- Lazy-load heavy admin logic
+
+========================
+WORDPRESS BEST PRACTICES
+========================
+- Use wp_die() for fatal failures
+- Use esc_* consistently
+- Prefix all hooks and actions
+- Remove unused hooks
+
+========================
+PRODUCTION CHECKLIST
+========================
+Add a README comment block with:
+- Required wp-config.php constants
+- Required PHP version
+- Recommended hosting settings
+- Cron / webhook notes
+
+========================
+OUTPUT
+========================
+A hardened, optimized, production-ready
+WordPress storefront.
+
+========================
+STOP CONDITIONS
+========================
+When:
+- No PHP notices/warnings
+- No security gaps found
+- Performance improved
+- App ready for deployment
+
+STOP immediately after this step.

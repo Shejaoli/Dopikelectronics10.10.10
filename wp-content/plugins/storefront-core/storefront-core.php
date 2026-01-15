@@ -11,6 +11,24 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/*
+================================================================================
+PRODUCTION READINESS CHECKLIST
+================================================================================
+PHP VERSION: 7.4+ (8.1 recommended)
+REQUIRED WP-CONFIG.PHP CONSTANTS:
+- SESSION_SECRET: String for session encryption
+- STRIPE_SECRET_KEY: Stripe Secret Key
+- STRIPE_PUBLISHABLE_KEY: Stripe Publishable Key
+- OLD_DB_HOST, OLD_DB_NAME, OLD_DB_USER, OLD_DB_PASS (For Migration only)
+
+RECOMMENDED SETTINGS:
+- HTTPS must be enabled for Stripe and secure sessions.
+- Configure server to prevent access to .php files in /wp-content/uploads/
+- Webhook URL: https://yourdomain.com/?storefront_stripe_webhook=1
+================================================================================
+*/
+
 // Register activation and deactivation hooks
 register_activation_hook(__FILE__, 'storefront_core_activate');
 register_deactivation_hook(__FILE__, 'storefront_core_deactivate');

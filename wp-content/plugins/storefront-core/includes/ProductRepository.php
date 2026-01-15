@@ -17,15 +17,20 @@ class ProductRepository {
      * @return array
      */
     public static function get_all_products() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'storefront_products';
-
-        $results = $wpdb->get_results(
-            "SELECT * FROM $table_name WHERE status = 'active' ORDER BY created_at DESC",
-            ARRAY_A
-        );
-
-        return $results ? $results : [];
+        $cache_key = 'storefront_all_products';
+        $products = get_transient($cache_key);
+        
+        if (false === $products) {
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'storefront_products';
+            $products = $wpdb->get_results(
+                "SELECT * FROM $table_name WHERE status = 'active' ORDER BY created_at DESC",
+                ARRAY_A
+            );
+            set_transient($cache_key, $products, HOUR_IN_SECONDS);
+        }
+        
+        return $products ? $products : [];
     }
 
     /**
@@ -80,6 +85,7 @@ class ProductRepository {
      * Create a new product.
      */
     public static function create_product($data) {
+        delete_transient('storefront_all_products');
         global $wpdb;
         $wpdb->insert(
             $wpdb->prefix . 'storefront_products',
@@ -99,6 +105,7 @@ class ProductRepository {
      * Update a product.
      */
     public static function update_product($id, $data) {
+        delete_transient('storefront_all_products');
         global $wpdb;
         return $wpdb->update(
             $wpdb->prefix . 'storefront_products',
@@ -119,6 +126,7 @@ class ProductRepository {
      * Delete a product and its variations.
      */
     public static function delete_product($id) {
+        delete_transient('storefront_all_products');
         global $wpdb;
         $wpdb->delete($wpdb->prefix . 'storefront_variations', ['product_id' => intval($id)], ['%d']);
         return $wpdb->delete($wpdb->prefix . 'storefront_products', ['id' => intval($id)], ['%d']);

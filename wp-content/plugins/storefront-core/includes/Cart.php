@@ -15,7 +15,7 @@ class Cart {
      * Initialize the cart session.
      */
     public static function init() {
-        if (!session_id()) {
+        if (!session_id() && !headers_sent()) {
             session_start();
         }
 
