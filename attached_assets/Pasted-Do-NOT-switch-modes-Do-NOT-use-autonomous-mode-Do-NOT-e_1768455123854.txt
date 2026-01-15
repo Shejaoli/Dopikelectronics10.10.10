@@ -1,0 +1,99 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+WORDPRESS CONVERSION — STEP 13
+Migrate data from PostgreSQL to WordPress MySQL.
+
+========================
+GOAL
+========================
+Create a one-time migration script that imports:
+- Products
+- Variations
+- Orders
+
+from the old Node/Postgres database into
+the custom WordPress tables.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- /wp-content/plugins/storefront-core/
+
+Do NOT touch:
+- Theme files
+- Admin UI
+- Cart or checkout logic
+- Existing WordPress data
+
+========================
+MIGRATION STRATEGY
+========================
+- One-time admin-triggered migration
+- Read-only from Postgres
+- Idempotent (safe to re-run)
+
+========================
+POSTGRES CONNECTION
+========================
+- Use PDO pgsql
+- Credentials loaded from wp-config.php constants:
+  OLD_DB_HOST
+  OLD_DB_NAME
+  OLD_DB_USER
+  OLD_DB_PASS
+
+========================
+DATA MAPPING
+========================
+
+Postgres → MySQL
+
+products → wp_storefront_products
+product_variations → wp_storefront_variations
+orders → wp_storefront_orders
+order_items → wp_storefront_order_items
+
+========================
+FILES TO CREATE
+========================
+Create:
+- includes/Migration.php
+
+========================
+ADMIN TRIGGER
+========================
+- Add a button under Storefront > Tools
+- “Run Migration”
+- Confirmation required
+
+========================
+SAFETY RULES
+========================
+- Use transactions
+- Skip duplicates by slug/order ID
+- Log results (success/fail counts)
+- No deletes
+
+========================
+OUTPUT
+========================
+Existing data appears in WordPress
+exactly as in the old app.
+
+========================
+STOP CONDITIONS
+========================
+When:
+- Migration runs without fatal errors
+- Products, variations, and orders appear
+- No duplicate records created
+
+STOP immediately after this step.

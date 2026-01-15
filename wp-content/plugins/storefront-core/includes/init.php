@@ -15,6 +15,7 @@ require_once __DIR__ . '/Cart.php';
 require_once __DIR__ . '/OrderRepository.php';
 require_once __DIR__ . '/AdminOrdersPage.php';
 require_once __DIR__ . '/AdminProductsPage.php';
+require_once __DIR__ . '/Migration.php';
 
 function init() {
     \StorefrontCore\Cart::init();
@@ -22,6 +23,7 @@ function init() {
     if (is_admin()) {
         \StorefrontCore\AdminOrdersPage::init();
         \StorefrontCore\AdminProductsPage::init();
+        \StorefrontCore\Migration::init();
     }
 }
     // Initialization code here
