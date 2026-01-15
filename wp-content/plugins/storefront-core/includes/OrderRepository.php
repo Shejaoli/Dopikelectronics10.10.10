@@ -19,6 +19,8 @@ class OrderRepository {
             $status = 'awaiting_payment';
         } elseif ($payment_method === 'whatsapp') {
             $status = 'pending_whatsapp';
+        } elseif ($payment_method === 'stripe') {
+            $status = 'pending_payment';
         }
 
         $wpdb->insert(

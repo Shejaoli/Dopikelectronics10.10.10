@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['storefront_checkout_n
             $order_id = OrderRepository::create_order($customer_data, $cart_items);
             if ($order_id) {
                 if ($customer_data['payment_method'] === 'whatsapp') {
+                    // ... existing whatsapp logic ...
                     $message = "New Order #" . $order_id . "\n";
                     $message .= "Customer: " . $customer_data['name'] . " (" . $customer_data['phone'] . ")\n";
                     $message .= "Items:\n";
@@ -39,6 +40,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['storefront_checkout_n
                     $wa_url = "https://wa.me/250780000000?text=" . urlencode($message); // Example phone
                     wp_redirect($wa_url);
                     exit;
+                } elseif ($customer_data['payment_method'] === 'stripe') {
+                    $total = 0;
+                    foreach ($cart_items as $item) {
+                        $total += $item['price'] * $item['quantity'];
+                    }
+                    $stripe_url = StripeGateway::create_checkout_session($order_id, $total);
+                    if ($stripe_url) {
+                        Cart::clear_cart();
+                        wp_redirect($stripe_url);
+                        exit;
+                    }
                 }
                 
                 Cart::clear_cart();
@@ -99,6 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['storefront_checkout_n
                     <label>
                         <input type="radio" name="payment_method" value="bank_transfer" required>
                         Bank Transfer
+                    </label>
+                </div>
+                <div class="method-option">
+                    <label>
+                        <input type="radio" name="payment_method" value="stripe" required>
+                        Card Payment (Stripe)
                     </label>
                 </div>
             </div>

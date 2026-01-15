@@ -1,0 +1,105 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+WORDPRESS CONVERSION — STEP 14
+Stripe card payment integration.
+
+========================
+GOAL
+========================
+Allow customers to pay by card using Stripe
+while keeping existing payment methods.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- /wp-content/plugins/storefront-core/
+- /wp-content/themes/storefront-custom/
+
+Do NOT touch:
+- Product logic
+- Cart logic
+- Migration code
+- WooCommerce
+
+========================
+PAYMENT METHOD
+========================
+Add:
+- Stripe (Card Payment)
+
+========================
+STRIPE SETUP
+========================
+- Use Stripe Checkout (hosted)
+- Keys loaded from wp-config.php:
+  STRIPE_SECRET_KEY
+  STRIPE_PUBLISHABLE_KEY
+
+========================
+CHECKOUT PAGE CHANGES
+========================
+Modify:
+- page-checkout.php
+
+Add:
+- Stripe as a payment option
+- Redirect to Stripe Checkout after order creation
+
+========================
+ORDER FLOW
+========================
+1️⃣ Create order with status: pending_payment
+2️⃣ Redirect to Stripe Checkout
+3️⃣ On success webhook:
+   - Update order status → paid
+4️⃣ On cancel:
+   - Keep order as pending_payment
+
+========================
+FILES TO CREATE
+========================
+Create:
+- includes/StripeGateway.php
+
+Modify:
+- OrderRepository.php
+- init.php
+
+========================
+WEBHOOK HANDLING
+========================
+- Secure webhook endpoint
+- Verify Stripe signature
+- Update order status safely
+
+========================
+SECURITY RULES
+========================
+- No keys in frontend
+- Sanitize all inputs
+- Validate order amounts
+
+========================
+OUTPUT
+========================
+Customers can pay by card using Stripe,
+and orders update status correctly.
+
+========================
+STOP CONDITIONS
+========================
+When:
+- Stripe checkout opens
+- Successful payment updates order to "paid"
+- Failed/cancelled payments handled safely
+- No PHP warnings or errors
+
+STOP immediately after this step.

@@ -13,9 +13,9 @@ if (!defined('ABSPATH')) {
 require_once __DIR__ . '/ProductRepository.php';
 require_once __DIR__ . '/Cart.php';
 require_once __DIR__ . '/OrderRepository.php';
-require_once __DIR__ . '/AdminOrdersPage.php';
 require_once __DIR__ . '/AdminProductsPage.php';
 require_once __DIR__ . '/Migration.php';
+require_once __DIR__ . '/StripeGateway.php';
 
 function init() {
     \StorefrontCore\Cart::init();
@@ -25,6 +25,8 @@ function init() {
         \StorefrontCore\AdminProductsPage::init();
         \StorefrontCore\Migration::init();
     }
+
+    add_action('init', [\StorefrontCore\StripeGateway::class, 'handle_webhook']);
 }
     // Initialization code here
 }
