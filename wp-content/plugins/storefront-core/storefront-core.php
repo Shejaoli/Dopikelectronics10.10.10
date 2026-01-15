@@ -59,6 +59,7 @@ function storefront_core_activate() {
         customer_name varchar(255) NOT NULL,
         customer_email varchar(255) NOT NULL,
         customer_phone varchar(50) NOT NULL,
+        payment_method varchar(100) NOT NULL,
         total_amount decimal(10,2) NOT NULL,
         status varchar(50) DEFAULT 'pending' NOT NULL,
         created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,

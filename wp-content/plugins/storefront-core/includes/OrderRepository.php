@@ -12,16 +12,26 @@ class OrderRepository {
             $total += $item['price'] * $item['quantity'];
         }
 
+        $payment_method = sanitize_text_field($customer_data['payment_method']);
+        $status = 'pending';
+        
+        if ($payment_method === 'bank_transfer') {
+            $status = 'awaiting_payment';
+        } elseif ($payment_method === 'whatsapp') {
+            $status = 'pending_whatsapp';
+        }
+
         $wpdb->insert(
             $wpdb->prefix . 'storefront_orders',
             [
                 'customer_name'  => sanitize_text_field($customer_data['name']),
                 'customer_email' => sanitize_email($customer_data['email']),
                 'customer_phone' => sanitize_text_field($customer_data['phone']),
+                'payment_method' => $payment_method,
                 'total_amount'   => $total,
-                'status'         => 'pending'
+                'status'         => $status
             ],
-            ['%s', '%s', '%s', '%f', '%s']
+            ['%s', '%s', '%s', '%s', '%f', '%s']
         );
 
         $order_id = $wpdb->insert_id;

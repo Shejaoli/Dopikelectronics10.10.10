@@ -15,13 +15,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['storefront_checkout_n
     if (wp_verify_nonce($_POST['storefront_checkout_nonce'], 'storefront_checkout')) {
         if (!empty($cart_items)) {
             $customer_data = [
-                'name'  => $_POST['customer_name'],
-                'email' => $_POST['customer_email'],
-                'phone' => $_POST['customer_phone']
+                'name'           => $_POST['customer_name'],
+                'email'          => $_POST['customer_email'],
+                'phone'          => $_POST['customer_phone'],
+                'payment_method' => $_POST['payment_method']
             ];
             
             $order_id = OrderRepository::create_order($customer_data, $cart_items);
             if ($order_id) {
+                if ($customer_data['payment_method'] === 'whatsapp') {
+                    $message = "New Order #" . $order_id . "\n";
+                    $message .= "Customer: " . $customer_data['name'] . " (" . $customer_data['phone'] . ")\n";
+                    $message .= "Items:\n";
+                    $total = 0;
+                    foreach ($cart_items as $item) {
+                        $line_total = $item['price'] * $item['quantity'];
+                        $message .= "- " . $item['name'] . " (" . implode(', ', $item['options']) . ") x " . $item['quantity'] . ": " . number_format($line_total, 0) . " RWF\n";
+                        $total += $line_total;
+                    }
+                    $message .= "Total: " . number_format($total, 0) . " RWF";
+                    
+                    Cart::clear_cart();
+                    $wa_url = "https://wa.me/250780000000?text=" . urlencode($message); // Example phone
+                    wp_redirect($wa_url);
+                    exit;
+                }
+                
                 Cart::clear_cart();
                 $order_success = true;
             }
@@ -62,6 +81,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['storefront_checkout_n
                 <input type="tel" name="customer_phone" id="customer_phone" required>
             </div>
 
+            <div class="payment-methods">
+                <h3>Payment Method</h3>
+                <div class="method-option">
+                    <label>
+                        <input type="radio" name="payment_method" value="cod" required checked>
+                        Cash on Delivery
+                    </label>
+                </div>
+                <div class="method-option">
+                    <label>
+                        <input type="radio" name="payment_method" value="whatsapp" required>
+                        WhatsApp Confirmation
+                    </label>
+                </div>
+                <div class="method-option">
+                    <label>
+                        <input type="radio" name="payment_method" value="bank_transfer" required>
+                        Bank Transfer
+                    </label>
+                </div>
+            </div>
+
             <div class="order-summary">
                 <h3>Order Summary</h3>
                 <?php $total = 0; foreach ($cart_items as $item) : $total += $item['price'] * $item['quantity']; ?>
@@ -89,6 +130,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['storefront_checkout_n
 .order-summary { background: #f9f9f9; padding: 1.5rem; border-radius: 8px; margin: 2rem 0; }
 .summary-item { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
 .summary-total { display: flex; justify-content: space-between; margin-top: 1rem; border-top: 1px solid #ddd; padding-top: 1rem; font-size: 1.2rem; }
+.payment-methods { margin: 2rem 0; padding: 1.5rem; border: 1px solid #eee; border-radius: 8px; }
+.method-option { margin-bottom: 0.5rem; }
+.method-option label { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; }
 .place-order-btn { width: 100%; padding: 1rem; background: #333; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
 .thank-you { text-align: center; padding: 4rem 0; }
 </style>

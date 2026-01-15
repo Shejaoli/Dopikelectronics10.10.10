@@ -1,0 +1,96 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+WORDPRESS CONVERSION — STEP 11
+Add non-gateway payment options.
+
+========================
+GOAL
+========================
+Allow customers to choose a payment method
+at checkout and finalize orders accordingly.
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- /wp-content/themes/storefront-custom/
+- /wp-content/plugins/storefront-core/
+
+Do NOT touch:
+- Database schema
+- Admin orders UI
+- WooCommerce
+- External payment SDKs
+
+========================
+PAYMENT METHODS
+========================
+Implement:
+1️⃣ Cash on Delivery
+2️⃣ WhatsApp Order Confirmation
+3️⃣ Bank Transfer (manual)
+
+========================
+CHECKOUT PAGE CHANGES
+========================
+Modify:
+- page-checkout.php
+
+Add:
+- Payment method radio buttons
+- Required selection before submit
+
+========================
+ORDER LOGIC
+========================
+Modify OrderRepository:
+- Save payment_method with order
+- Set initial order status:
+  - COD → pending
+  - WhatsApp → pending_whatsapp
+  - Bank → awaiting_payment
+
+========================
+WHATSAPP INTEGRATION
+========================
+- Generate WhatsApp message with:
+  - Order ID
+  - Items
+  - Total
+  - Customer info
+- Redirect user to:
+  https://wa.me/{PHONE}?text={ENCODED_MESSAGE}
+
+(No API calls)
+
+========================
+SECURITY & UX
+========================
+- Validate payment method
+- Sanitize inputs
+- Show confirmation message per method
+- Cart clears after order creation
+
+========================
+OUTPUT
+========================
+Checkout supports multiple payment methods
+and updates order status correctly.
+
+========================
+STOP CONDITIONS
+========================
+When:
+- Payment options appear at checkout
+- Orders save payment method
+- WhatsApp redirect works
+- No PHP warnings or errors
+
+STOP immediately after this step.
