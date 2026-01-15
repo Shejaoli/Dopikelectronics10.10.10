@@ -1,0 +1,100 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES ONLY.
+
+========================
+CURRENT STEP
+========================
+WORDPRESS FRONTEND STEP 1 — HEADER / NAVBAR
+
+This step ONLY.
+Do NOT touch backend logic.
+Do NOT touch plugins.
+Do NOT touch database.
+Do NOT touch product logic.
+
+========================
+GOAL
+========================
+Recreate the EXACT header/navbar UI
+from the existing Replit storefront
+inside the WordPress theme.
+
+The visual result MUST closely match
+the Replit header design.
+
+========================
+REFERENCE
+========================
+Use the existing Replit storefront UI
+as the visual reference (logo, layout,
+spacing, colors, alignment).
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- wp-content/themes/storefront-custom/header.php
+- wp-content/themes/storefront-custom/assets/css/header.css
+(Optional)
+- wp-content/themes/storefront-custom/assets/js/header.js
+
+========================
+HEADER CONTENT
+========================
+Include:
+- Logo (left)
+- Search bar (center)
+- Navigation links:
+  All Items
+  Deals
+  iPhones
+  Laptops
+  Electronics
+  Samsung Phones
+  Home
+  Tools
+  Gaming
+- Right-side icons:
+  Help
+  Account
+  Theme toggle (visual only)
+
+========================
+DESIGN RULES
+========================
+- Match spacing and alignment from Replit
+- Clean modern ecommerce style
+- Rounded inputs and buttons
+- Sticky header
+- White background
+- Subtle borders/shadows
+- Desktop-first (mobile later)
+
+========================
+FUNCTIONAL RULES
+========================
+- Search bar is visual only
+- Nav links can be static <a> tags
+- No WordPress menus yet
+- No JS-heavy logic
+
+========================
+STRICT NOs
+========================
+❌ Do NOT add page builders
+❌ Do NOT redesign
+❌ Do NOT use Bootstrap
+❌ Do NOT touch footer
+❌ Do NOT modify index.php
+
+========================
+STOP CONDITION
+========================
+STOP immediately when:
+- Header visually matches Replit
+- No PHP errors
+- No console errors
+- Site still loads correctly
