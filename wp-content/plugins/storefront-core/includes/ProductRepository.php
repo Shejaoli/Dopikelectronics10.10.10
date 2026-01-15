@@ -75,4 +75,82 @@ class ProductRepository {
 
         return $results ? $results : [];
     }
+
+    /**
+     * Create a new product.
+     */
+    public static function create_product($data) {
+        global $wpdb;
+        $wpdb->insert(
+            $wpdb->prefix . 'storefront_products',
+            [
+                'name' => sanitize_text_field($data['name']),
+                'slug' => sanitize_title($data['slug']),
+                'description' => wp_kses_post($data['description']),
+                'base_price' => floatval($data['base_price']),
+                'status' => sanitize_text_field($data['status']),
+            ],
+            ['%s', '%s', '%s', '%f', '%s']
+        );
+        return $wpdb->insert_id;
+    }
+
+    /**
+     * Update a product.
+     */
+    public static function update_product($id, $data) {
+        global $wpdb;
+        return $wpdb->update(
+            $wpdb->prefix . 'storefront_products',
+            [
+                'name' => sanitize_text_field($data['name']),
+                'slug' => sanitize_title($data['slug']),
+                'description' => wp_kses_post($data['description']),
+                'base_price' => floatval($data['base_price']),
+                'status' => sanitize_text_field($data['status']),
+            ],
+            ['id' => intval($id)],
+            ['%s', '%s', '%s', '%f', '%s'],
+            ['%d']
+        );
+    }
+
+    /**
+     * Delete a product and its variations.
+     */
+    public static function delete_product($id) {
+        global $wpdb;
+        $wpdb->delete($wpdb->prefix . 'storefront_variations', ['product_id' => intval($id)], ['%d']);
+        return $wpdb->delete($wpdb->prefix . 'storefront_products', ['id' => intval($id)], ['%d']);
+    }
+
+    /**
+     * Save a variation.
+     */
+    public static function save_variation($data) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'storefront_variations';
+        $variation_data = [
+            'product_id' => intval($data['product_id']),
+            'storage_option' => sanitize_text_field($data['storage_option']),
+            'color' => sanitize_text_field($data['color']),
+            'condition_name' => sanitize_text_field($data['condition_name']),
+            'price' => floatval($data['price']),
+            'stock' => intval($data['stock']),
+        ];
+
+        if (!empty($data['id'])) {
+            return $wpdb->update($table, $variation_data, ['id' => intval($data['id'])], ['%d', '%s', '%s', '%s', '%f', '%d'], ['%d']);
+        } else {
+            return $wpdb->insert($table, $variation_data, ['%d', '%s', '%s', '%s', '%f', '%d']);
+        }
+    }
+
+    /**
+     * Delete a variation.
+     */
+    public static function delete_variation($id) {
+        global $wpdb;
+        return $wpdb->delete($wpdb->prefix . 'storefront_variations', ['id' => intval($id)], ['%d']);
+    }
 }

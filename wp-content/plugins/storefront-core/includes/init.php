@@ -14,12 +14,14 @@ require_once __DIR__ . '/ProductRepository.php';
 require_once __DIR__ . '/Cart.php';
 require_once __DIR__ . '/OrderRepository.php';
 require_once __DIR__ . '/AdminOrdersPage.php';
+require_once __DIR__ . '/AdminProductsPage.php';
 
 function init() {
     \StorefrontCore\Cart::init();
     
     if (is_admin()) {
         \StorefrontCore\AdminOrdersPage::init();
+        \StorefrontCore\AdminProductsPage::init();
     }
 }
     // Initialization code here
