@@ -1,0 +1,102 @@
+Do NOT switch modes.
+Do NOT use autonomous mode.
+Do NOT explain.
+Do NOT summarize.
+MAKE REAL CODE CHANGES.
+
+========================
+CURRENT STEP
+========================
+WORDPRESS CONVERSION — STEP 7
+Create session-based cart system.
+
+========================
+GOAL
+========================
+Implement a PHP session-based cart that can:
+- Add items
+- Remove items
+- Persist per user session
+
+========================
+SCOPE (STRICT)
+========================
+Modify ONLY:
+- /wp-content/plugins/storefront-core/
+- /wp-content/themes/storefront-custom/ (minimal UI only)
+
+Do NOT touch:
+- Database schema
+- Admin UI
+- Checkout or orders
+- WooCommerce
+
+========================
+PLUGIN FILES TO CREATE
+========================
+Create:
+- includes/Cart.php
+
+========================
+CART RULES
+========================
+- Use PHP sessions
+- Initialize session safely on init
+- Cart stored in $_SESSION['storefront_cart']
+- Each cart item includes:
+  - product_id
+  - variation_id
+  - quantity
+  - price
+  - name
+  - selected options (storage, color, condition)
+
+========================
+CART METHODS
+========================
+Implement:
+- add_item($product_id, $variation_id, $qty)
+- remove_item($variation_id)
+- get_items()
+- clear_cart()
+
+========================
+SECURITY RULES
+========================
+- Validate product & variation existence
+- Prevent negative quantities
+- Sanitize all inputs
+- No direct $_POST handling yet
+
+========================
+THEME INTEGRATION
+========================
+Modify:
+- single-product.php
+
+Add:
+- “Add to Cart” form
+- POSTs product_id + variation_id + quantity
+- Uses Cart::add_item()
+
+========================
+UI RULES
+========================
+- Simple button
+- No JS required
+- No styling overhaul
+
+========================
+OUTPUT
+========================
+A working session-based cart system.
+
+========================
+STOP CONDITIONS
+========================
+When:
+- Items can be added to cart
+- Cart persists on page refresh
+- No PHP warnings or session errors
+
+STOP immediately after this step.

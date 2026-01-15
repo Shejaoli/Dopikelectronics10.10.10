@@ -52,42 +52,35 @@ $conditions = array_unique(array_column($variations, 'condition_name'));
             </div>
 
             <?php if (!empty($variations)) : ?>
-                <form class="variation-selector">
+                <form class="variation-selector" method="POST">
+                    <input type="hidden" name="product_id" value="<?php echo esc_attr($product['id']); ?>">
+                    <input type="hidden" name="storefront_add_to_cart" value="1">
+                    
                     <div class="variation-group">
-                        <h3>Storage</h3>
-                        <div class="options-list">
-                            <?php foreach ($storage_options as $option) : ?>
-                                <label class="option-item">
-                                    <input type="radio" name="storage" value="<?php echo esc_attr($option); ?>">
-                                    <span><?php echo esc_html($option); ?></span>
-                                </label>
+                        <h3>Select Variation</h3>
+                        <select name="variation_id" required class="variation-dropdown">
+                            <option value="">Choose an option</option>
+                            <?php foreach ($variations as $v) : ?>
+                                <option value="<?php echo esc_attr($v['id']); ?>" <?php disabled($v['stock'] <= 0); ?>>
+                                    <?php echo esc_html($v['storage_option'] . ' - ' . $v['color'] . ' (' . $v['condition_name'] . ') - ' . number_format($v['price'], 0, '.', ',') . ' RWF'); ?>
+                                    <?php if ($v['stock'] <= 0) echo ' (Out of Stock)'; ?>
+                                </option>
                             <?php endforeach; ?>
-                        </div>
+                        </select>
                     </div>
 
-                    <div class="variation-group">
-                        <h3>Color</h3>
-                        <div class="options-list">
-                            <?php foreach ($colors as $color) : ?>
-                                <label class="option-item color-swatch">
-                                    <input type="radio" name="color" value="<?php echo esc_attr($color); ?>">
-                                    <span style="background-color: <?php echo esc_attr($color); ?>;" title="<?php echo esc_attr($color); ?>"></span>
-                                </label>
-                            <?php endforeach; ?>
-                        </div>
+                    <div class="quantity-group">
+                        <h3>Quantity</h3>
+                        <input type="number" name="quantity" value="1" min="1" class="quantity-input">
                     </div>
 
-                    <div class="variation-group">
-                        <h3>Condition</h3>
-                        <div class="options-list">
-                            <?php foreach ($conditions as $condition) : ?>
-                                <label class="option-item">
-                                    <input type="radio" name="condition" value="<?php echo esc_attr($condition); ?>">
-                                    <span><?php echo esc_html($condition); ?></span>
-                                </label>
-                            <?php endforeach; ?>
-                        </div>
+                    <div class="cart-actions">
+                        <button type="submit" class="add-to-cart-button">Add to Cart</button>
                     </div>
+
+                    <?php if (isset($_GET['added-to-cart'])) : ?>
+                        <p class="success-message">Item added to cart!</p>
+                    <?php endif; ?>
 
                     <div class="variations-table-container">
                         <h3>Available Variations</h3>
@@ -170,6 +163,29 @@ $conditions = array_unique(array_column($variations, 'condition_name'));
     height: 32px;
     padding: 0;
     border-radius: 50%;
+}
+.variation-dropdown, .quantity-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+.add-to-cart-button {
+    width: 100%;
+    padding: 1rem;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+.success-message {
+    color: green;
+    margin-top: 1rem;
+    font-weight: bold;
 }
 .variations-table-container { margin-top: 2rem; }
 .variations-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
