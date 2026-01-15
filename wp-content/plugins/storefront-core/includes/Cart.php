@@ -23,26 +23,62 @@ class Cart {
             $_SESSION['storefront_cart'] = [];
         }
 
-        self::handle_add_to_cart();
+        self::handle_cart_actions();
     }
 
     /**
-     * Handle the add to cart POST request.
+     * Handle cart POST actions (add, update, remove).
      */
-    private static function handle_add_to_cart() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['storefront_add_to_cart'])) {
+    private static function handle_cart_actions() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
+        }
+
+        // Add to cart
+        if (isset($_POST['storefront_add_to_cart'])) {
             $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
             $variation_id = isset($_POST['variation_id']) ? intval($_POST['variation_id']) : 0;
             $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
 
             if ($product_id > 0 && $variation_id > 0 && $quantity > 0) {
                 self::add_item($product_id, $variation_id, $quantity);
-                
-                // Redirect to avoid form resubmission
                 wp_safe_redirect(add_query_arg('added-to-cart', $variation_id, wp_get_referer()));
                 exit;
             }
         }
+
+        // Update quantity
+        if (isset($_POST['update_cart']) && check_admin_referer('storefront_cart_action')) {
+            $quantities = isset($_POST['cart_qty']) ? $_POST['cart_qty'] : [];
+            foreach ($quantities as $variation_id => $qty) {
+                self::update_quantity(intval($variation_id), intval($qty));
+            }
+            wp_safe_redirect(home_url('/cart/?updated=1'));
+            exit;
+        }
+
+        // Remove item
+        if (isset($_POST['remove_item']) && check_admin_referer('storefront_cart_action')) {
+            $variation_id = intval($_POST['remove_item']);
+            self::remove_item($variation_id);
+            wp_safe_redirect(home_url('/cart/?removed=1'));
+            exit;
+        }
+    }
+
+    /**
+     * Update item quantity in cart.
+     */
+    public static function update_quantity($variation_id, $quantity) {
+        if (isset($_SESSION['storefront_cart'][$variation_id])) {
+            if ($quantity <= 0) {
+                self::remove_item($variation_id);
+            } else {
+                $_SESSION['storefront_cart'][$variation_id]['quantity'] = $quantity;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
