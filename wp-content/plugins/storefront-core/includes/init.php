@@ -13,9 +13,14 @@ if (!defined('ABSPATH')) {
 require_once __DIR__ . '/ProductRepository.php';
 require_once __DIR__ . '/Cart.php';
 require_once __DIR__ . '/OrderRepository.php';
+require_once __DIR__ . '/AdminOrdersPage.php';
 
 function init() {
     \StorefrontCore\Cart::init();
+    
+    if (is_admin()) {
+        \StorefrontCore\AdminOrdersPage::init();
+    }
 }
     // Initialization code here
 }

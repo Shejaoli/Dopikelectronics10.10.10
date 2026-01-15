@@ -42,4 +42,21 @@ class OrderRepository {
 
         return $order_id;
     }
+
+    /**
+     * Get all orders.
+     *
+     * @return array
+     */
+    public static function get_all_orders() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'storefront_orders';
+
+        $results = $wpdb->get_results(
+            "SELECT * FROM $table_name ORDER BY created_at DESC",
+            ARRAY_A
+        );
+
+        return $results ? $results : [];
+    }
 }
