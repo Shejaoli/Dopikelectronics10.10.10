@@ -59,7 +59,7 @@ const HomeHero = () => {
   const slides = [
     {
       isFirst: true,
-      title: "Certified Refurbished for You",
+      title: "Certified Electronic Shop",
       subtitle: "Premium quality, low price.",
       buttonText: "Shop Deals",
       buttonHref: "/deals",
