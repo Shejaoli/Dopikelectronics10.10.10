@@ -144,7 +144,7 @@ const HomeHero = () => {
                     <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                       {slide.title}
                     </h1>
-                    <p className="text-base opacity-90 max-w-lg hidden sm:block">
+                    <p className="text-base opacity-90 max-w-lg hidden sm:block text-[#b0d2ff]">
                       {slide.subtitle}
                     </p>
                     <Link href={slide.buttonHref}>
