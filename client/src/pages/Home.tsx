@@ -50,6 +50,13 @@ import banner1 from "@assets/stock_images/high_quality_banner__3cb20b92.jpg";
 import banner2 from "@assets/stock_images/high_quality_banner__880fc6d2.jpg";
 import banner3 from "@assets/stock_images/high_quality_banner__b1407c03.jpg";
 
+// Category Images
+import smartphonesCat from "@assets/generated_images/two_modern_smartphones_with_blue_circular_background_motif.png";
+import laptopsCat from "@assets/generated_images/sleek_laptop_with_blue_circular_background_motif.png";
+import tabletsCat from "@assets/generated_images/tablet_with_stylus_and_blue_circular_background_motif.png";
+import watchesCat from "@assets/generated_images/two_smartwatches_with_blue_circular_background_motif.png";
+import gamingCat from "@assets/generated_images/gaming_console_and_controller_with_blue_circular_background_motif.png";
+
 // Custom Assets for First Slide
 import controllerImg from "@assets/32497_1_1768720576552.png";
 import phoneImg from "@assets/Apple-iPhone-15-Pro-vs-Samsung-Galaxy-S23-Ultra-cameras_1768720576555.png";
@@ -216,11 +223,11 @@ const ContinueShopping = () => {
 };
 const PopularCategories = () => {
   const categories = [
-    { name: "Smartphones", icon: Smartphone, href: "/shop?category=Smartphones" },
-    { name: "Laptops", icon: Laptop, href: "/shop?category=Laptops" },
-    { name: "Tablets", icon: Tablet, href: "/shop?category=Tablets" },
-    { name: "Smartwatches", icon: Watch, href: "/shop?category=Smartwatches" },
-    { name: "Gaming", icon: Gamepad2, href: "/gaming" },
+    { name: "Smartphones", image: smartphonesCat, href: "/shop?category=Smartphones" },
+    { name: "Laptops", image: laptopsCat, href: "/shop?category=Laptops" },
+    { name: "Tablets", image: tabletsCat, href: "/shop?category=Tablets" },
+    { name: "Smartwatches", image: watchesCat, href: "/shop?category=Smartwatches" },
+    { name: "Gaming", image: gamingCat, href: "/gaming" },
     { name: "Audio", icon: Headphones, href: "/shop?category=Audio" },
     { name: "Accessories & Bundles", icon: Wrench, href: "/shop?category=Accessories" },
     { name: "Electronics", icon: Monitor, href: "/shop?category=Electronics" },
@@ -232,14 +239,24 @@ const PopularCategories = () => {
     <section className="py-12 bg-muted/30">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold mb-8">Popular Categories</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
           {categories.map((cat) => (
             <Link key={cat.name} href={cat.href}>
-              <div className="bg-background border border-border rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-center hover:shadow-md transition-all cursor-pointer group">
-                <div className="bg-primary/5 p-4 rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
-                  <cat.icon className="w-8 h-8" />
+              <div className="flex flex-col items-center justify-center gap-4 text-center cursor-pointer group">
+                <div className="relative w-32 h-32 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                  {cat.image ? (
+                    <img 
+                      src={cat.image} 
+                      alt={cat.name} 
+                      className="w-full h-full object-contain z-10" 
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-cyan-100/50 flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
+                      {cat.icon && <cat.icon className="w-10 h-10 text-primary" />}
+                    </div>
+                  )}
                 </div>
-                <span className="font-bold text-sm">{cat.name}</span>
+                <span className="font-bold text-sm tracking-tight">{cat.name}</span>
               </div>
             </Link>
           ))}
