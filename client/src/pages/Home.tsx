@@ -55,7 +55,7 @@ import smartphonesCat from "@assets/Phone_category_1768723350746.png";
 import laptopsCat from "@assets/Laptop_category_1768723909466.png";
 import tabletsCat from "@assets/tablet_category_1768724210189.png";
 import watchesCat from "@assets/smartwatches_category_1768746560605.png";
-import gamingCat from "@assets/generated_images/gaming_console_and_controller_with_blue_circular_background_motif.png";
+import gamingCat from "@assets/Gaming_category_1768746932352.png";
 
 // Custom Assets for First Slide
 import controllerImg from "@assets/32497_1_1768720576552.png";
