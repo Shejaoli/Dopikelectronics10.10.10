@@ -52,7 +52,7 @@ import banner3 from "@assets/stock_images/high_quality_banner__b1407c03.jpg";
 
 // Category Images
 import smartphonesCat from "@assets/Phone_category_1768723350746.png";
-import laptopsCat from "@assets/generated_images/sleek_laptop_with_blue_circular_background_motif.png";
+import laptopsCat from "@assets/Laptop_category_1768723909466.png";
 import tabletsCat from "@assets/generated_images/tablet_with_stylus_and_blue_circular_background_motif.png";
 import watchesCat from "@assets/generated_images/two_smartwatches_with_blue_circular_background_motif.png";
 import gamingCat from "@assets/generated_images/gaming_console_and_controller_with_blue_circular_background_motif.png";
