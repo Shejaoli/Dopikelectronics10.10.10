@@ -52,7 +52,6 @@ import banner3 from "@assets/stock_images/high_quality_banner__b1407c03.jpg";
 
 // Custom Assets for First Slide
 import controllerImg from "@assets/32497_1_1768720576552.png";
-import airpodsImg from "@assets/airpods-max-select-202409-blue_FV1_FMT_WHH_1768720576554.png";
 import phoneImg from "@assets/Apple-iPhone-15-Pro-vs-Samsung-Galaxy-S23-Ultra-cameras_1768720576555.png";
 import macbookImg from "@assets/apple-macbook-air-15in-m4_1768720576555.png";
 
@@ -132,11 +131,6 @@ const HomeHero = () => {
                         {slide.buttonText}
                       </Button>
                     </Link>
-                  </div>
-
-                  {/* AirPods - Right Side floating */}
-                  <div className="absolute right-[5%] lg:right-[10%] top-[10%] w-[20%] lg:w-[18%] z-10">
-                    <img src={airpodsImg} alt="AirPods" className="w-full h-auto object-contain animate-float" />
                   </div>
 
                   {/* Controller - Far Right Bottom/Side */}
