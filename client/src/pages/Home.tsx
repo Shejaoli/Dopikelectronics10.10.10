@@ -107,14 +107,19 @@ const HomeHero = () => {
           <SwiperSlide key={index}>
             <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${slide.bgColor} ${slide.textColor}`}>
               {slide.isFirst ? (
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full relative flex flex-col items-center justify-center text-center">
-                  {/* Game Controller - Top Center */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 lg:w-40 z-10">
-                    <img src={controllerImg} alt="Controller" className="w-full h-auto object-contain" />
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full relative flex items-center justify-center">
+                  {/* Macbook - Left Side */}
+                  <div className="absolute left-[-5%] lg:left-0 bottom-[-10%] lg:bottom-[-5%] w-[35%] lg:w-[30%] z-10 rotate-[-5deg]">
+                    <img src={macbookImg} alt="Macbook" className="w-full h-auto object-contain" />
+                  </div>
+
+                  {/* Phone - Bottom Center-ish but slightly left of center */}
+                  <div className="absolute left-[20%] lg:left-[25%] bottom-[-5%] w-[25%] lg:w-[22%] z-10">
+                    <img src={phoneImg} alt="Phones" className="w-full h-auto object-contain" />
                   </div>
                   
-                  {/* Content Container */}
-                  <div className="relative z-20 space-y-4 pt-4">
+                  {/* Content Container - Centered */}
+                  <div className="relative z-20 space-y-4 text-center px-4">
                     <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                       {slide.title}
                     </h1>
@@ -122,26 +127,21 @@ const HomeHero = () => {
                       {slide.subtitle}
                     </p>
                     
-                    {/* Phone Image - Center Bottom under words */}
-                    <div className="relative flex justify-center -mt-2">
-                       <img src={phoneImg} alt="Phones" className="max-h-[80px] lg:max-h-[100px] object-contain" />
-                    </div>
-
                     <Link href={slide.buttonHref}>
-                      <Button size="sm" className="rounded-full px-8 h-10 text-base font-bold">
+                      <Button size="sm" className="rounded-full px-8 h-10 text-base font-bold mt-2">
                         {slide.buttonText}
                       </Button>
                     </Link>
                   </div>
 
-                  {/* Macbook - Left Corner Bottom */}
-                  <div className="absolute bottom-0 left-0 w-48 lg:w-64 z-10">
-                    <img src={macbookImg} alt="Macbook" className="w-full h-auto object-contain translate-y-4" />
+                  {/* AirPods - Right Side floating */}
+                  <div className="absolute right-[5%] lg:right-[10%] top-[10%] w-[20%] lg:w-[18%] z-10">
+                    <img src={airpodsImg} alt="AirPods" className="w-full h-auto object-contain animate-float" />
                   </div>
 
-                  {/* AirPods - Floating beside words near right edge */}
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-32 lg:w-48 z-10">
-                    <img src={airpodsImg} alt="AirPods" className="w-full h-auto object-contain animate-float" />
+                  {/* Controller - Far Right Bottom/Side */}
+                  <div className="absolute right-[-10%] lg:right-[-5%] bottom-[-15%] w-[40%] lg:w-[35%] z-10 rotate-[10deg]">
+                    <img src={controllerImg} alt="Controller" className="w-full h-auto object-contain" />
                   </div>
                 </div>
               ) : (
