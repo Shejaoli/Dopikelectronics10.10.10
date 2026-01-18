@@ -50,14 +50,20 @@ import banner1 from "@assets/stock_images/high_quality_banner__3cb20b92.jpg";
 import banner2 from "@assets/stock_images/high_quality_banner__880fc6d2.jpg";
 import banner3 from "@assets/stock_images/high_quality_banner__b1407c03.jpg";
 
+// Custom Assets for First Slide
+import controllerImg from "@assets/32497_1_1768720576552.png";
+import airpodsImg from "@assets/airpods-max-select-202409-blue_FV1_FMT_WHH_1768720576554.png";
+import phoneImg from "@assets/Apple-iPhone-15-Pro-vs-Samsung-Galaxy-S23-Ultra-cameras_1768720576555.png";
+import macbookImg from "@assets/apple-macbook-air-15in-m4_1768720576555.png";
+
 const HomeHero = () => {
   const slides = [
     {
+      isFirst: true,
       title: "Certified Refurbished for You",
       subtitle: "Premium quality, low price.",
       buttonText: "Shop Deals",
       buttonHref: "/deals",
-      image: banner1,
       bgColor: "bg-cyan-100",
       textColor: "text-cyan-950",
     },
@@ -99,29 +105,69 @@ const HomeHero = () => {
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className={`w-full h-full flex items-center justify-center ${slide.bgColor} ${slide.textColor}`}>
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center w-full">
-                <div className="space-y-4">
-                  <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                    {slide.title}
-                  </h1>
-                  <p className="text-base opacity-90 max-w-lg hidden sm:block">
-                    {slide.subtitle}
-                  </p>
-                  <Link href={slide.buttonHref}>
-                    <Button size="sm" className="rounded-full px-8 h-10 text-base font-bold">
-                      {slide.buttonText}
-                    </Button>
-                  </Link>
+            <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${slide.bgColor} ${slide.textColor}`}>
+              {slide.isFirst ? (
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full relative flex flex-col items-center justify-center text-center">
+                  {/* Game Controller - Top Center */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 lg:w-40 z-10">
+                    <img src={controllerImg} alt="Controller" className="w-full h-auto object-contain" />
+                  </div>
+                  
+                  {/* Content Container */}
+                  <div className="relative z-20 space-y-4 pt-4">
+                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                      {slide.title}
+                    </h1>
+                    <p className="text-base opacity-90 max-w-lg mx-auto hidden sm:block">
+                      {slide.subtitle}
+                    </p>
+                    
+                    {/* Phone Image - Center Bottom under words */}
+                    <div className="relative flex justify-center -mt-2">
+                       <img src={phoneImg} alt="Phones" className="max-h-[80px] lg:max-h-[100px] object-contain" />
+                    </div>
+
+                    <Link href={slide.buttonHref}>
+                      <Button size="sm" className="rounded-full px-8 h-10 text-base font-bold">
+                        {slide.buttonText}
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* Macbook - Left Corner Bottom */}
+                  <div className="absolute bottom-0 left-0 w-48 lg:w-64 z-10">
+                    <img src={macbookImg} alt="Macbook" className="w-full h-auto object-contain translate-y-4" />
+                  </div>
+
+                  {/* AirPods - Floating beside words near right edge */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 w-32 lg:w-48 z-10">
+                    <img src={airpodsImg} alt="AirPods" className="w-full h-auto object-contain animate-float" />
+                  </div>
                 </div>
-                <div className="hidden lg:flex justify-end relative">
-                   <img 
-                    src={slide.image} 
-                    alt={slide.title} 
-                    className="max-h-[220px] lg:max-h-[280px] object-contain drop-shadow-2xl" 
-                  />
+              ) : (
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center w-full h-full">
+                  <div className="space-y-4">
+                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                      {slide.title}
+                    </h1>
+                    <p className="text-base opacity-90 max-w-lg hidden sm:block">
+                      {slide.subtitle}
+                    </p>
+                    <Link href={slide.buttonHref}>
+                      <Button size="sm" className="rounded-full px-8 h-10 text-base font-bold">
+                        {slide.buttonText}
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="hidden lg:flex justify-end relative">
+                    <img 
+                      src={slide.image} 
+                      alt={slide.title} 
+                      className="max-h-[220px] lg:max-h-[280px] object-contain drop-shadow-2xl" 
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </SwiperSlide>
         ))}
