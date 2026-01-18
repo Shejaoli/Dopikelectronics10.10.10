@@ -60,7 +60,7 @@ const HomeHero = () => {
     {
       isFirst: true,
       title: "Certified Electronic Shop",
-      subtitle: "Premium quality, low price.",
+      subtitle: "in Rwanda",
       buttonText: "Shop Deals",
       buttonHref: "/deals",
       bgColor: "bg-cyan-100",
