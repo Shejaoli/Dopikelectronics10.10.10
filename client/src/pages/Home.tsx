@@ -2,6 +2,14 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation } from "swiper/modules";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+
 import { 
   ArrowRight, 
   Star, 
@@ -21,6 +29,7 @@ import {
   Users,
   Timer
 } from "lucide-react";
+
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
@@ -35,55 +44,106 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-const heroImg = "/images/iphone-17-pro-max-1.png";
+
+// Import images
+import banner1 from "@assets/stock_images/high_quality_banner__3cb20b92.jpg";
+import banner2 from "@assets/stock_images/high_quality_banner__880fc6d2.jpg";
+import banner3 from "@assets/stock_images/high_quality_banner__b1407c03.jpg";
 
 const HomeHero = () => {
+  const slides = [
+    {
+      title: "Certified Refurbished for You",
+      subtitle: "Premium quality, low price.",
+      buttonText: "Shop Deals",
+      buttonHref: "/deals",
+      image: banner1,
+      bgColor: "bg-cyan-100",
+      textColor: "text-cyan-950",
+    },
+    {
+      title: "Refurbished iPads & Tablets",
+      subtitle: "On the go or on the fly.",
+      buttonText: "Shop Now",
+      buttonHref: "/shop?category=Tablets",
+      image: banner2,
+      bgColor: "bg-slate-950",
+      textColor: "text-white",
+    },
+    {
+      title: "Smartwatches for Everyone",
+      subtitle: "Stay connected, stay healthy.",
+      buttonText: "Explore More",
+      buttonHref: "/shop?category=Smartwatches",
+      image: banner3,
+      bgColor: "bg-blue-100",
+      textColor: "text-blue-950",
+    },
+  ];
+
   return (
-    <section className="relative bg-slate-950 text-white overflow-hidden py-16 lg:py-24">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-transparent"></div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
-          <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-8"
-          >
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-              Refurbished <br />
-              <span className="text-primary">iPads & Tablets</span>
-            </h1>
-            <p className="max-w-xl text-lg text-slate-300">
-              Premium performance, perfectly refurbished. Get the tech you love at up to 70% off.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/shop?category=Tablets">
-                <Button size="lg" className="px-10 h-14 text-lg font-bold">
-                  Shop Now
-                </Button>
-              </Link>
+    <section className="relative w-full overflow-hidden">
+      <Swiper
+        spaceBetween={0}
+        centeredSlides={true}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+        }}
+        pagination={{
+          clickable: true,
+        }}
+        navigation={true}
+        modules={[Autoplay, Pagination, Navigation]}
+        className="h-[400px] lg:h-[500px]"
+      >
+        {slides.map((slide, index) => (
+          <SwiperSlide key={index}>
+            <div className={`w-full h-full flex items-center justify-center ${slide.bgColor} ${slide.textColor}`}>
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center w-full">
+                <div className="space-y-6">
+                  <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                    {slide.title}
+                  </h1>
+                  <p className="text-lg opacity-90 max-w-lg">
+                    {slide.subtitle}
+                  </p>
+                  <Link href={slide.buttonHref}>
+                    <Button size="lg" className="rounded-full px-10 h-14 text-lg font-bold">
+                      {slide.buttonText}
+                    </Button>
+                  </Link>
+                </div>
+                <div className="hidden lg:flex justify-end relative">
+                   <img 
+                    src={slide.image} 
+                    alt={slide.title} 
+                    className="max-h-[350px] lg:max-h-[450px] object-contain drop-shadow-2xl" 
+                  />
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-white/10">
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
-                <ShieldCheck className="w-5 h-5 text-primary" /> 1Y Warranty
-              </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
-                <Truck className="w-5 h-5 text-primary" /> Fast Delivery
-              </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
-                <RotateCcw className="w-5 h-5 text-primary" /> 30D Returns
-              </div>
-              <div className="flex items-center gap-2 text-sm font-medium text-slate-400">
-                <Star className="w-5 h-5 text-primary" /> 4.8 Rating
-              </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+      
+      {/* Features Bar */}
+      <div className="bg-white border-b py-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-medium text-slate-500">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-primary" /> 12-Month Warranty
             </div>
-          </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="relative hidden lg:block"
-          >
-            <img src={heroImg} alt="Featured Product" className="w-full h-auto drop-shadow-2xl animate-float" />
-          </motion.div>
+            <div className="flex items-center gap-2">
+              <Truck className="w-5 h-5 text-primary" /> Free Delivery
+            </div>
+            <div className="flex items-center gap-2">
+              <RotateCcw className="w-5 h-5 text-primary" /> 30-Day Trial
+            </div>
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-primary" /> 4.7 out of 5 Trustpilot
+            </div>
+          </div>
         </div>
       </div>
     </section>
