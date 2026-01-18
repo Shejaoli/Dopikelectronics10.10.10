@@ -141,7 +141,7 @@ const HomeHero = () => {
               ) : (
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center w-full h-full text-[#010033]">
                   <div className="space-y-4">
-                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-[#9cbbe5]">
                       {slide.title}
                     </h1>
                     <p className="text-base opacity-90 max-w-lg hidden sm:block text-[#b0d2ff]">
