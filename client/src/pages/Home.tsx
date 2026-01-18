@@ -51,7 +51,7 @@ import banner2 from "@assets/stock_images/high_quality_banner__880fc6d2.jpg";
 import banner3 from "@assets/stock_images/high_quality_banner__b1407c03.jpg";
 
 // Category Images
-import smartphonesCat from "@assets/generated_images/two_modern_smartphones_with_blue_circular_background_motif.png";
+import smartphonesCat from "@assets/Phone_category_1768723350746.png";
 import laptopsCat from "@assets/generated_images/sleek_laptop_with_blue_circular_background_motif.png";
 import tabletsCat from "@assets/generated_images/tablet_with_stylus_and_blue_circular_background_motif.png";
 import watchesCat from "@assets/generated_images/two_smartwatches_with_blue_circular_background_motif.png";
