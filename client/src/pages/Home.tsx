@@ -95,21 +95,21 @@ const HomeHero = () => {
         }}
         navigation={true}
         modules={[Autoplay, Pagination, Navigation]}
-        className="h-[400px] lg:h-[500px]"
+        className="h-[250px] lg:h-[300px]"
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
             <div className={`w-full h-full flex items-center justify-center ${slide.bgColor} ${slide.textColor}`}>
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center w-full">
-                <div className="space-y-6">
-                  <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center w-full">
+                <div className="space-y-4">
+                  <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                     {slide.title}
                   </h1>
-                  <p className="text-lg opacity-90 max-w-lg">
+                  <p className="text-base opacity-90 max-w-lg hidden sm:block">
                     {slide.subtitle}
                   </p>
                   <Link href={slide.buttonHref}>
-                    <Button size="lg" className="rounded-full px-10 h-14 text-lg font-bold">
+                    <Button size="sm" className="rounded-full px-8 h-10 text-base font-bold">
                       {slide.buttonText}
                     </Button>
                   </Link>
@@ -118,7 +118,7 @@ const HomeHero = () => {
                    <img 
                     src={slide.image} 
                     alt={slide.title} 
-                    className="max-h-[350px] lg:max-h-[450px] object-contain drop-shadow-2xl" 
+                    className="max-h-[220px] lg:max-h-[280px] object-contain drop-shadow-2xl" 
                   />
                 </div>
               </div>
