@@ -190,7 +190,7 @@ const HomeHero = () => {
               <RotateCcw className="w-5 h-5 text-primary" /> 30-Day Trial
             </div>
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-primary" /> 4.7 out of 5 Trustpilot
+              <Star className="w-5 h-5 text-primary" /> 4.7 Customer Reviews
             </div>
           </div>
         </div>
