@@ -57,6 +57,7 @@ import tabletsCat from "@assets/tablet_category_1768724210189.png";
 import watchesCat from "@assets/smartwatches_category_1768746560605.png";
 import gamingCat from "@assets/Gaming_category_1768746932352.png";
 import audioCat from "@assets/Audio_category_1768748035466.png";
+import accessoriesCat from "@assets/Accessoirs_category_1768748494801.png";
 
 // Custom Assets for First Slide
 import controllerImg from "@assets/32497_1_1768720576552.png";
@@ -230,7 +231,7 @@ const PopularCategories = () => {
     { name: "Smartwatches", image: watchesCat, href: "/shop?category=Smartwatches" },
     { name: "Gaming", image: gamingCat, href: "/gaming" },
     { name: "Audio", image: audioCat, href: "/shop?category=Audio" },
-    { name: "Accessories & Bundles", icon: Wrench, href: "/shop?category=Accessories" },
+    { name: "Accessories & Bundles", image: accessoriesCat, href: "/shop?category=Accessories" },
     { name: "Electronics", icon: Monitor, href: "/shop?category=Electronics" },
     { name: "Vacuum Cleaners", icon: Trash2, href: "/shop?category=Vacuums" },
     { name: "Home & Kitchen", icon: Tv, href: "/home-kitchen" },
