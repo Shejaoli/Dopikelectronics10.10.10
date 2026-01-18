@@ -139,7 +139,7 @@ const HomeHero = () => {
                   </div>
                 </div>
               ) : (
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center w-full h-full">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center w-full h-full text-[#9294d7]">
                   <div className="space-y-4">
                     <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                       {slide.title}
@@ -166,7 +166,6 @@ const HomeHero = () => {
           </SwiperSlide>
         ))}
       </Swiper>
-      
       {/* Features Bar */}
       <div className="bg-white border-b py-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
