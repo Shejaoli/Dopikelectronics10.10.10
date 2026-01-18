@@ -96,3 +96,31 @@
     @apply bg-card/60 backdrop-blur-md border border-white/5 shadow-xl;
   }
 }
+
+/* Swiper Navigation Customization */
+.swiper-button-next,
+.swiper-button-prev {
+  width: 32px !important;
+  height: 32px !important;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  color: hsl(var(--primary)) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+  font-size: 14px !important;
+  font-weight: 800;
+}
+
+.swiper-pagination-bullet-active {
+  background: hsl(var(--primary)) !important;
+}
