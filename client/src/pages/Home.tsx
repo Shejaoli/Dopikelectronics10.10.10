@@ -234,8 +234,6 @@ const PopularCategories = () => {
     { name: "Audio", image: audioCat, href: "/shop?category=Audio" },
     { name: "Accessories & Bundles", image: accessoriesCat, href: "/shop?category=Accessories" },
     { name: "Electronics", image: electronicsCat, href: "/shop?category=Electronics" },
-    { name: "Vacuum Cleaners", icon: Trash2, href: "/shop?category=Vacuums" },
-    { name: "Home & Kitchen", icon: Tv, href: "/home-kitchen" },
   ];
 
   return (
