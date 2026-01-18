@@ -76,6 +76,7 @@
     "recharts": "^2.15.2",
     "scrypt-ts": "^1.4.5",
     "stripe": "^20.1.2",
+    "swiper": "^12.0.3",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "tw-animate-css": "^1.2.5",
