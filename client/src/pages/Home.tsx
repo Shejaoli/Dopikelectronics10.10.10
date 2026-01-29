@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 
@@ -27,7 +27,9 @@ import {
   Trash2,
   Tv,
   Users,
-  Timer
+  Timer,
+  Volume2,
+  VolumeX
 } from "lucide-react";
 
 import { Navbar } from "@/components/Navbar";
@@ -471,11 +473,44 @@ const GamingPreview = () => {
   );
 };
 const CircularEconomy = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          videoRef.current?.play().catch(error => {
+            console.log("Autoplay blocked:", error);
+          });
+        } else {
+          videoRef.current?.pause();
+        }
+      });
+    }, options);
+
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+
+    return () => {
+      if (videoRef.current) {
+        observer.unobserve(videoRef.current);
+      }
+    };
+  }, []);
+
   return (
     <section className="py-16 bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row gap-12 items-center">
-          <div className="md:w-1/2 space-y-6">
+          <div className="md:w-7/12 lg:w-8/12 space-y-6">
             <h2 className="text-3xl md:text-5xl font-bold">Join the Circular Economy</h2>
             <p className="text-lg text-slate-300 leading-relaxed">
               By choosing refurbished, you're not just saving money—you're saving the planet. 
@@ -491,15 +526,30 @@ const CircularEconomy = () => {
           <div className="md:w-5/12 lg:w-4/12 flex justify-center">
             <div className="relative group w-full max-w-[280px]">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary to-cyan-400 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+              <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">
                 <video 
+                  ref={videoRef}
                   src="/videos/economy.mp4" 
-                  controls 
-                  className="w-full aspect-[4/5] object-cover block"
+                  loop
+                  muted={isMuted}
+                  playsInline
+                  className="w-full h-full object-cover block"
                   poster="/assets/stock_images/high_quality_banner__3cb20b92.jpg"
                 >
                   Your browser does not support the video tag.
                 </video>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
+                  onClick={() => setIsMuted(!isMuted)}
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-5 h-5" />
+                  ) : (
+                    <Volume2 className="w-5 h-5" />
+                  )}
+                </Button>
               </div>
             </div>
           </div>
