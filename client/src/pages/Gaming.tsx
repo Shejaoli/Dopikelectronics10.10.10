@@ -234,7 +234,7 @@ export default function Gaming() {
               </div>
             </div>
             <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 text-center md:text-right">
-              <p className="text-sm font-medium text-slate-400 mb-1">Excellent on Trustpilot</p>
+              <p className="text-sm font-medium text-slate-400 mb-1">Excellent on Google</p>
               <div className="flex items-center justify-center md:justify-end gap-1 mb-1">
                 {[1, 2, 3, 4, 5].map(i => (
                   <div key={i} className="bg-green-500 p-0.5 rounded-sm">
@@ -242,7 +242,7 @@ export default function Gaming() {
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-slate-500 font-medium tracking-wider">TRUSTPILOT</p>
+              <p className="text-xs text-slate-500 font-medium tracking-wider">GOOGLE REVIEWS</p>
             </div>
           </div>
         </div>
@@ -365,7 +365,7 @@ export default function Gaming() {
                       <div className="bg-green-500 p-0.5 rounded-sm">
                         <Star className="w-3 h-3 fill-white text-white" />
                       </div>
-                      <span className="font-bold text-sm">Trustpilot</span>
+                      <span className="font-bold text-sm">Google Reviews</span>
                     </div>
                   </div>
                 </div>

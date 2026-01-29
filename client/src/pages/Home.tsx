@@ -190,7 +190,7 @@ const HomeHero = () => {
               <RotateCcw className="w-5 h-5 text-primary" /> 30-Day Trial
             </div>
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-primary" /> 4.7 Customer Reviews
+              <Star className="w-5 h-5 text-primary" /> 4.7 Google Reviews
             </div>
           </div>
         </div>
@@ -383,7 +383,7 @@ const TrustBanner = () => {
               <div className="bg-green-500 p-0.5 rounded-sm">
                 <Star className="w-3 h-3 fill-white text-white" />
               </div>
-              <span className="font-bold text-teal-900 dark:text-white">Trustpilot</span>
+              <span className="font-bold text-teal-900 dark:text-white">Google Reviews</span>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">

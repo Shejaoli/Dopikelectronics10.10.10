@@ -184,14 +184,14 @@ export default function Laptops() {
             </div>
             <div className="flex items-center gap-3 rounded-xl bg-white/5 p-4 border border-white/10">
               <div className="text-right">
-                <div className="text-sm font-bold">Excellent on Trustpilot</div>
+                <div className="text-sm font-bold">Excellent on Google</div>
                 <div className="flex justify-end gap-0.5 mt-1">
                   {[1, 2, 3, 4, 5].map(i => (
                     <Star key={i} className="h-3 w-3 fill-green-500 text-green-500" />
                   ))}
                 </div>
               </div>
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Trustpilot_Logo_%282022%29.svg/1200px-Trustpilot_Logo_%282022%29.svg.png" alt="Trustpilot" className="h-6 opacity-80" />
+              <span className="font-bold text-white/80">Google Reviews</span>
             </div>
           </div>
         </div>
