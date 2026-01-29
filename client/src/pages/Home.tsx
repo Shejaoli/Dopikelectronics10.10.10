@@ -488,21 +488,17 @@ const CircularEconomy = () => {
               </Button>
             </Link>
           </div>
-          <div className="md:w-1/2 grid grid-cols-2 gap-4">
-            <div className="col-span-2 aspect-video bg-slate-900 rounded-2xl border border-white/5 overflow-hidden">
+          <div className="md:w-1/2">
+            <div className="w-full rounded-2xl border border-white/5 overflow-hidden bg-slate-900 shadow-2xl">
               <video 
                 src="/videos/economy.mp4" 
                 controls 
-                className="w-full h-full object-cover"
+                className="w-full h-auto block"
                 poster="/assets/stock_images/high_quality_banner__3cb20b92.jpg"
               >
                 Your browser does not support the video tag.
               </video>
             </div>
-            <div className="aspect-video bg-slate-900 rounded-2xl border border-white/5 flex items-center justify-center">
-              <div className="bg-primary p-4 rounded-full"><ArrowRight className="w-6 h-6" /></div>
-            </div>
-            <div className="aspect-video bg-slate-900 rounded-2xl border border-white/5"></div>
           </div>
         </div>
       </div>
