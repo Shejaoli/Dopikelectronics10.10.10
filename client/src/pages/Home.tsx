@@ -489,13 +489,13 @@ const CircularEconomy = () => {
             </Link>
           </div>
           <div className="md:w-5/12 lg:w-4/12 flex justify-center">
-            <div className="relative group w-full max-w-[320px]">
+            <div className="relative group w-full max-w-[280px]">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary to-cyan-400 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
               <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
                 <video 
                   src="/videos/economy.mp4" 
                   controls 
-                  className="w-full aspect-[9/16] object-cover block"
+                  className="w-full aspect-[4/5] object-cover block"
                   poster="/assets/stock_images/high_quality_banner__3cb20b92.jpg"
                 >
                   Your browser does not support the video tag.
