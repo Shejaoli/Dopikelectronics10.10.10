@@ -473,8 +473,10 @@ const GamingPreview = () => {
   );
 };
 const CircularEconomy = () => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef1 = useRef<HTMLVideoElement>(null);
+  const videoRef2 = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
+  const [activeVideo, setActiveVideo] = useState(1);
 
   useEffect(() => {
     const options = {
@@ -486,31 +488,48 @@ const CircularEconomy = () => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          videoRef.current?.play().catch(error => {
-            console.log("Autoplay blocked:", error);
-          });
+          if (activeVideo === 1) {
+            videoRef1.current?.play().catch(() => {});
+          } else {
+            videoRef2.current?.play().catch(() => {});
+          }
         } else {
-          videoRef.current?.pause();
+          videoRef1.current?.pause();
+          videoRef2.current?.pause();
         }
       });
     }, options);
 
-    if (videoRef.current) {
-      observer.observe(videoRef.current);
+    const currentRef = activeVideo === 1 ? videoRef1.current : videoRef2.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (videoRef.current) {
-        observer.unobserve(videoRef.current);
-      }
+      if (videoRef1.current) observer.unobserve(videoRef1.current);
+      if (videoRef2.current) observer.unobserve(videoRef2.current);
     };
-  }, []);
+  }, [activeVideo]);
+
+  const handleVideo1End = () => {
+    setActiveVideo(2);
+    setTimeout(() => {
+      videoRef2.current?.play().catch(() => {});
+    }, 100);
+  };
+
+  const handleVideo2End = () => {
+    setActiveVideo(1);
+    setTimeout(() => {
+      videoRef1.current?.play().catch(() => {});
+    }, 100);
+  };
 
   return (
     <section className="py-16 bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row gap-12 items-center">
-          <div className="md:w-7/12 lg:w-8/12 space-y-6">
+          <div className="md:w-6/12 lg:w-7/12 space-y-6">
             <h2 className="text-3xl md:text-5xl font-bold">Join the Circular Economy</h2>
             <p className="text-lg text-slate-300 leading-relaxed">
               By choosing refurbished, you're not just saving money—you're saving the planet. 
@@ -523,33 +542,72 @@ const CircularEconomy = () => {
               </Button>
             </Link>
           </div>
-          <div className="md:w-5/12 lg:w-4/12 flex justify-center">
-            <div className="relative group w-full max-w-[280px]">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-cyan-400 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div className="md:w-6/12 lg:w-5/12 flex justify-center gap-4">
+            {/* Video 1 */}
+            <div className={`relative group w-full max-w-[240px] transition-all duration-500 ${activeVideo === 1 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
+              <div className={`absolute -inset-1 bg-gradient-to-r from-primary to-cyan-400 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 ${activeVideo === 1 ? 'opacity-40' : 'opacity-0'}`}></div>
               <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">
                 <video 
-                  ref={videoRef}
+                  ref={videoRef1}
                   src="/videos/economy.mp4" 
-                  loop
                   muted={isMuted}
                   playsInline
-                  className="w-full h-full object-cover block"
-                  poster="/assets/stock_images/high_quality_banner__3cb20b92.jpg"
+                  onEnded={handleVideo1End}
+                  className="w-full h-full object-cover block cursor-pointer"
+                  onClick={() => {
+                    setActiveVideo(1);
+                    videoRef1.current?.play();
+                  }}
                 >
                   Your browser does not support the video tag.
                 </video>
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
-                  onClick={() => setIsMuted(!isMuted)}
+                {activeVideo === 1 && (
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMuted(!isMuted);
+                    }}
+                  >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Video 2 */}
+            <div className={`relative group w-full max-w-[240px] transition-all duration-500 ${activeVideo === 2 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
+              <div className={`absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 ${activeVideo === 2 ? 'opacity-40' : 'opacity-0'}`}></div>
+              <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">
+                <video 
+                  ref={videoRef2}
+                  src="/videos/iphone17.mp4" 
+                  muted={isMuted}
+                  playsInline
+                  onEnded={handleVideo2End}
+                  className="w-full h-full object-cover block cursor-pointer"
+                  onClick={() => {
+                    setActiveVideo(2);
+                    videoRef2.current?.play();
+                  }}
                 >
-                  {isMuted ? (
-                    <VolumeX className="w-5 h-5" />
-                  ) : (
-                    <Volume2 className="w-5 h-5" />
-                  )}
-                </Button>
+                  Your browser does not support the video tag.
+                </video>
+                {activeVideo === 2 && (activeVideo === 2) && (
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMuted(!isMuted);
+                    }}
+                  >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
