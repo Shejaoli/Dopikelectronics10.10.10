@@ -163,7 +163,7 @@ function AdminVideoList() {
                         size="icon" 
                         className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                         onClick={() => {
-                          if (confirm("Are you sure you want to delete this video? This action cannot be undone.")) {
+                          if (confirm("⚠️ SECURITY ALERT: Are you sure you want to permanently DELETE this video? This action will remove it from the Circular Economy section and cannot be undone.")) {
                             deleteMutation.mutate(video.id);
                           }
                         }}
@@ -415,6 +415,16 @@ export default function AdminDashboard() {
                               const allowedTypes = ["video/mp4", "video/webm"];
                               if (!allowedTypes.includes(file.type)) {
                                 toast({ variant: "destructive", title: "Unsupported format", description: "Please upload MP4 or WebM videos." });
+                                return;
+                              }
+
+                              const maxSize = 50 * 1024 * 1024; // 50MB
+                              if (file.size > maxSize) {
+                                toast({ 
+                                  variant: "destructive", 
+                                  title: "File too large", 
+                                  description: "Maximum video size is 50MB. Please optimize your video before uploading." 
+                                });
                                 return;
                               }
 

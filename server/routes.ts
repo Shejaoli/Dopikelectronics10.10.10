@@ -128,6 +128,7 @@ export async function registerRoutes(
       }
       
       try {
+        const admin = await storage.getAdminById(req.session.adminId!);
         const videoUrl = `/uploads/videos/${req.file.filename}`;
         const videoData = insertVideoSchema.parse({
           title: req.body.title || req.file.originalname,
@@ -137,6 +138,16 @@ export async function registerRoutes(
         });
         
         const video = await storage.createVideo(videoData);
+        
+        // Log video upload
+        await storage.createAuditLog({
+          action: `Video Uploaded: ${video.title}`,
+          adminEmail: admin?.email || "unknown",
+          actionType: "upload",
+          targetType: "Video",
+          targetId: video.id
+        }).catch(err => console.error("Audit log failed:", err));
+
         res.status(201).json(video);
       } catch (error) {
         res.status(400).json({ message: error instanceof Error ? error.message : "Invalid video data" });
@@ -151,7 +162,25 @@ export async function registerRoutes(
 
   app.delete("/api/admin/videos/:id", requireAdminAuth, async (req, res) => {
     try {
-      await storage.deleteVideo(Number(req.params.id));
+      const id = Number(req.params.id);
+      const video = await db.select().from(videos).where(eq(videos.id, id)).then(res => res[0]);
+      
+      if (!video) {
+        return res.status(404).json({ message: "Video not found" });
+      }
+
+      await storage.deleteVideo(id);
+      const admin = await storage.getAdminById(req.session.adminId!);
+      
+      // Log video deletion
+      await storage.createAuditLog({
+        action: `Video Deleted: ${video.title}`,
+        adminEmail: admin?.email || "unknown",
+        actionType: "delete",
+        targetType: "Video",
+        targetId: id
+      }).catch(err => console.error("Audit log failed:", err));
+
       res.sendStatus(200);
     } catch (error) {
       res.status(500).json({ message: "Failed to delete video" });
