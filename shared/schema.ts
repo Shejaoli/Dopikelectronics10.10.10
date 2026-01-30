@@ -60,6 +60,7 @@ export const videos = pgTable("videos", {
   title: text("title").notNull(),
   url: text("url").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  isFeatured: boolean("is_featured").default(false).notNull(),
   order: integer("order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

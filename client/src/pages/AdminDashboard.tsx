@@ -37,7 +37,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { Recycle, Trash2 as TrashIcon, CheckCircle2, Circle } from "lucide-react";
+import { Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star } from "lucide-react";
 
 function AdminVideoList() {
   const { data: videos, isLoading } = useQuery<any[]>({
@@ -56,12 +56,12 @@ function AdminVideoList() {
   });
 
   const toggleMutation = useMutation({
-    mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
-      await apiRequest("PATCH", `/api/admin/videos/${id}`, { isActive });
+    mutationFn: async ({ id, isActive, isFeatured }: { id: number; isActive?: boolean; isFeatured?: boolean }) => {
+      await apiRequest("PATCH", `/api/admin/videos/${id}`, { isActive, isFeatured });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
-      toast({ title: "Status updated" });
+      toast({ title: "Updated successfully" });
     }
   });
 
@@ -90,6 +90,7 @@ function AdminVideoList() {
               <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Preview</th>
               <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Filename</th>
               <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Status</th>
+              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Featured</th>
               <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Uploaded</th>
               <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground text-right">Actions</th>
             </tr>
@@ -115,6 +116,17 @@ function AdminVideoList() {
                       {video.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </div>
+                </td>
+                <td className="px-4 py-3">
+                   <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-7 px-2 gap-1.5 transition-all ${video.isFeatured ? "text-yellow-500 bg-yellow-500/10" : "text-muted-foreground"}`}
+                    onClick={() => toggleMutation.mutate({ id: video.id, isFeatured: !video.isFeatured })}
+                  >
+                    <Star className={`h-3.5 w-3.5 ${video.isFeatured ? "fill-yellow-500" : ""}`} />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">{video.isFeatured ? 'Featured' : 'Standard'}</span>
+                  </Button>
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">
                   {new Date(video.createdAt).toLocaleDateString()}

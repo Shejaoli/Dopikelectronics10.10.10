@@ -481,15 +481,21 @@ export const CircularEconomy = () => {
   });
 
   const activeDbVideos = dbVideos?.filter(v => v.isActive) || [];
+  
+  // Prioritize featured videos if they exist
+  const featuredVideos = activeDbVideos.filter(v => v.isFeatured);
+  const displayVideos = featuredVideos.length >= 2 
+    ? featuredVideos 
+    : [...featuredVideos, ...activeDbVideos.filter(v => !v.isFeatured)].slice(0, 2);
 
   const videoRef1 = useRef<HTMLVideoElement>(null);
   const videoRef2 = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [activeVideo, setActiveVideo] = useState(1);
 
-  // Use DB videos if available, fallback to defaults
-  const video1Url = activeDbVideos?.[0]?.url || "/videos/economy.mp4";
-  const video2Url = activeDbVideos?.[1]?.url || "/videos/iphone17.mp4";
+  // Use display videos if available, fallback to defaults
+  const video1Url = displayVideos?.[0]?.url || "/videos/economy.mp4";
+  const video2Url = displayVideos?.[1]?.url || "/videos/iphone17.mp4";
 
   useEffect(() => {
     const options = {
@@ -522,10 +528,10 @@ export const CircularEconomy = () => {
       if (videoRef1.current) observer.unobserve(videoRef1.current);
       if (videoRef2.current) observer.unobserve(videoRef2.current);
     };
-  }, [activeVideo, activeDbVideos]);
+  }, [activeVideo, displayVideos]);
 
   const handleVideo1End = () => {
-    if (activeDbVideos && activeDbVideos.length > 1) {
+    if (displayVideos && displayVideos.length > 1) {
       setActiveVideo(2);
       setTimeout(() => {
         videoRef2.current?.play().catch(() => {});
