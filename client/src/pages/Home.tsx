@@ -674,11 +674,7 @@ export const CircularEconomy = () => {
         <div className="flex flex-col md:flex-row gap-12 items-center">
           <div className="md:w-6/12 lg:w-7/12 space-y-6">
             <h2 className="text-3xl md:text-5xl font-bold">Join the Circular Economy</h2>
-            <p className="text-lg text-slate-300 leading-relaxed">
-              By choosing refurbished, you're not just saving money—you're saving the planet. 
-              Every device refurbished is one less device in a landfill. Learn how your purchase 
-              reduces e-waste and CO₂ emissions.
-            </p>
+            <p className="text-lg text-slate-300 leading-relaxed">.</p>
             <Link href="/about">
               <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 h-14 px-8 font-bold">
                 Learn More
