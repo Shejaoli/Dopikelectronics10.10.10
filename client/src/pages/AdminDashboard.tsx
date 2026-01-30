@@ -39,7 +39,6 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw } from "lucide-react";
 
 function AdminVideoList() {
   const { data: videos, isLoading } = useQuery<any[]>({
