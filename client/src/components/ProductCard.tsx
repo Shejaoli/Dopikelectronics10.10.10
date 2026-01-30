@@ -74,7 +74,7 @@ export function ProductCard({ product, isDeal }: ProductCardProps) {
         <div className="mt-auto flex items-center justify-between gap-2">
           <div className="flex flex-col">
             {isDeal && (
-              <span className="text-[10px] font-medium text-muted-foreground line-through decoration-primary/50">{(product.price * 1.4).toLocaleString()} RWF</span>
+              <span className="text-[10px] font-medium text-muted-foreground/60 line-through decoration-primary/50">{(product.price * 1.4).toLocaleString()} RWF</span>
             )}
             <div className="text-lg font-bold tracking-tight text-foreground">
               {formatPrice(product.price)}

@@ -169,27 +169,21 @@ export function Navbar() {
           </div>
 
           {/* Right - Location & Icons */}
-          <div className="flex w-auto items-center gap-6">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5" />
-              <span>Deliver to: Kigali, Rwanda</span>
-            </div>
-            <div className="flex items-center gap-4 border-l border-border pl-6">
-              <Link href="/contact" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary">
+                  <div className="flex items-center gap-4 border-l border-border pl-6">
+              <Link href="/contact" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80 hover:text-primary">
                 <HelpCircle className="h-4 w-4" />
                 <span className="hidden xl:inline">Help</span>
               </Link>
-              <Link href="/about" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary">
+              <Link href="/about" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80 hover:text-primary">
                 <Info className="h-4 w-4" />
                 <span className="hidden xl:inline">About</span>
               </Link>
-              <Link href="/admin/login" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary">
+              <Link href="/admin/login" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80 hover:text-primary">
                 <User className="h-4 w-4" />
                 <span className="hidden xl:inline">Sign In</span>
               </Link>
               <CartDrawer />
             </div>
-          </div>
         </div>
       </div>
 
@@ -225,7 +219,7 @@ export function Navbar() {
                   <Link key={link.name} href={link.href}>
                     <span 
                       className={`cursor-pointer text-sm font-semibold transition-all hover:text-primary active:scale-95 whitespace-nowrap ${
-                        isActive(link.href) ? "text-primary" : "text-muted-foreground"
+                        isActive(link.href) ? "text-primary" : "text-muted-foreground/80"
                       }`}
                     >
                       {link.name}

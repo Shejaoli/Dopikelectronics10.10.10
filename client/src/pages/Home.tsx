@@ -132,10 +132,10 @@ const HomeHero = () => {
                   
                   {/* Content Container - Centered */}
                   <div className="relative z-20 space-y-4 text-center px-4">
-                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+                    <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
                       {slide.title}
                     </h1>
-                    <p className="text-base opacity-90 max-w-lg mx-auto hidden sm:block">
+                    <p className="text-base text-muted-foreground/80 max-w-lg mx-auto hidden sm:block">
                       {slide.subtitle}
                     </p>
                     
@@ -154,10 +154,10 @@ const HomeHero = () => {
               ) : (
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center w-full h-full text-[#010033]">
                   <div className="space-y-4">
-                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-[#9cbbe5]">
+                    <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl text-[#9cbbe5]">
                       {slide.title}
                     </h1>
-                    <p className="text-base opacity-90 max-w-lg hidden sm:block text-[#b0d2ff]">
+                    <p className="text-base text-muted-foreground/80 max-w-lg hidden sm:block text-[#b0d2ff]">
                       {slide.subtitle}
                     </p>
                     <Link href={slide.buttonHref}>
@@ -182,18 +182,18 @@ const HomeHero = () => {
       {/* Features Bar */}
       <div className="bg-white border-b py-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-medium text-slate-500">
+          <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-medium text-muted-foreground/70">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-primary" /> 12-Month Warranty
+              <ShieldCheck className="w-5 h-5 text-primary/70" /> 12-Month Warranty
             </div>
             <div className="flex items-center gap-2">
-              <Truck className="w-5 h-5 text-primary" /> Free Delivery
+              <Truck className="w-5 h-5 text-primary/70" /> Free Delivery
             </div>
             <div className="flex items-center gap-2">
-              <RotateCcw className="w-5 h-5 text-primary" /> 30-Day Trial
+              <RotateCcw className="w-5 h-5 text-primary/70" /> 30-Day Trial
             </div>
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-primary" /> 4.7 Google Reviews
+              <Star className="w-5 h-5 text-primary/70" /> 4.7 Google Reviews
             </div>
           </div>
         </div>
@@ -240,7 +240,7 @@ const PopularCategories = () => {
   ];
 
   return (
-    <section className="py-12 bg-muted/30">
+    <section className="py-12 bg-muted/10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold mb-8">Popular Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
@@ -255,16 +255,16 @@ const PopularCategories = () => {
                       className="w-full h-full object-contain z-10" 
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-cyan-100/50 flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
+                    <div className="w-full h-full rounded-full bg-cyan-100/30 flex items-center justify-center group-hover:bg-cyan-100/50 transition-colors">
                       {(cat as any).icon && (
-                        <div className="w-10 h-10 text-primary">
+                        <div className="w-10 h-10 text-primary/70">
                           {(cat as any).icon}
                         </div>
                       )}
                     </div>
                   )}
                 </div>
-                <span className="font-bold text-sm tracking-tight">{cat.name}</span>
+                <span className="font-bold text-sm tracking-tight text-muted-foreground group-hover:text-foreground transition-colors">{cat.name}</span>
               </div>
             </Link>
           ))}
@@ -592,7 +592,7 @@ export const CircularEconomy = () => {
                 {activeVideo === 1 && (
                   <Button
                     size="icon"
-                    variant="secondary"
+                    variant="ghost"
                     className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -628,7 +628,7 @@ export const CircularEconomy = () => {
                   {activeVideo === 2 && (
                     <Button
                       size="icon"
-                      variant="secondary"
+                      variant="ghost"
                       className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -711,11 +711,11 @@ export default function Home() {
       <WhatsAppFloat />
 
       <HomeHero />
-      <ContinueShopping />
       <PopularCategories />
       <CustomerFavorites />
-      <TopDeals />
       <TrustBanner />
+      <TopDeals />
+      <ContinueShopping />
       <HomeProducts />
       <GamingPreview />
       <CircularEconomy />

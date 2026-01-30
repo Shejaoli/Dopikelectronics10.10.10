@@ -12,7 +12,7 @@ export function Footer() {
             <h3 className="text-2xl font-bold text-foreground">
               DOPIK <span className="text-primary">ELECTRONICS</span>
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground/80">
               Where Gadgets Meet Great Deals. Your premium destination for the latest electronics in Kigali.
             </p>
             <div className="flex gap-4">
@@ -79,7 +79,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 border-t border-border pt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-16 border-t border-border pt-8 text-center text-sm text-muted-foreground/60">
           <p>&copy; {new Date().getFullYear()} DOPIK ELECTRONICS. All rights reserved. SHEVIO</p>
         </div>
       </div>
