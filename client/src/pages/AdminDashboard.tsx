@@ -65,54 +65,90 @@ function AdminVideoList() {
     }
   });
 
-  if (isLoading) return <div>Loading videos...</div>;
+  if (isLoading) return <div className="p-8 text-center">Loading videos...</div>;
+
+  if (!videos || videos.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center bg-muted/20 rounded-lg border-2 border-dashed border-muted">
+        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+          <Recycle className="w-8 h-8 text-muted-foreground/40" />
+        </div>
+        <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">No videos found</h4>
+        <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+          Upload your first video to showcase your circular economy commitment.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="divide-y">
-      {videos?.map((video) => (
-        <div key={video.id} className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
-          <div className="flex items-center gap-4">
-            <div className="w-20 aspect-video bg-muted rounded-md overflow-hidden shadow-sm ring-1 ring-border">
-              <video src={video.url} className="w-full h-full object-cover" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-semibold tracking-tight">{video.title}</span>
-              <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${video.isActive ? 'bg-green-500' : 'bg-slate-300'}`}></span>
-                <span className="text-xs font-medium text-muted-foreground">{video.isActive ? 'Active' : 'Inactive'}</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className={`h-8 gap-2 transition-all ${video.isActive ? "border-primary/20 bg-primary/5 text-primary" : "text-muted-foreground"}`}
-              onClick={() => toggleMutation.mutate({ id: video.id, isActive: !video.isActive })}
-            >
-              {video.isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
-              <span className="text-xs font-bold uppercase tracking-wider">{video.isActive ? 'Active' : 'Inactive'}</span>
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              onClick={() => {
-                if (confirm("Delete this video?")) {
-                  deleteMutation.mutate(video.id);
-                }
-              }}
-            >
-              <TrashIcon className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      ))}
-      {videos?.length === 0 && (
-        <div className="p-8 text-center text-muted-foreground">
-          <p className="text-sm font-medium">No videos uploaded yet.</p>
-        </div>
-      )}
+    <div className="overflow-hidden rounded-md border border-border shadow-sm bg-card">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-muted/50 border-b border-border">
+            <tr>
+              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Preview</th>
+              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Filename</th>
+              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Status</th>
+              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Uploaded</th>
+              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {videos.map((video) => (
+              <tr key={video.id} className="hover:bg-muted/30 transition-colors group">
+                <td className="px-4 py-3">
+                  <div className="w-20 aspect-video bg-muted rounded-md overflow-hidden ring-1 ring-border shadow-sm relative group/video">
+                    <video src={video.url} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/video:opacity-100 transition-opacity flex items-center justify-center">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={() => window.open(video.url, '_blank')}>
+                        <LayoutDashboard className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3 font-medium truncate max-w-[150px]">{video.title}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${video.isActive ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                    <span className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground">
+                      {video.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-xs text-muted-foreground">
+                  {new Date(video.createdAt).toLocaleDateString()}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`h-8 gap-2 transition-all border-none hover-elevate ${video.isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                      onClick={() => toggleMutation.mutate({ id: video.id, isActive: !video.isActive })}
+                    >
+                      {video.isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
+                      <span className="text-[10px] font-bold uppercase tracking-wider">{video.isActive ? 'Disable' : 'Enable'}</span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      onClick={() => {
+                        if (confirm("Are you sure you want to delete this video? This action cannot be undone.")) {
+                          deleteMutation.mutate(video.id);
+                        }
+                      }}
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
