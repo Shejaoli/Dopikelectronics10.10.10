@@ -37,13 +37,21 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star } from "lucide-react";
+import { Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw } from "lucide-react";
 
 function AdminVideoList() {
   const { data: videos, isLoading } = useQuery<any[]>({
     queryKey: ["/api/videos"]
   });
   const { toast } = useToast();
+
+  const activeDbVideos = videos?.filter(v => v.isActive) || [];
+  const featuredVideos = activeDbVideos.filter(v => v.isFeatured);
+  const displayVideos = featuredVideos.length >= 2 
+    ? featuredVideos 
+    : [...featuredVideos, ...activeDbVideos.filter(v => !v.isFeatured)].slice(0, 2);
+  
+  const displayVideoIds = displayVideos.map(v => v.id);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -96,68 +104,76 @@ function AdminVideoList() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {videos.map((video) => (
-              <tr key={video.id} className="hover:bg-muted/30 transition-colors group">
-                <td className="px-4 py-3">
-                  <div className="w-20 aspect-video bg-muted rounded-md overflow-hidden ring-1 ring-border shadow-sm relative group/video">
-                    <video src={video.url} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/video:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={() => window.open(video.url, '_blank')}>
-                        <LayoutDashboard className="h-4 w-4" />
+            {videos.map((video) => {
+              const isLive = displayVideoIds.includes(video.id) && video.isActive;
+              return (
+                <tr key={video.id} className={`hover:bg-muted/30 transition-colors group ${isLive ? "bg-primary/5" : ""}`}>
+                  <td className="px-4 py-3">
+                    <div className={`w-20 aspect-video bg-muted rounded-md overflow-hidden ring-1 shadow-sm relative group/video ${isLive ? "ring-primary ring-2" : "ring-border"}`}>
+                      <video src={video.url} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/video:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={() => window.open(video.url, '_blank')}>
+                          <LayoutDashboard className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {isLive && (
+                        <div className="absolute top-1 left-1 bg-primary text-[8px] font-black uppercase text-primary-foreground px-1 py-0.5 rounded shadow-sm">
+                          Live
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 font-medium truncate max-w-[150px]">{video.title}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${video.isActive ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                      <span className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground">
+                        {video.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                     <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`h-7 px-2 gap-1.5 transition-all ${video.isFeatured ? "text-yellow-500 bg-yellow-500/10" : "text-muted-foreground"}`}
+                      onClick={() => toggleMutation.mutate({ id: video.id, isFeatured: !video.isFeatured })}
+                    >
+                      <Star className={`h-3.5 w-3.5 ${video.isFeatured ? "fill-yellow-500" : ""}`} />
+                      <span className="text-[10px] font-bold uppercase tracking-wider">{video.isFeatured ? 'Featured' : 'Standard'}</span>
+                    </Button>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    {new Date(video.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`h-8 gap-2 transition-all border-none hover-elevate ${video.isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                        onClick={() => toggleMutation.mutate({ id: video.id, isActive: !video.isActive })}
+                      >
+                        {video.isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
+                        <span className="text-[10px] font-bold uppercase tracking-wider">{video.isActive ? 'Disable' : 'Enable'}</span>
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        onClick={() => {
+                          if (confirm("Are you sure you want to delete this video? This action cannot be undone.")) {
+                            deleteMutation.mutate(video.id);
+                          }
+                        }}
+                      >
+                        <TrashIcon className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 font-medium truncate max-w-[150px]">{video.title}</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${video.isActive ? 'bg-green-500' : 'bg-slate-300'}`}></span>
-                    <span className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground">
-                      {video.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                   <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`h-7 px-2 gap-1.5 transition-all ${video.isFeatured ? "text-yellow-500 bg-yellow-500/10" : "text-muted-foreground"}`}
-                    onClick={() => toggleMutation.mutate({ id: video.id, isFeatured: !video.isFeatured })}
-                  >
-                    <Star className={`h-3.5 w-3.5 ${video.isFeatured ? "fill-yellow-500" : ""}`} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">{video.isFeatured ? 'Featured' : 'Standard'}</span>
-                  </Button>
-                </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">
-                  {new Date(video.createdAt).toLocaleDateString()}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={`h-8 gap-2 transition-all border-none hover-elevate ${video.isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
-                      onClick={() => toggleMutation.mutate({ id: video.id, isActive: !video.isActive })}
-                    >
-                      {video.isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
-                      <span className="text-[10px] font-bold uppercase tracking-wider">{video.isActive ? 'Disable' : 'Enable'}</span>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                      onClick={() => {
-                        if (confirm("Are you sure you want to delete this video? This action cannot be undone.")) {
-                          deleteMutation.mutate(video.id);
-                        }
-                      }}
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -463,7 +479,18 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="grid gap-4">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Live Website Preview</h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Live Website Preview</h3>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5"
+                        onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/videos"] })}
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        Refresh Preview
+                      </Button>
+                    </div>
                     <Card className="border-none shadow-2xl overflow-hidden bg-slate-950">
                       <CircularEconomy />
                     </Card>
