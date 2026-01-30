@@ -299,45 +299,78 @@ export default function AdminDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-4">
-                        <div className="flex items-center justify-center w-full">
-                          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-colors border-primary/30">
+                        <div className="flex flex-col gap-4 items-center">
+                          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/30 group/upload">
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <Recycle className="w-8 h-8 mb-3 text-primary/60" />
-                              <p className="mb-2 text-sm font-medium">Click to upload or drag and drop</p>
-                              <p className="text-xs text-muted-foreground">MP4, WebM (Max 50MB)</p>
+                              <div className="p-3 rounded-full bg-primary/10 group-hover/upload:bg-primary/20 transition-colors mb-3">
+                                <Recycle className="w-8 h-8 text-primary" />
+                              </div>
+                              <p className="mb-1 text-sm font-bold tracking-tight">
+                                {(() => {
+                                  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+                                  return selectedFile ? selectedFile.name : "Click to upload or drag and drop";
+                                })()}
+                              </p>
+                              <p className="text-xs text-muted-foreground font-medium">MP4 or WebM · Max 50MB</p>
                             </div>
                             <input 
                               type="file" 
+                              id="video-upload-input"
                               accept="video/mp4,video/webm"
                               className="hidden"
-                              onChange={async (e) => {
+                              onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (!file) return;
-                                
-                                const formData = new FormData();
-                                formData.append("video", file);
-                                formData.append("title", file.name);
-
-                                try {
-                                  toast({ title: "Uploading...", description: "Please wait while your video is uploaded." });
-                                  const response = await fetch("/api/admin/videos/upload", {
-                                    method: "POST",
-                                    body: formData
-                                  });
-                                  
-                                  if (response.ok) {
-                                    toast({ title: "Success!", description: "Video uploaded successfully." });
-                                    queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
-                                  } else {
-                                    const error = await response.json();
-                                    toast({ variant: "destructive", title: "Upload Failed", description: error.message });
-                                  }
-                                } catch (err) {
-                                  toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
+                                if (file) {
+                                  const btn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
+                                  const label = e.target.parentElement?.querySelector('p.mb-1') as HTMLParagraphElement;
+                                  if (btn) btn.disabled = false;
+                                  if (label) label.textContent = file.name;
                                 }
                               }}
                             />
                           </label>
+                          <Button 
+                            id="upload-submit-btn"
+                            disabled
+                            className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
+                            onClick={async () => {
+                              const input = document.getElementById('video-upload-input') as HTMLInputElement;
+                              const file = input.files?.[0];
+                              if (!file) return;
+                              
+                              const formData = new FormData();
+                              formData.append("video", file);
+                              formData.append("title", file.name);
+
+                              const btn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
+                              btn.disabled = true;
+
+                              try {
+                                toast({ title: "Uploading...", description: "Please wait while your video is uploaded." });
+                                const response = await fetch("/api/admin/videos/upload", {
+                                  method: "POST",
+                                  body: formData
+                                });
+                                
+                                if (response.ok) {
+                                  toast({ title: "Success!", description: "Video uploaded successfully." });
+                                  queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+                                  input.value = "";
+                                  const label = input.parentElement?.querySelector('p.mb-1') as HTMLParagraphElement;
+                                  if (label) label.textContent = "Click to upload or drag and drop";
+                                } else {
+                                  const error = await response.json();
+                                  toast({ variant: "destructive", title: "Upload Failed", description: error.message });
+                                  btn.disabled = false;
+                                }
+                              } catch (err) {
+                                toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
+                                btn.disabled = false;
+                              }
+                            }}
+                          >
+                            Upload Video
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
