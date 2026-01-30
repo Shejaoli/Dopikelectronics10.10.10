@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { products, admins, orders, auditLogs, type Product, type InsertProduct, type Admin, type InsertAdmin, type Order, type InsertOrder, type AuditLog, type InsertAuditLog } from "@shared/schema";
+import { products, admins, orders, auditLogs, videos, type Product, type InsertProduct, type Admin, type InsertAdmin, type Order, type InsertOrder, type AuditLog, type InsertAuditLog, type Video, type InsertVideo } from "@shared/schema";
 import { eq, like, and, desc, gte, lte, or } from "drizzle-orm";
 
 export interface IStorage {
