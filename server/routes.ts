@@ -190,6 +190,13 @@ export async function registerRoutes(
   app.patch("/api/admin/videos/:id", requireAdminAuth, express.json(), async (req, res) => {
     try {
       const id = Number(req.params.id);
+      const { isFeatured, ...otherData } = req.body;
+
+      if (isFeatured === true) {
+        // Unfeature all other videos first
+        await db.update(videos).set({ isFeatured: false }).where(eq(videos.isFeatured, true));
+      }
+
       const updated = await db.update(videos).set(req.body).where(eq(videos.id, id)).returning();
       res.json(updated[0]);
     } catch (error) {

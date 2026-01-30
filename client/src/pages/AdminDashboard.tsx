@@ -47,10 +47,10 @@ function AdminVideoList() {
   const { toast } = useToast();
 
   const activeDbVideos = videos?.filter(v => v.isActive) || [];
-  const featuredVideos = activeDbVideos.filter(v => v.isFeatured);
-  const displayVideos = featuredVideos.length >= 2 
-    ? featuredVideos 
-    : [...featuredVideos, ...activeDbVideos.filter(v => !v.isFeatured)].slice(0, 2);
+  const featuredVideo = activeDbVideos.find(v => v.isFeatured);
+  const displayVideos = featuredVideo 
+    ? [featuredVideo, ...activeDbVideos.filter(v => v.id !== featuredVideo.id)].slice(0, 2)
+    : activeDbVideos.slice(0, 2);
   
   const displayVideoIds = displayVideos.map(v => v.id);
 
@@ -145,11 +145,13 @@ function AdminVideoList() {
                      <Button
                       variant="ghost"
                       size="sm"
-                      className={`h-7 px-2 gap-1.5 transition-all ${video.isFeatured ? "text-yellow-500 bg-yellow-500/10" : "text-muted-foreground"}`}
+                      className={`h-7 px-2 gap-1.5 transition-all ${video.isFeatured ? "text-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20" : "text-muted-foreground hover:bg-primary/5"}`}
                       onClick={() => toggleMutation.mutate({ id: video.id, isFeatured: !video.isFeatured })}
                     >
                       <Star className={`h-3.5 w-3.5 ${video.isFeatured ? "fill-yellow-500" : ""}`} />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">{video.isFeatured ? 'Featured' : 'Standard'}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider">
+                        {video.isFeatured ? 'Currently Featured on Website' : 'Set as Featured'}
+                      </span>
                     </Button>
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
