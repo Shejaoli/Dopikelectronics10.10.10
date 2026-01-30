@@ -71,7 +71,39 @@ import phoneImg from "@assets/Apple-iPhone-15-Pro-vs-Samsung-Galaxy-S23-Ultra-ca
 import macbookImg from "@assets/apple-macbook-air-15in-m4_1768720576555.png";
 
 const HomeHero = () => {
-  // ... existing code
+  const slides = [
+    {
+      bgColor: "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800",
+      textColor: "text-foreground",
+      isFirst: true,
+      title: "Tech Essentials",
+      subtitle: "Discover premium refurbished devices at unbeatable prices. Quality guaranteed.",
+      buttonText: "Shop Now",
+      buttonHref: "/products",
+      image: null
+    },
+    {
+      bgColor: "bg-gradient-to-br from-[#010033] to-[#020066]",
+      textColor: "text-white",
+      isFirst: false,
+      title: "Latest Smartphones",
+      subtitle: "Get the newest models with warranty and free shipping on all orders.",
+      buttonText: "View Phones",
+      buttonHref: "/products?category=smartphones",
+      image: phoneImg
+    },
+    {
+      bgColor: "bg-gradient-to-br from-[#010033] to-[#020066]",
+      textColor: "text-white",
+      isFirst: false,
+      title: "Premium Laptops",
+      subtitle: "Powerful performance for work and play. Certified refurbished.",
+      buttonText: "Browse Laptops",
+      buttonHref: "/products?category=laptops",
+      image: macbookImg
+    }
+  ];
+
   return (
     <section className="relative w-full overflow-hidden">
       <Swiper
