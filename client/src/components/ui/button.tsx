@@ -50,10 +50,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className }), "relative overflow-hidden group/btn active:scale-95 transition-all duration-200")}
         ref={ref}
         {...props}
-      />
+      >
+        <span className="relative z-10 flex items-center justify-center gap-2">
+          {props.children}
+        </span>
+        <span className="absolute inset-0 z-0 bg-primary-foreground/5 translate-y-full transition-transform duration-300 group-hover/btn:translate-y-0" />
+      </Comp>
     )
   },
 )

@@ -71,55 +71,20 @@ import phoneImg from "@assets/Apple-iPhone-15-Pro-vs-Samsung-Galaxy-S23-Ultra-ca
 import macbookImg from "@assets/apple-macbook-air-15in-m4_1768720576555.png";
 
 const HomeHero = () => {
-  const slides = [
-    {
-      isFirst: true,
-      title: "Certified Electronic Shop",
-      subtitle: "in Rwanda",
-      buttonText: "Shop Deals",
-      buttonHref: "/deals",
-      bgColor: "bg-cyan-100",
-      textColor: "text-cyan-950",
-    },
-    {
-      title: "Refurbished iPads & Tablets",
-      subtitle: "On the go or on the fly.",
-      buttonText: "Shop Now",
-      buttonHref: "/shop?category=Tablets",
-      image: banner2,
-      bgColor: "bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900",
-      textColor: "text-white",
-    },
-    {
-      title: "Smartwatches for Everyone",
-      subtitle: "Stay connected, stay healthy.",
-      buttonText: "Explore More",
-      buttonHref: "/shop?category=Smartwatches",
-      image: banner3,
-      bgColor: "bg-blue-100",
-      textColor: "text-blue-950",
-    },
-  ];
-
+  // ... existing code
   return (
     <section className="relative w-full overflow-hidden">
       <Swiper
-        spaceBetween={0}
-        centeredSlides={true}
-        autoplay={{
-          delay: 5000,
-          disableOnInteraction: false,
-        }}
-        pagination={{
-          clickable: true,
-        }}
-        navigation={true}
-        modules={[Autoplay, Pagination, Navigation]}
-        className="h-[250px] lg:h-[300px]"
+        // ... existing props
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className={`relative w-full h-full flex items-center justify-center overflow-hidden ${slide.bgColor} ${slide.textColor}`}>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
+              className={`relative w-full h-full flex items-center justify-center overflow-hidden ${slide.bgColor} ${slide.textColor}`}
+            >
               {slide.isFirst ? (
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full relative flex items-center justify-center">
                   {/* Macbook - Left Side */}
@@ -177,12 +142,22 @@ const HomeHero = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
           </SwiperSlide>
         ))}
       </Swiper>
-      {/* Trust Bar */}
-      <div className="bg-white dark:bg-slate-900 border-b py-6 relative z-30">
+    </section>
+  );
+};
+
+const TrustBar = () => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+      className="bg-white dark:bg-slate-900 border-b py-6 relative z-30"
+    >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 items-center justify-items-center">
             <div className="flex items-center gap-3 group">
@@ -223,8 +198,7 @@ const HomeHero = () => {
             </div>
           </div>
         </div>
-      </div>
-    </section>
+    </motion.div>
   );
 };
 const RecommendedProducts = () => {
@@ -479,12 +453,30 @@ const TrustBanner = () => {
   );
 };
 const HomeProducts = () => {
-  const { data: products } = useProducts({ category: "Home" });
+  const { data: products, isLoading } = useProducts({ category: "Home" });
   
+  if (isLoading) {
+    return (
+      <section className="py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="h-8 w-48 bg-muted animate-pulse rounded-md mb-8"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/5] bg-muted animate-pulse rounded-xl"></div>)}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!products || products.length === 0) return null;
 
   return (
-    <section className="py-12">
+    <motion.section 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="py-12"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold">Home Products</h2>
@@ -508,16 +500,34 @@ const HomeProducts = () => {
           </div>
         </Carousel>
       </div>
-    </section>
+    </motion.section>
   );
 };
 const GamingPreview = () => {
-  const { data: products } = useProducts({ category: "Gaming" });
+  const { data: products, isLoading } = useProducts({ category: "Gaming" });
   
+  if (isLoading) {
+    return (
+      <section className="py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="h-8 w-48 bg-muted animate-pulse rounded-md mb-8"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/5] bg-muted animate-pulse rounded-xl"></div>)}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!products || products.length === 0) return null;
 
   return (
-    <section className="py-12">
+    <motion.section 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="py-12"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold">Gaming Gear</h2>
@@ -541,7 +551,7 @@ const GamingPreview = () => {
           </div>
         </Carousel>
       </div>
-    </section>
+    </motion.section>
   );
 };
 export const CircularEconomy = () => {
@@ -779,6 +789,7 @@ export default function Home() {
       <WhatsAppFloat />
 
       <HomeHero />
+      <TrustBar />
       <RecommendedProducts />
       <PopularCategories />
       <CustomerFavorites />

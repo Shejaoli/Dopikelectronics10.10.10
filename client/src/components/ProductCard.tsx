@@ -22,7 +22,9 @@ export function ProductCard({ product, isDeal }: ProductCardProps) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-500 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5"
+      whileHover={{ y: -8 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-500 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/5 active:scale-[0.98]"
     >
       {/* Badges */}
       <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-1.5">
@@ -64,7 +66,7 @@ export function ProductCard({ product, isDeal }: ProductCardProps) {
       </Link>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-3">
+      <div className="flex flex-1 flex-col p-3 group/content">
         <div className="mb-0.5 flex items-center justify-between">
           <span className="text-[8px] font-bold uppercase tracking-[0.1em] text-primary/70">
             {product.brand}
