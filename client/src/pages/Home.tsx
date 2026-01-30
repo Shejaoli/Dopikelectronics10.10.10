@@ -266,30 +266,31 @@ const RecommendedProducts = () => {
 };
 const PopularCategories = () => {
   const categories = [
-    { name: "Smartphones", image: smartphonesCat, href: "/shop?category=Smartphones" },
-    { name: "Laptops", image: laptopsCat, href: "/shop?category=Laptops" },
-    { name: "Tablets", image: tabletsCat, href: "/shop?category=Tablets" },
-    { name: "Smartwatches", image: watchesCat, href: "/shop?category=Smartwatches" },
-    { name: "Gaming", image: gamingCat, href: "/gaming" },
-    { name: "Audio", image: audioCat, href: "/shop?category=Audio" },
-    { name: "Accessories & Bundles", image: accessoriesCat, href: "/shop?category=Accessories" },
-    { name: "Electronics", image: electronicsCat, href: "/shop?category=Electronics" },
+    { name: "Smartphones", image: smartphonesCat, href: "/shop?category=Smartphones", description: "New & Refurbished" },
+    { name: "Laptops", image: laptopsCat, href: "/shop?category=Laptops", description: "Power & Portability" },
+    { name: "Tablets", image: tabletsCat, href: "/shop?category=Tablets", description: "On the go or on the fly" },
+    { name: "Smartwatches", image: watchesCat, href: "/shop?category=Smartwatches", description: "Stay connected" },
+    { name: "Gaming", image: gamingCat, href: "/gaming", description: "Consoles & Controllers" },
+    { name: "Audio", image: audioCat, href: "/shop?category=Audio", description: "Immersive Sound" },
+    { name: "Accessories", image: accessoriesCat, href: "/shop?category=Accessories", description: "Bundles & Gear" },
+    { name: "Electronics", image: electronicsCat, href: "/shop?category=Electronics", description: "Premium Tech" },
   ];
 
   return (
     <section className="py-12 bg-gradient-to-b from-transparent to-muted/10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold mb-8">Popular Categories</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 lg:gap-8">
           {categories.map((cat) => (
             <Link key={cat.name} href={cat.href}>
-              <div className="flex flex-col items-center justify-center gap-4 text-center cursor-pointer group">
-                <div className="relative w-32 h-32 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+              <div className="flex flex-col items-center justify-center gap-4 text-center cursor-pointer group p-4 rounded-2xl transition-all duration-300 hover:bg-white dark:hover:bg-slate-900 hover:shadow-xl hover:shadow-primary/5 border border-transparent hover:border-primary/10">
+                <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   {cat.image ? (
                     <img 
                       src={cat.image} 
                       alt={cat.name} 
-                      className="w-full h-full object-contain z-10" 
+                      className="w-full h-full object-contain z-10 drop-shadow-md group-hover:drop-shadow-xl" 
                     />
                   ) : (
                     <div className="w-full h-full rounded-full bg-cyan-100/30 flex items-center justify-center group-hover:bg-cyan-100/50 transition-colors">
@@ -301,7 +302,10 @@ const PopularCategories = () => {
                     </div>
                   )}
                 </div>
-                <span className="font-bold text-sm tracking-tight text-muted-foreground group-hover:text-foreground transition-colors">{cat.name}</span>
+                <div className="space-y-1">
+                  <span className="block font-bold text-sm tracking-tight text-foreground group-hover:text-primary transition-colors">{cat.name}</span>
+                  <span className="block text-[10px] font-medium text-muted-foreground/80 line-clamp-1">{cat.description}</span>
+                </div>
               </div>
             </Link>
           ))}
