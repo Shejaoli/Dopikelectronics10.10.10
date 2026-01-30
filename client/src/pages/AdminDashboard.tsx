@@ -37,7 +37,54 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { Recycle } from "lucide-react";
+import { Recycle, Trash2 as TrashIcon } from "lucide-react";
+
+function AdminVideoList() {
+  const { data: videos, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/videos"]
+  });
+  const { toast } = useToast();
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/admin/videos/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+      toast({ title: "Video deleted" });
+    }
+  });
+
+  if (isLoading) return <div>Loading videos...</div>;
+
+  return (
+    <div className="grid gap-2">
+      {videos?.map((video) => (
+        <div key={video.id} className="flex items-center justify-between p-3 border rounded-md bg-card">
+          <div className="flex items-center gap-3">
+            <div className="w-16 aspect-video bg-muted rounded overflow-hidden">
+              <video src={video.url} className="w-full h-full object-cover" />
+            </div>
+            <span className="text-sm font-medium">{video.title}</span>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={() => {
+              if (confirm("Delete this video?")) {
+                deleteMutation.mutate(video.id);
+              }
+            }}
+          >
+            <TrashIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      ))}
+      {videos?.length === 0 && <p className="text-sm text-muted-foreground">No videos uploaded yet.</p>}
+    </div>
+  );
+}
 
 export function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-RW", {
@@ -211,7 +258,58 @@ export default function AdminDashboard() {
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Circular Economy Preview</CardTitle>
+                    <CardTitle>Manage Videos</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-6">
+                      <div className="flex flex-col gap-4 p-4 border rounded-lg bg-muted/30">
+                        <h3 className="font-semibold text-sm">Upload New Video</h3>
+                        <div className="grid gap-2">
+                          <label className="text-sm">Video File (MP4/WebM)</label>
+                          <input 
+                            type="file" 
+                            accept="video/mp4,video/webm"
+                            className="text-sm"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              
+                              const formData = new FormData();
+                              formData.append("video", file);
+                              formData.append("title", file.name);
+
+                              try {
+                                toast({ title: "Uploading...", description: "Please wait while your video is uploaded." });
+                                const response = await fetch("/api/admin/videos/upload", {
+                                  method: "POST",
+                                  body: formData
+                                });
+                                
+                                if (response.ok) {
+                                  toast({ title: "Success!", description: "Video uploaded successfully." });
+                                  queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+                                } else {
+                                  const error = await response.json();
+                                  toast({ variant: "destructive", title: "Upload Failed", description: error.message });
+                                }
+                              } catch (err) {
+                                toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-sm">Active Videos</h3>
+                        <AdminVideoList />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Website Preview</CardTitle>
                   </CardHeader>
                   <CardContent className="bg-slate-950 rounded-lg p-0 overflow-hidden">
                     <CircularEconomy />
