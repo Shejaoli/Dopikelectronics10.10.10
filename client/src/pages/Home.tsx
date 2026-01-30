@@ -77,7 +77,7 @@ const HomeHero = () => {
       textColor: "text-foreground",
       isFirst: true,
       title: "Certified Electronic Shop",
-      subtitle: "Discover premium refurbished devices at unbeatable prices. Quality guaranteed.",
+      subtitle: "in Rwanda",
       buttonText: "Shop Now",
       buttonHref: "/products",
       image: null
