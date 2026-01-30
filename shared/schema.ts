@@ -59,8 +59,12 @@ export const videos = pgTable("videos", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   url: text("url").notNull(),
+  originalUrl: text("original_url"),
+  mimeType: text("mime_type").notNull().default("video/mp4"),
+  fileSize: integer("file_size").notNull().default(0),
   isActive: boolean("is_active").default(true).notNull(),
   isFeatured: boolean("is_featured").default(false).notNull(),
+  isCompressed: boolean("is_compressed").default(false).notNull(),
   order: integer("order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

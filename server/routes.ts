@@ -13,6 +13,27 @@ import fs from "fs";
 import express from "express";
 import Stripe from "stripe";
 import { Buffer } from "buffer";
+import ffmpeg from "fluent-ffmpeg";
+
+// Video compression utility
+async function compressVideo(inputPath: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .outputOptions([
+        '-c:v libx264',
+        '-crf 28',
+        '-preset fast',
+        '-c:a aac',
+        '-b:a 128k',
+        '-movflags +faststart',
+        '-vf scale=trunc(iw/2)*2:trunc(ih/2)*2'
+      ])
+      .output(outputPath)
+      .on('end', () => resolve())
+      .on('error', (err) => reject(err))
+      .run();
+  });
+}
 
 import paypal from "@paypal/checkout-server-sdk";
 
@@ -118,7 +139,10 @@ export async function registerRoutes(
   app.post("/api/admin/videos/upload", requireAdminAuth, (req, res) => {
     uploadVideo.single("video")(req, res, async (err) => {
       if (err instanceof multer.MulterError) {
-        return res.status(400).json({ message: `Multer error: ${err.message}` });
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ message: "File too large. Maximum size is 50MB." });
+        }
+        return res.status(400).json({ message: `Upload error: ${err.message}` });
       } else if (err) {
         return res.status(400).json({ message: err.message });
       }
@@ -126,26 +150,83 @@ export async function registerRoutes(
       if (!req.file) {
         return res.status(400).json({ message: "No video file uploaded" });
       }
+
+      // Additional server-side validation
+      const allowedMimeTypes = ["video/mp4", "video/webm", "video/ogg"];
+      if (!allowedMimeTypes.includes(req.file.mimetype)) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ message: "Invalid video format. Only MP4, WebM, and OGG are allowed." });
+      }
+
+      const maxFileSize = 50 * 1024 * 1024; // 50MB
+      if (req.file.size > maxFileSize) {
+        fs.unlinkSync(req.file.path);
+        return res.status(400).json({ message: "File too large. Maximum size is 50MB." });
+      }
       
       try {
         const admin = await storage.getAdminById(req.session.adminId!);
-        const videoUrl = `/uploads/videos/${req.file.filename}`;
+        const originalFilename = req.file.filename;
+        const originalPath = req.file.path;
+        const originalUrl = `/uploads/videos/${originalFilename}`;
+        
+        // Compress video for web delivery
+        const compressedFilename = `compressed-${originalFilename}`;
+        const compressedPath = `./public/uploads/videos/${compressedFilename}`;
+        const compressedUrl = `/uploads/videos/${compressedFilename}`;
+        
+        let finalUrl = originalUrl;
+        let finalSize = req.file.size;
+        let isCompressed = false;
+
+        // Only compress if file is larger than 5MB
+        if (req.file.size > 5 * 1024 * 1024) {
+          try {
+            await compressVideo(originalPath, compressedPath);
+            const compressedStats = fs.statSync(compressedPath);
+            
+            // Use compressed version if it's smaller
+            if (compressedStats.size < req.file.size) {
+              finalUrl = compressedUrl;
+              finalSize = compressedStats.size;
+              isCompressed = true;
+              console.log(`Video compressed: ${req.file.size} -> ${compressedStats.size} bytes (${Math.round((1 - compressedStats.size / req.file.size) * 100)}% reduction)`);
+            } else {
+              // Remove compressed file if it's not smaller
+              fs.unlinkSync(compressedPath);
+            }
+          } catch (compressionError) {
+            console.error("Video compression failed, using original:", compressionError);
+            // Continue with original file if compression fails
+          }
+        }
+
         const videoData = insertVideoSchema.parse({
           title: req.body.title || req.file.originalname,
-          url: videoUrl,
+          url: finalUrl,
+          originalUrl: isCompressed ? originalUrl : null,
+          mimeType: req.file.mimetype,
+          fileSize: finalSize,
           isActive: true,
+          isCompressed,
           order: parseInt(req.body.order || "0")
         });
         
         const video = await storage.createVideo(videoData);
         
-        // Log video upload
+        // Log video upload with metadata
         await storage.createAuditLog({
           action: `Video Uploaded: ${video.title}`,
           adminEmail: admin?.email || "unknown",
           actionType: "upload",
           targetType: "Video",
-          targetId: video.id
+          targetId: video.id,
+          newValue: JSON.stringify({
+            fileSize: finalSize,
+            mimeType: req.file.mimetype,
+            isCompressed,
+            originalSize: req.file.size
+          })
         }).catch(err => console.error("Audit log failed:", err));
 
         res.status(201).json(video);
@@ -169,20 +250,41 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Video not found" });
       }
 
+      // Clean up video files from disk
+      const videoPath = `./public${video.url}`;
+      if (fs.existsSync(videoPath)) {
+        fs.unlinkSync(videoPath);
+      }
+      
+      // Also remove original if compressed version exists
+      if (video.originalUrl) {
+        const originalPath = `./public${video.originalUrl}`;
+        if (fs.existsSync(originalPath)) {
+          fs.unlinkSync(originalPath);
+        }
+      }
+
       await storage.deleteVideo(id);
       const admin = await storage.getAdminById(req.session.adminId!);
       
-      // Log video deletion
+      // Log video deletion with metadata
       await storage.createAuditLog({
         action: `Video Deleted: ${video.title}`,
         adminEmail: admin?.email || "unknown",
         actionType: "delete",
         targetType: "Video",
-        targetId: id
+        targetId: id,
+        previousValue: JSON.stringify({
+          fileSize: video.fileSize,
+          mimeType: video.mimeType,
+          isCompressed: video.isCompressed,
+          url: video.url
+        })
       }).catch(err => console.error("Audit log failed:", err));
 
       res.sendStatus(200);
     } catch (error) {
+      console.error("Failed to delete video:", error);
       res.status(500).json({ message: "Failed to delete video" });
     }
   });
