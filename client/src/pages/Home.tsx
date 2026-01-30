@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 
@@ -255,7 +256,9 @@ const PopularCategories = () => {
                     />
                   ) : (
                     <div className="w-full h-full rounded-full bg-cyan-100/50 flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
-                      {cat.icon && <cat.icon className="w-10 h-10 text-primary" />}
+                      {cat.icon && (
+                        <cat.icon className="w-10 h-10 text-primary" />
+                      )}
                     </div>
                   )}
                 </div>
@@ -473,10 +476,18 @@ const GamingPreview = () => {
   );
 };
 export const CircularEconomy = () => {
+  const { data: dbVideos, isLoading } = useQuery<any[]>({
+    queryKey: ["/api/videos"]
+  });
+
   const videoRef1 = useRef<HTMLVideoElement>(null);
   const videoRef2 = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [activeVideo, setActiveVideo] = useState(1);
+
+  // Use DB videos if available, fallback to defaults
+  const video1Url = dbVideos?.[0]?.url || "/videos/economy.mp4";
+  const video2Url = dbVideos?.[1]?.url || "/videos/iphone17.mp4";
 
   useEffect(() => {
     const options = {
@@ -509,13 +520,17 @@ export const CircularEconomy = () => {
       if (videoRef1.current) observer.unobserve(videoRef1.current);
       if (videoRef2.current) observer.unobserve(videoRef2.current);
     };
-  }, [activeVideo]);
+  }, [activeVideo, dbVideos]);
 
   const handleVideo1End = () => {
-    setActiveVideo(2);
-    setTimeout(() => {
-      videoRef2.current?.play().catch(() => {});
-    }, 100);
+    if (dbVideos && dbVideos.length > 1) {
+      setActiveVideo(2);
+      setTimeout(() => {
+        videoRef2.current?.play().catch(() => {});
+      }, 100);
+    } else {
+      videoRef1.current?.play().catch(() => {});
+    }
   };
 
   const handleVideo2End = () => {
@@ -524,6 +539,8 @@ export const CircularEconomy = () => {
       videoRef1.current?.play().catch(() => {});
     }, 100);
   };
+
+  if (isLoading) return null;
 
   return (
     <section className="py-16 bg-slate-950 text-white">
@@ -549,7 +566,7 @@ export const CircularEconomy = () => {
               <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">
                 <video 
                   ref={videoRef1}
-                  src="/videos/economy.mp4" 
+                  src={video1Url} 
                   muted={isMuted}
                   playsInline
                   onEnded={handleVideo1End}
@@ -578,40 +595,42 @@ export const CircularEconomy = () => {
               </div>
             </div>
 
-            {/* Video 2 */}
-            <div className={`relative group w-full max-w-[240px] transition-all duration-500 ${activeVideo === 2 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
-              <div className={`absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 ${activeVideo === 2 ? 'opacity-40' : 'opacity-0'}`}></div>
-              <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">
-                <video 
-                  ref={videoRef2}
-                  src="/videos/iphone17.mp4" 
-                  muted={isMuted}
-                  playsInline
-                  onEnded={handleVideo2End}
-                  className="w-full h-full object-cover block cursor-pointer"
-                  onClick={() => {
-                    setActiveVideo(2);
-                    videoRef1.current?.pause();
-                    videoRef2.current?.play().catch(() => {});
-                  }}
-                >
-                  Your browser does not support the video tag.
-                </video>
-                {activeVideo === 2 && (
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsMuted(!isMuted);
+            {/* Video 2 (Only show if we have a second video or are using default) */}
+            {(dbVideos?.length !== 1) && (
+              <div className={`relative group w-full max-w-[240px] transition-all duration-500 ${activeVideo === 2 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
+                <div className={`absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 ${activeVideo === 2 ? 'opacity-40' : 'opacity-0'}`}></div>
+                <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">
+                  <video 
+                    ref={videoRef2}
+                    src={video2Url} 
+                    muted={isMuted}
+                    playsInline
+                    onEnded={handleVideo2End}
+                    className="w-full h-full object-cover block cursor-pointer"
+                    onClick={() => {
+                      setActiveVideo(2);
+                      videoRef1.current?.pause();
+                      videoRef2.current?.play().catch(() => {});
                     }}
                   >
-                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </Button>
-                )}
+                    Your browser does not support the video tag.
+                  </video>
+                  {activeVideo === 2 && (
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMuted(!isMuted);
+                      }}
+                    >
+                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
