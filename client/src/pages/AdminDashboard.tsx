@@ -306,17 +306,20 @@ export default function AdminDashboard() {
                               onClick={() => setActiveTab(item.title)}
                               isActive={activeTab === item.title}
                               className={`
-                                w-full transition-all duration-200 group/item relative
+                                w-full transition-all duration-300 group/item relative overflow-hidden
                                 ${activeTab === item.title 
-                                  ? "bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 scale-[1.02]" 
-                                  : "hover:bg-primary/5 hover:text-primary"
+                                  ? "bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 scale-[1.02] active-elevate-2" 
+                                  : "hover:bg-primary/10 hover:text-primary hover-elevate"
                                 }
                               `}
                             >
-                              <item.icon className={`w-4 h-4 mr-2 transition-transform duration-200 group-hover/item:scale-110 ${activeTab === item.title ? "text-primary-foreground" : "text-muted-foreground group-hover/item:text-primary"}`} />
-                              <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                              <item.icon className={`w-4 h-4 mr-2 transition-transform duration-300 group-hover/item:scale-125 group-hover/item:rotate-12 ${activeTab === item.title ? "text-primary-foreground" : "text-muted-foreground group-hover/item:text-primary"}`} />
+                              <span className="group-data-[collapsible=icon]:hidden transition-all duration-300 group-hover/item:translate-x-1">{item.title}</span>
                               {activeTab === item.title && (
-                                <div className="absolute left-0 w-1 h-6 bg-primary-foreground rounded-r-full" />
+                                <motion.div 
+                                  layoutId="active-pill"
+                                  className="absolute left-0 w-1.5 h-6 bg-primary-foreground rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                                />
                               )}
                             </SidebarMenuButton>
                           </TooltipTrigger>
