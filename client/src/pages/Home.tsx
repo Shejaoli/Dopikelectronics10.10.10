@@ -30,7 +30,9 @@ import {
   Users,
   Timer,
   Volume2,
-  VolumeX
+  VolumeX,
+  Check,
+  MapPin
 } from "lucide-react";
 
 import { Navbar } from "@/components/Navbar";
@@ -179,21 +181,45 @@ const HomeHero = () => {
           </SwiperSlide>
         ))}
       </Swiper>
-      {/* Features Bar */}
-      <div className="bg-white border-b py-4">
+      {/* Trust Bar */}
+      <div className="bg-white dark:bg-slate-900 border-b py-6 relative z-30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 text-sm font-medium text-muted-foreground/70">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-primary/70" /> 12-Month Warranty
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 items-center justify-items-center">
+            <div className="flex items-center gap-3 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold leading-none mb-1">12-Month Warranty</span>
+                <span className="text-[10px] text-muted-foreground/70">Genuine protection</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Truck className="w-5 h-5 text-primary/70" /> Free Delivery
+            <div className="flex items-center gap-3 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <Check className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold leading-none mb-1">Quality Checked</span>
+                <span className="text-[10px] text-muted-foreground/70">Rigorously tested</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <RotateCcw className="w-5 h-5 text-primary/70" /> 30-Day Trial
+            <div className="flex items-center gap-3 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <MapPin className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold leading-none mb-1">Kigali Support</span>
+                <span className="text-[10px] text-muted-foreground/70">Local expert help</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-primary/70" /> 4.7 Google Reviews
+            <div className="flex items-center gap-3 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400/10 text-yellow-600 transition-transform group-hover:scale-110">
+                <Star className="w-5 h-5 fill-yellow-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold leading-none mb-1">4.7 Google Reviews</span>
+                <span className="text-[10px] text-muted-foreground/70">Trusted by thousands</span>
+              </div>
             </div>
           </div>
         </div>
@@ -756,6 +782,8 @@ export default function Home() {
       <RecommendedProducts />
       <PopularCategories />
       <CustomerFavorites />
+      <TopDeals />
+      <HomeProducts />
       <GamingPreview />
       <CircularEconomy />
       <AudioPreview />
