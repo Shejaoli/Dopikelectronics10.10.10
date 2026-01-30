@@ -74,7 +74,15 @@ function AdminVideoList() {
     }
   });
 
-  if (isLoading) return <div className="p-8 text-center">Loading videos...</div>;
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-24 bg-muted/50 rounded-md animate-pulse border border-border" />
+        ))}
+      </div>
+    );
+  }
 
   if (!videos || videos.length === 0) {
     return (
@@ -363,21 +371,30 @@ export default function AdminDashboard() {
             ) : activeTab === "Orders" ? (
               <AdminOrders />
             ) : activeTab === "Circular Economy" ? (
-              <div className="space-y-8 max-w-4xl mx-auto">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="space-y-8 max-w-4xl mx-auto"
+              >
                 <div className="flex flex-col gap-2">
                   <h2 className="text-xl font-bold tracking-tight">Circular Economy Settings</h2>
                   <p className="text-sm text-muted-foreground">Manage your sustainable electronics promotion videos.</p>
                 </div>
 
                 <div className="grid gap-8">
-                  <Card className="border-none shadow-md bg-primary/5 ring-1 ring-primary/20">
+                  <Card className="border-none shadow-md bg-primary/5 ring-1 ring-primary/20 hover:shadow-lg transition-shadow duration-300">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-sm font-bold uppercase tracking-wider text-primary">Upload New Video</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-4">
                         <div className="flex flex-col gap-4 items-center">
-                          <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/30 group/upload">
+                          <motion.label 
+                            whileHover={{ scale: 1.005 }}
+                            whileTap={{ scale: 0.995 }}
+                            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/30 group/upload"
+                          >
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               <div className="p-3 rounded-full bg-primary/10 group-hover/upload:bg-primary/20 transition-colors mb-3">
                                 <Recycle className="w-8 h-8 text-primary" />
@@ -519,7 +536,7 @@ export default function AdminDashboard() {
                     </Card>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ) : activeTab === "Audit Log" ? (
               <AdminAuditLog />
             ) : (
