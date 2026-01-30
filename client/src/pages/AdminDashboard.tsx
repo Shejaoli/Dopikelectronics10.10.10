@@ -468,29 +468,57 @@ export default function AdminDashboard() {
 
                               xhr.onload = () => {
                                 if (xhr.status === 201) {
+                                  const statusText = document.getElementById('upload-status-text');
+                                  const progressIcon = document.getElementById('upload-progress-icon');
+                                  if (statusText) {
+                                    statusText.textContent = "Video uploaded successfully";
+                                    statusText.className = "text-[10px] text-center uppercase tracking-tighter font-bold text-green-600 dark:text-green-400";
+                                  }
+                                  if (progressIcon) {
+                                    progressIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-green-600 dark:text-green-400"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                                  }
+                                  
                                   toast({ title: "Success!", description: "Video uploaded successfully." });
                                   queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
                                   input.value = "";
                                   const label = input.parentElement?.querySelector('p.mb-1') as HTMLParagraphElement;
                                   if (label) label.textContent = "Click to upload or drag and drop";
-                                  if (progressContainer) progressContainer.classList.add('hidden');
-                                  if (progressBar) progressBar.style.width = "0%";
+                                  
+                                  setTimeout(() => {
+                                    if (progressContainer) progressContainer.classList.add('hidden');
+                                    if (progressBar) progressBar.style.width = "0%";
+                                    if (statusText) {
+                                      statusText.textContent = "Uploading video...";
+                                      statusText.className = "text-[10px] text-center uppercase tracking-tighter font-bold text-muted-foreground";
+                                    }
+                                    if (progressIcon) progressIcon.innerHTML = '';
+                                  }, 3000);
                                 } else {
                                   let message = "Upload failed";
                                   try {
                                     const error = JSON.parse(xhr.responseText);
                                     message = error.message;
                                   } catch (e) {}
+                                  
+                                  const statusText = document.getElementById('upload-status-text');
+                                  if (statusText) {
+                                    statusText.textContent = `Error: ${message}`;
+                                    statusText.className = "text-[10px] text-center uppercase tracking-tighter font-bold text-destructive";
+                                  }
+                                  
                                   toast({ variant: "destructive", title: "Upload Failed", description: message });
                                   btn.disabled = false;
-                                  if (progressContainer) progressContainer.classList.add('hidden');
                                 }
                               };
 
                               xhr.onerror = () => {
+                                const statusText = document.getElementById('upload-status-text');
+                                if (statusText) {
+                                  statusText.textContent = "Error: An unexpected error occurred";
+                                  statusText.className = "text-[10px] text-center uppercase tracking-tighter font-bold text-destructive";
+                                }
                                 toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
                                 btn.disabled = false;
-                                if (progressContainer) progressContainer.classList.add('hidden');
                               };
 
                               xhr.send(formData);
@@ -505,7 +533,10 @@ export default function AdminDashboard() {
                             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                               <div id="upload-progress-bar" className="h-full bg-primary transition-all duration-300 w-0"></div>
                             </div>
-                            <p className="text-[10px] text-center uppercase tracking-tighter font-bold text-muted-foreground">Uploading video...</p>
+                            <div className="flex items-center justify-center gap-2">
+                              <div id="upload-progress-icon"></div>
+                              <p id="upload-status-text" className="text-[10px] text-center uppercase tracking-tighter font-bold text-muted-foreground">Uploading video...</p>
+                            </div>
                           </div>
                         </div>
                       </div>
