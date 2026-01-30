@@ -201,18 +201,55 @@ const HomeHero = () => {
     </section>
   );
 };
-const ContinueShopping = () => {
-  const { data: products } = useProducts({ featured: "true" });
-  
-  if (!products || products.length === 0) return null;
+const RecommendedProducts = () => {
+  const { data: allProducts } = useProducts();
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+  const [recommendationReason, setRecommendationReason] = useState<string | null>(null);
+
+  useEffect(() => {
+    const viewedIdsStr = localStorage.getItem("recentlyViewed");
+    if (viewedIdsStr && allProducts) {
+      const viewedIds = JSON.parse(viewedIdsStr) as number[];
+      // Get the 6 most recent unique products
+      const products = viewedIds
+        .map(id => allProducts.find(p => p.id === id))
+        .filter(Boolean)
+        .slice(0, 6);
+      
+      setRecentlyViewed(products);
+      
+      if (products.length > 0) {
+        setRecommendationReason(`Because you viewed ${products[0].name}`);
+      }
+    }
+  }, [allProducts]);
+
+  // Fallback to "Popular in Kigali" (Featured) or "Best Value" (Deals)
+  const displayProducts = recentlyViewed.length > 0 
+    ? recentlyViewed 
+    : allProducts?.filter(p => p.isFeatured || p.category === "Deals").slice(0, 6) || [];
+
+  if (displayProducts.length === 0) return null;
 
   return (
     <section className="py-12 border-b">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold mb-8">Pick up where you left off</h2>
+        <div className="flex flex-col mb-8">
+          <h2 className="text-2xl font-bold">Recommended for You</h2>
+          {recommendationReason && recentlyViewed.length > 0 && (
+            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5 font-medium italic">
+              <RotateCcw className="w-3 h-3 text-primary" /> {recommendationReason}
+            </p>
+          )}
+          {!recommendationReason && (
+            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
+              Popular in Kigali • Best value today
+            </p>
+          )}
+        </div>
         <Carousel className="w-full">
           <CarouselContent className="-ml-4">
-            {products.slice(0, 6).map((product) => (
+            {displayProducts.map((product) => (
               <CarouselItem key={product.id} className="pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                 <ProductCard product={product} />
               </CarouselItem>
@@ -712,12 +749,9 @@ export default function Home() {
       <WhatsAppFloat />
 
       <HomeHero />
+      <RecommendedProducts />
       <PopularCategories />
       <CustomerFavorites />
-      <TrustBanner />
-      <TopDeals />
-      <ContinueShopping />
-      <HomeProducts />
       <GamingPreview />
       <CircularEconomy />
       <AudioPreview />

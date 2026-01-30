@@ -48,6 +48,12 @@ export default function ProductDetails() {
   useEffect(() => {
     if (product?.imageUrl) {
       setSelectedImage(product.imageUrl);
+      
+      // Update recently viewed
+      const viewedIds = JSON.parse(localStorage.getItem("recentlyViewed") || "[]") as number[];
+      const updatedViewed = [product.id, ...viewedIds.filter(id => id !== product.id)].slice(0, 10);
+      localStorage.setItem("recentlyViewed", JSON.stringify(updatedViewed));
+      window.dispatchEvent(new Event("storage"));
     }
   }, [product]);
 
@@ -89,6 +95,12 @@ export default function ProductDetails() {
     const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
     const updatedCart = [...existingCart, cartItem];
     localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    // Update recently viewed
+    const viewedIds = JSON.parse(localStorage.getItem("recentlyViewed") || "[]") as number[];
+    const updatedViewed = [product.id, ...viewedIds.filter(id => id !== product.id)].slice(0, 10);
+    localStorage.setItem("recentlyViewed", JSON.stringify(updatedViewed));
+
     window.dispatchEvent(new Event("storage"));
 
     toast({
