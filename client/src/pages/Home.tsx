@@ -85,7 +85,7 @@ const HomeHero = () => {
       buttonText: "Shop Now",
       buttonHref: "/shop?category=Tablets",
       image: banner2,
-      bgColor: "bg-slate-950",
+      bgColor: "bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900",
       textColor: "text-white",
     },
     {
@@ -240,7 +240,7 @@ const PopularCategories = () => {
   ];
 
   return (
-    <section className="py-12 bg-muted/10">
+    <section className="py-12 bg-gradient-to-b from-transparent to-muted/10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl font-bold mb-8">Popular Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8">
@@ -341,7 +341,7 @@ const TopDeals = () => {
   if (!deals || deals.length === 0) return null;
 
   return (
-    <section className="py-12 bg-red-50/30 dark:bg-red-950/10">
+    <section className="py-16 bg-gradient-to-b from-red-50/20 to-transparent dark:from-red-950/5 dark:to-transparent">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -381,7 +381,7 @@ const TopDeals = () => {
 };
 const TrustBanner = () => {
   return (
-    <section className="py-12 bg-teal-50 dark:bg-teal-950/20">
+    <section className="py-16 bg-gradient-to-b from-teal-50/30 to-transparent dark:from-teal-950/10 dark:to-transparent">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row gap-8 items-center justify-between">
           <div className="space-y-4 text-center md:text-left">
@@ -553,8 +553,9 @@ export const CircularEconomy = () => {
   if (isLoading) return null;
 
   return (
-    <section className="py-16 bg-slate-950 text-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="py-16 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none"></div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col md:flex-row gap-12 items-center">
           <div className="md:w-6/12 lg:w-7/12 space-y-6">
             <h2 className="text-3xl md:text-5xl font-bold">Join the Circular Economy</h2>
