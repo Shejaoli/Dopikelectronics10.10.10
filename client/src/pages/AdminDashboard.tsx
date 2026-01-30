@@ -17,7 +17,7 @@ import {
 import { Tooltip as ShadcnTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -269,6 +269,8 @@ export default function AdminDashboard() {
   }
 
   if (!admin) return null;
+
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
 
   const menuItems = [
     { title: "Dashboard", icon: LayoutDashboard, description: "Overview of your store performance" },
@@ -565,20 +567,51 @@ export default function AdminDashboard() {
 
                   <div className="grid gap-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Live Website Preview</h3>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5"
-                        onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/videos"] })}
-                      >
-                        <RotateCcw className="h-3.5 w-3.5" />
-                        Refresh Preview
-                      </Button>
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Live Website Preview</h3>
+                        <p className="text-[10px] font-bold text-primary/60 uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded border border-primary/10 w-fit">
+                          Homepage – Circular Economy Section
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center bg-muted p-1 rounded-md mr-2">
+                          <Button
+                            variant={previewMode === "desktop" ? "secondary" : "ghost"}
+                            size="sm"
+                            className="h-7 px-2 gap-1.5 text-[10px] font-bold uppercase"
+                            onClick={() => setPreviewMode("desktop")}
+                          >
+                            <Monitor className="h-3.5 w-3.5" />
+                            Desktop
+                          </Button>
+                          <Button
+                            variant={previewMode === "mobile" ? "secondary" : "ghost"}
+                            size="sm"
+                            className="h-7 px-2 gap-1.5 text-[10px] font-bold uppercase"
+                            onClick={() => setPreviewMode("mobile")}
+                          >
+                            <Smartphone className="h-3.5 w-3.5" />
+                            Mobile
+                          </Button>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5"
+                          onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/videos"] })}
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" />
+                          Refresh
+                        </Button>
+                      </div>
                     </div>
-                    <Card className="border-none shadow-2xl overflow-hidden bg-slate-950">
-                      <CircularEconomy />
-                    </Card>
+                    <div className="flex justify-center transition-all duration-500 ease-in-out">
+                      <Card className={`border-none shadow-2xl overflow-hidden bg-slate-950 transition-all duration-500 ${previewMode === "mobile" ? "w-[375px] h-[667px]" : "w-full"}`}>
+                        <div className={`${previewMode === "mobile" ? "scale-[0.8] origin-top h-[125%]" : ""}`}>
+                          <CircularEconomy />
+                        </div>
+                      </Card>
+                    </div>
                   </div>
                 </div>
               </motion.div>
