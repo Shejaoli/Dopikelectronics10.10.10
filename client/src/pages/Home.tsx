@@ -76,7 +76,7 @@ const HomeHero = () => {
       bgColor: "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800",
       textColor: "text-foreground",
       isFirst: true,
-      title: "Tech Essentials",
+      title: "Certified Electronic Shop",
       subtitle: "Discover premium refurbished devices at unbeatable prices. Quality guaranteed.",
       buttonText: "Shop Now",
       buttonHref: "/products",
