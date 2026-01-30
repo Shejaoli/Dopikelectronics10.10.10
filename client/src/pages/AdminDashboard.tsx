@@ -148,7 +148,7 @@ function AdminVideoList() {
                       data-testid={`button-feature-video-${video.id}`}
                       aria-label={video.isFeatured ? `Remove ${video.title} from featured` : `Set ${video.title} as featured`}
                       aria-pressed={video.isFeatured}
-                      className={`h-8 px-3 gap-2 text-xs font-medium transition-all focus:ring-2 focus:ring-primary focus:ring-offset-1 ${video.isFeatured ? "bg-amber-600 hover:bg-amber-700 text-white" : ""}`}
+                      className={`h-8 px-3 gap-2 text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-offset-2 ${video.isFeatured ? "bg-amber-600 hover:bg-amber-700 text-white border-amber-700 focus-visible:ring-amber-500" : "focus-visible:ring-primary"}`}
                       onClick={() => toggleMutation.mutate({ id: video.id, isFeatured: !video.isFeatured })}
                     >
                       <Star className={`h-4 w-4 ${video.isFeatured ? "fill-current" : ""}`} aria-hidden="true" />
@@ -165,7 +165,7 @@ function AdminVideoList() {
                         size="sm"
                         data-testid={`button-preview-video-${video.id}`}
                         aria-label={`Preview video ${video.title}`}
-                        className="h-8 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                        className="h-8 gap-2 text-xs font-medium focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                         onClick={() => window.open(video.url, '_blank')}
                       >
                         <Play className="h-4 w-4" aria-hidden="true" />
@@ -177,7 +177,7 @@ function AdminVideoList() {
                         data-testid={`button-toggle-video-${video.id}`}
                         aria-label={video.isActive ? `Disable video ${video.title}` : `Enable video ${video.title}`}
                         aria-pressed={video.isActive}
-                        className="h-8 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                        className="h-8 gap-2 text-xs font-medium focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                         onClick={() => toggleMutation.mutate({ id: video.id, isActive: !video.isActive })}
                       >
                         {video.isActive ? <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> : <Circle className="h-4 w-4" aria-hidden="true" />}
@@ -188,7 +188,7 @@ function AdminVideoList() {
                         size="icon" 
                         data-testid={`button-delete-video-${video.id}`}
                         aria-label={`Delete video ${video.title}`}
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 focus:ring-2 focus:ring-destructive focus:ring-offset-1 transition-colors"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 transition-colors"
                         onClick={() => {
                           if (confirm("Are you sure you want to permanently delete this video? This action cannot be undone.")) {
                             deleteMutation.mutate(video.id);
@@ -432,7 +432,7 @@ export default function AdminDashboard() {
               >
                 <div className="flex flex-col gap-2">
                   <h2 className="text-2xl font-bold tracking-tight">Circular Economy Settings</h2>
-                  <p className="text-base text-muted-foreground">Manage your sustainable electronics promotion videos.</p>
+                  <p className="text-sm text-muted-foreground">Manage your sustainable electronics promotion videos.</p>
                 </div>
 
                 <div className="grid gap-8">
@@ -455,7 +455,29 @@ export default function AdminDashboard() {
                                 document.getElementById('video-upload-input')?.click();
                               }
                             }}
-                            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/30 group/upload focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.currentTarget.classList.add('ring-2', 'ring-primary', 'bg-primary/10');
+                            }}
+                            onDragLeave={(e) => {
+                              e.currentTarget.classList.remove('ring-2', 'ring-primary', 'bg-primary/10');
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.currentTarget.classList.remove('ring-2', 'ring-primary', 'bg-primary/10');
+                              const file = e.dataTransfer.files?.[0];
+                              if (file) {
+                                const input = document.getElementById('video-upload-input') as HTMLInputElement;
+                                const dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(file);
+                                input.files = dataTransfer.files;
+                                const btn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
+                                const label = e.currentTarget.querySelector('p.mb-1') as HTMLParagraphElement;
+                                if (btn) btn.disabled = false;
+                                if (label) label.textContent = file.name;
+                              }
+                            }}
+                            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/40 group/upload focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                           >
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               <div className="p-3 rounded-full bg-primary/10 group-hover/upload:bg-primary/20 transition-colors mb-3" aria-hidden="true">
@@ -487,7 +509,7 @@ export default function AdminDashboard() {
                             id="upload-submit-btn"
                             disabled
                             data-testid="button-upload-video"
-                            className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                            className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                             onClick={async () => {
                               const input = document.getElementById('video-upload-input') as HTMLInputElement;
                               const file = input.files?.[0];
@@ -608,7 +630,7 @@ export default function AdminDashboard() {
                   </Card>
 
                   <div className="grid gap-4">
-                    <h3 className="text-base font-semibold text-foreground">Active Videos</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Active Videos</h3>
                     <Card className="border-none shadow-sm ring-1 ring-border/50">
                       <CardContent className="p-0">
                         <AdminVideoList />
@@ -619,7 +641,7 @@ export default function AdminDashboard() {
                   <div className="grid gap-4">
                     <div className="flex items-center justify-between flex-wrap gap-4">
                       <div className="flex flex-col gap-1">
-                        <h3 className="text-base font-semibold text-foreground">Live Website Preview</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Live Website Preview</h3>
                         <p className="text-xs text-muted-foreground">
                           Homepage – Circular Economy Section
                         </p>
@@ -631,7 +653,7 @@ export default function AdminDashboard() {
                             size="sm"
                             data-testid="button-preview-desktop"
                             aria-pressed={previewMode === "desktop"}
-                            className="h-8 px-3 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                            className="h-8 px-3 gap-2 text-xs font-medium focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             onClick={() => setPreviewMode("desktop")}
                           >
                             <Monitor className="h-4 w-4" aria-hidden="true" />
@@ -642,7 +664,7 @@ export default function AdminDashboard() {
                             size="sm"
                             data-testid="button-preview-mobile"
                             aria-pressed={previewMode === "mobile"}
-                            className="h-8 px-3 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                            className="h-8 px-3 gap-2 text-xs font-medium focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                             onClick={() => setPreviewMode("mobile")}
                           >
                             <Smartphone className="h-4 w-4" aria-hidden="true" />
@@ -653,7 +675,7 @@ export default function AdminDashboard() {
                           variant="outline" 
                           size="sm" 
                           data-testid="button-refresh-preview"
-                          className="h-8 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                          className="h-8 gap-2 text-xs font-medium focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                           onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/videos"] })}
                         >
                           <RotateCcw className="h-4 w-4" aria-hidden="true" />
