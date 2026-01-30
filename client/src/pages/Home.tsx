@@ -480,14 +480,16 @@ export const CircularEconomy = () => {
     queryKey: ["/api/videos"]
   });
 
+  const activeDbVideos = dbVideos?.filter(v => v.isActive) || [];
+
   const videoRef1 = useRef<HTMLVideoElement>(null);
   const videoRef2 = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [activeVideo, setActiveVideo] = useState(1);
 
   // Use DB videos if available, fallback to defaults
-  const video1Url = dbVideos?.[0]?.url || "/videos/economy.mp4";
-  const video2Url = dbVideos?.[1]?.url || "/videos/iphone17.mp4";
+  const video1Url = activeDbVideos?.[0]?.url || "/videos/economy.mp4";
+  const video2Url = activeDbVideos?.[1]?.url || "/videos/iphone17.mp4";
 
   useEffect(() => {
     const options = {
@@ -520,10 +522,10 @@ export const CircularEconomy = () => {
       if (videoRef1.current) observer.unobserve(videoRef1.current);
       if (videoRef2.current) observer.unobserve(videoRef2.current);
     };
-  }, [activeVideo, dbVideos]);
+  }, [activeVideo, activeDbVideos]);
 
   const handleVideo1End = () => {
-    if (dbVideos && dbVideos.length > 1) {
+    if (activeDbVideos && activeDbVideos.length > 1) {
       setActiveVideo(2);
       setTimeout(() => {
         videoRef2.current?.play().catch(() => {});
@@ -596,7 +598,7 @@ export const CircularEconomy = () => {
             </div>
 
             {/* Video 2 (Only show if we have a second video or are using default) */}
-            {(dbVideos?.length !== 1) && (
+            {(activeDbVideos?.length !== 1) && (
               <div className={`relative group w-full max-w-[240px] transition-all duration-500 ${activeVideo === 2 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
                 <div className={`absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 ${activeVideo === 2 ? 'opacity-40' : 'opacity-0'}`}></div>
                 <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">

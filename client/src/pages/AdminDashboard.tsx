@@ -37,7 +37,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import { Recycle, Trash2 as TrashIcon } from "lucide-react";
+import { Recycle, Trash2 as TrashIcon, CheckCircle2, Circle } from "lucide-react";
 
 function AdminVideoList() {
   const { data: videos, isLoading } = useQuery<any[]>({
@@ -55,6 +55,16 @@ function AdminVideoList() {
     }
   });
 
+  const toggleMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
+      await apiRequest("PATCH", `/api/admin/videos/${id}`, { isActive });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+      toast({ title: "Status updated" });
+    }
+  });
+
   if (isLoading) return <div>Loading videos...</div>;
 
   return (
@@ -65,20 +75,33 @@ function AdminVideoList() {
             <div className="w-16 aspect-video bg-muted rounded overflow-hidden">
               <video src={video.url} className="w-full h-full object-cover" />
             </div>
-            <span className="text-sm font-medium">{video.title}</span>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">{video.title}</span>
+              <span className="text-xs text-muted-foreground">{video.isActive ? 'Active' : 'Inactive'}</span>
+            </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={() => {
-              if (confirm("Delete this video?")) {
-                deleteMutation.mutate(video.id);
-              }
-            }}
-          >
-            <TrashIcon className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={video.isActive ? "text-primary" : "text-muted-foreground"}
+              onClick={() => toggleMutation.mutate({ id: video.id, isActive: !video.isActive })}
+            >
+              {video.isActive ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => {
+                if (confirm("Delete this video?")) {
+                  deleteMutation.mutate(video.id);
+                }
+              }}
+            >
+              <TrashIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       ))}
       {videos?.length === 0 && <p className="text-sm text-muted-foreground">No videos uploaded yet.</p>}

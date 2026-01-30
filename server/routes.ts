@@ -6,7 +6,7 @@ import { z } from "zod";
 import { hashPassword, verifyPassword, requireAdminAuth } from "./auth";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
-import { insertProductSchema, insertOrderSchema, orders, insertVideoSchema } from "@shared/schema";
+import { insertProductSchema, insertOrderSchema, orders, insertVideoSchema, videos } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -155,6 +155,16 @@ export async function registerRoutes(
       res.sendStatus(200);
     } catch (error) {
       res.status(500).json({ message: "Failed to delete video" });
+    }
+  });
+
+  app.patch("/api/admin/videos/:id", requireAdminAuth, express.json(), async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const updated = await db.update(videos).set(req.body).where(eq(videos.id, id)).returning();
+      res.json(updated[0]);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update video" });
     }
   });
 
