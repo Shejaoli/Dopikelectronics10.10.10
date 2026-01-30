@@ -419,7 +419,7 @@ export default function AdminDashboard() {
                                 }
                               }}
                             />
-                          </label>
+                          </motion.label>
                           <Button 
                             id="upload-submit-btn"
                             disabled
