@@ -101,15 +101,15 @@ function AdminVideoList() {
   return (
     <div className="overflow-hidden rounded-md border border-border shadow-sm bg-card">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
+        <table className="w-full text-left text-sm" role="grid" aria-label="Video management table">
           <thead className="bg-muted/50 border-b border-border">
             <tr>
-              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Preview</th>
-              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Filename</th>
-              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Status</th>
-              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Featured</th>
-              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground">Uploaded</th>
-              <th className="px-4 py-3 font-bold uppercase tracking-wider text-[10px] text-muted-foreground text-right">Actions</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-xs text-muted-foreground">Preview</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-xs text-muted-foreground">Filename</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-xs text-muted-foreground">Status</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-xs text-muted-foreground">Featured</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-xs text-muted-foreground">Uploaded</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-xs text-muted-foreground text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -143,51 +143,59 @@ function AdminVideoList() {
                   </td>
                   <td className="px-4 py-3">
                      <Button
-                      variant="ghost"
+                      variant={video.isFeatured ? "default" : "outline"}
                       size="sm"
-                      className={`h-7 px-2 gap-1.5 transition-all ${video.isFeatured ? "text-yellow-500 bg-yellow-500/10 hover:bg-yellow-500/20" : "text-muted-foreground hover:bg-primary/5"}`}
+                      data-testid={`button-feature-video-${video.id}`}
+                      aria-label={video.isFeatured ? `Remove ${video.title} from featured` : `Set ${video.title} as featured`}
+                      aria-pressed={video.isFeatured}
+                      className={`h-8 px-3 gap-2 text-xs font-medium transition-all focus:ring-2 focus:ring-primary focus:ring-offset-1 ${video.isFeatured ? "bg-amber-600 hover:bg-amber-700 text-white" : ""}`}
                       onClick={() => toggleMutation.mutate({ id: video.id, isFeatured: !video.isFeatured })}
                     >
-                      <Star className={`h-3.5 w-3.5 ${video.isFeatured ? "fill-yellow-500" : ""}`} />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">
-                        {video.isFeatured ? 'Currently Featured on Website' : 'Set as Featured'}
-                      </span>
+                      <Star className={`h-4 w-4 ${video.isFeatured ? "fill-current" : ""}`} aria-hidden="true" />
+                      {video.isFeatured ? 'Featured' : 'Set Featured'}
                     </Button>
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
                     {new Date(video.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 gap-2 border-none hover-elevate bg-muted/50 text-muted-foreground"
+                        data-testid={`button-preview-video-${video.id}`}
+                        aria-label={`Preview video ${video.title}`}
+                        className="h-8 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
                         onClick={() => window.open(video.url, '_blank')}
                       >
-                        <Play className="h-3.5 w-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Preview</span>
+                        <Play className="h-4 w-4" aria-hidden="true" />
+                        Preview
                       </Button>
                       <Button
-                        variant="outline"
+                        variant={video.isActive ? "default" : "secondary"}
                         size="sm"
-                        className={`h-8 gap-2 transition-all border-none hover-elevate ${video.isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                        data-testid={`button-toggle-video-${video.id}`}
+                        aria-label={video.isActive ? `Disable video ${video.title}` : `Enable video ${video.title}`}
+                        aria-pressed={video.isActive}
+                        className="h-8 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
                         onClick={() => toggleMutation.mutate({ id: video.id, isActive: !video.isActive })}
                       >
-                        {video.isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
-                        <span className="text-[10px] font-bold uppercase tracking-wider">{video.isActive ? 'Disable' : 'Enable'}</span>
+                        {video.isActive ? <CheckCircle2 className="h-4 w-4" aria-hidden="true" /> : <Circle className="h-4 w-4" aria-hidden="true" />}
+                        {video.isActive ? 'Disable' : 'Enable'}
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        data-testid={`button-delete-video-${video.id}`}
+                        aria-label={`Delete video ${video.title}`}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 focus:ring-2 focus:ring-destructive focus:ring-offset-1 transition-colors"
                         onClick={() => {
-                          if (confirm("⚠️ SECURITY ALERT: Are you sure you want to permanently DELETE this video? This action will remove it from the Circular Economy section and cannot be undone.")) {
+                          if (confirm("Are you sure you want to permanently delete this video? This action cannot be undone.")) {
                             deleteMutation.mutate(video.id);
                           }
                         }}
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     </div>
                   </td>
@@ -423,8 +431,8 @@ export default function AdminDashboard() {
                 className="space-y-8 max-w-4xl mx-auto"
               >
                 <div className="flex flex-col gap-2">
-                  <h2 className="text-xl font-bold tracking-tight">Circular Economy Settings</h2>
-                  <p className="text-sm text-muted-foreground">Manage your sustainable electronics promotion videos.</p>
+                  <h2 className="text-2xl font-bold tracking-tight">Circular Economy Settings</h2>
+                  <p className="text-base text-muted-foreground">Manage your sustainable electronics promotion videos.</p>
                 </div>
 
                 <div className="grid gap-8">
@@ -438,22 +446,32 @@ export default function AdminDashboard() {
                           <motion.label 
                             whileHover={{ scale: 1.005 }}
                             whileTap={{ scale: 0.995 }}
-                            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/30 group/upload"
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Upload video file. Click or press Enter to browse files. You can also drag and drop."
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                document.getElementById('video-upload-input')?.click();
+                              }
+                            }}
+                            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/30 group/upload focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                           >
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <div className="p-3 rounded-full bg-primary/10 group-hover/upload:bg-primary/20 transition-colors mb-3">
+                              <div className="p-3 rounded-full bg-primary/10 group-hover/upload:bg-primary/20 transition-colors mb-3" aria-hidden="true">
                                 <Recycle className="w-8 h-8 text-primary" />
                               </div>
-                              <p className="mb-1 text-sm font-bold tracking-tight">
+                              <p className="mb-1 text-sm font-semibold tracking-tight">
                                 Click to upload or drag and drop
                               </p>
-                              <p className="text-xs text-muted-foreground font-medium">MP4 or WebM · Max 50MB</p>
+                              <p className="text-xs text-muted-foreground">MP4 or WebM · Max 50MB</p>
                             </div>
                             <input 
                               type="file" 
                               id="video-upload-input"
                               accept="video/mp4,video/webm"
-                              className="hidden"
+                              className="sr-only"
+                              aria-describedby="upload-help-text"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
@@ -468,7 +486,8 @@ export default function AdminDashboard() {
                           <Button 
                             id="upload-submit-btn"
                             disabled
-                            className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover-elevate active-elevate-2 bg-blue-700 hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                            data-testid="button-upload-video"
+                            className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
                             onClick={async () => {
                               const input = document.getElementById('video-upload-input') as HTMLInputElement;
                               const file = input.files?.[0];
@@ -571,7 +590,7 @@ export default function AdminDashboard() {
                           >
                             Upload Video
                           </Button>
-                          <p className="text-[10px] text-muted-foreground font-medium text-center italic">
+                          <p id="upload-help-text" className="text-xs text-muted-foreground text-center">
                             Your video will appear instantly on the website
                           </p>
                           <div id="upload-progress-container" className="w-full hidden space-y-2">
@@ -589,7 +608,7 @@ export default function AdminDashboard() {
                   </Card>
 
                   <div className="grid gap-4">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Active Videos</h3>
+                    <h3 className="text-base font-semibold text-foreground">Active Videos</h3>
                     <Card className="border-none shadow-sm ring-1 ring-border/50">
                       <CardContent className="p-0">
                         <AdminVideoList />
@@ -598,41 +617,46 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="grid gap-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-4">
                       <div className="flex flex-col gap-1">
-                        <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Live Website Preview</h3>
-                        <p className="text-[10px] font-bold text-primary/60 uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded border border-primary/10 w-fit">
+                        <h3 className="text-base font-semibold text-foreground">Live Website Preview</h3>
+                        <p className="text-xs text-muted-foreground">
                           Homepage – Circular Economy Section
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2" role="group" aria-label="Preview mode toggle">
                         <div className="flex items-center bg-muted p-1 rounded-md mr-2">
                           <Button
                             variant={previewMode === "desktop" ? "secondary" : "ghost"}
                             size="sm"
-                            className="h-7 px-2 gap-1.5 text-[10px] font-bold uppercase"
+                            data-testid="button-preview-desktop"
+                            aria-pressed={previewMode === "desktop"}
+                            className="h-8 px-3 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
                             onClick={() => setPreviewMode("desktop")}
                           >
-                            <Monitor className="h-3.5 w-3.5" />
+                            <Monitor className="h-4 w-4" aria-hidden="true" />
                             Desktop
                           </Button>
                           <Button
                             variant={previewMode === "mobile" ? "secondary" : "ghost"}
                             size="sm"
-                            className="h-7 px-2 gap-1.5 text-[10px] font-bold uppercase"
+                            data-testid="button-preview-mobile"
+                            aria-pressed={previewMode === "mobile"}
+                            className="h-8 px-3 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
                             onClick={() => setPreviewMode("mobile")}
                           >
-                            <Smartphone className="h-3.5 w-3.5" />
+                            <Smartphone className="h-4 w-4" aria-hidden="true" />
                             Mobile
                           </Button>
                         </div>
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
                           size="sm" 
-                          className="h-8 gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/5"
+                          data-testid="button-refresh-preview"
+                          className="h-8 gap-2 text-xs font-medium focus:ring-2 focus:ring-primary focus:ring-offset-1"
                           onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/videos"] })}
                         >
-                          <RotateCcw className="h-3.5 w-3.5" />
+                          <RotateCcw className="h-4 w-4" aria-hidden="true" />
                           Refresh
                         </Button>
                       </div>
