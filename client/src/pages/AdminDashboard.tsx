@@ -14,9 +14,11 @@ import {
   SidebarHeader,
   SidebarFooter
 } from "@/components/ui/sidebar";
+import { Tooltip as ShadcnTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw } from "lucide-react";
+import { motion } from "framer-motion";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Admin } from "@shared/schema";
@@ -32,12 +34,12 @@ import {
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip, 
+  Tooltip as RechartsTooltip, 
   ResponsiveContainer,
   LineChart,
   Line,
 } from "recharts";
-import { Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw } from "lucide-react";
 
 function AdminVideoList() {
   const { data: videos, isLoading } = useQuery<any[]>({
@@ -251,11 +253,11 @@ export default function AdminDashboard() {
   if (!admin) return null;
 
   const menuItems = [
-    { title: "Dashboard", icon: LayoutDashboard },
-    { title: "Products", icon: Package },
-    { title: "Orders", icon: ShoppingCart },
-    { title: "Circular Economy", icon: Recycle },
-    { title: "Audit Log", icon: History },
+    { title: "Dashboard", icon: LayoutDashboard, description: "Overview of your store performance" },
+    { title: "Products", icon: Package, description: "Manage your electronic inventory" },
+    { title: "Orders", icon: ShoppingCart, description: "Track and update customer orders" },
+    { title: "Circular Economy", icon: Recycle, description: "Manage sustainable promotion videos" },
+    { title: "Audit Log", icon: History, description: "Review administrative actions" },
   ];
 
   const style = {
@@ -277,20 +279,32 @@ export default function AdminDashboard() {
                 <SidebarMenu>
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton 
-                        onClick={() => setActiveTab(item.title)}
-                        isActive={activeTab === item.title}
-                        className={`
-                          w-full transition-all duration-200 
-                          ${activeTab === item.title 
-                            ? "bg-primary/10 text-primary font-semibold border-r-2 border-primary rounded-none" 
-                            : "hover:bg-muted"
-                          }
-                        `}
-                      >
-                        <item.icon className={`w-4 h-4 mr-2 ${activeTab === item.title ? "text-primary" : "text-muted-foreground"}`} />
-                        <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
-                      </SidebarMenuButton>
+                      <TooltipProvider delayDuration={0}>
+                        <ShadcnTooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuButton 
+                              onClick={() => setActiveTab(item.title)}
+                              isActive={activeTab === item.title}
+                              className={`
+                                w-full transition-all duration-200 group/item relative
+                                ${activeTab === item.title 
+                                  ? "bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 scale-[1.02]" 
+                                  : "hover:bg-primary/5 hover:text-primary"
+                                }
+                              `}
+                            >
+                              <item.icon className={`w-4 h-4 mr-2 transition-transform duration-200 group-hover/item:scale-110 ${activeTab === item.title ? "text-primary-foreground" : "text-muted-foreground group-hover/item:text-primary"}`} />
+                              <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                              {activeTab === item.title && (
+                                <div className="absolute left-0 w-1 h-6 bg-primary-foreground rounded-r-full" />
+                              )}
+                            </SidebarMenuButton>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="bg-slate-900 text-white border-white/10 font-medium text-xs">
+                            {item.description}
+                          </TooltipContent>
+                        </ShadcnTooltip>
+                      </TooltipProvider>
                     </SidebarMenuItem>
                   ))}
                 </SidebarMenu>
@@ -551,7 +565,7 @@ export default function AdminDashboard() {
                           <CartesianGrid strokeDasharray="3 3" vertical={false} />
                           <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
                           <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                          <Tooltip 
+                          <RechartsTooltip 
                             contentStyle={ { backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" } }
                             itemStyle={ { color: "hsl(var(--foreground))" } }
                           />
@@ -576,7 +590,7 @@ export default function AdminDashboard() {
                             axisLine={false} 
                             tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
                           />
-                          <Tooltip 
+                          <RechartsTooltip 
                             contentStyle={ { backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" } }
                             formatter={(value: number) => formatCurrency(value)}
                           />

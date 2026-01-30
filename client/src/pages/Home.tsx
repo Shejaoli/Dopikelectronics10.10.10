@@ -256,8 +256,10 @@ const PopularCategories = () => {
                     />
                   ) : (
                     <div className="w-full h-full rounded-full bg-cyan-100/50 flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
-                      {cat.icon && (
-                        <cat.icon className="w-10 h-10 text-primary" />
+                      {(cat as any).icon && (
+                        <div className="w-10 h-10 text-primary">
+                          {(cat as any).icon}
+                        </div>
                       )}
                     </div>
                   )}
