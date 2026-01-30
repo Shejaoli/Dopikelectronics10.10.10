@@ -264,13 +264,13 @@ export default function AdminDashboard() {
     },
   });
 
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
+
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   if (!admin) return null;
-
-  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop");
 
   const menuItems = [
     { title: "Dashboard", icon: LayoutDashboard, description: "Overview of your store performance" },
