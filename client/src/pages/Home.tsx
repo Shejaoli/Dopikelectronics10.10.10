@@ -73,13 +73,13 @@ import macbookImg from "@assets/apple-macbook-air-15in-m4_1768720576555.png";
 const HomeHero = () => {
   const slides = [
     {
-      bgColor: "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800",
-      textColor: "text-foreground",
+      bgColor: "bg-[#D1F3F5]",
+      textColor: "text-[#012E40]",
       isFirst: true,
       title: "Certified Electronic Shop",
       subtitle: "in Rwanda",
-      buttonText: "Shop Now",
-      buttonHref: "/products",
+      buttonText: "Shop Deals",
+      buttonHref: "/deals",
       image: null
     },
     {
@@ -107,7 +107,13 @@ const HomeHero = () => {
   return (
     <section className="relative w-full overflow-hidden">
       <Swiper
-        // ... existing props
+        modules={[Autoplay, Pagination, Navigation]}
+        spaceBetween={0}
+        slidesPerView={1}
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        pagination={{ clickable: true }}
+        navigation={true}
+        className="h-[300px] sm:h-[400px] lg:h-[450px]"
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
@@ -120,33 +126,33 @@ const HomeHero = () => {
               {slide.isFirst ? (
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full relative flex items-center justify-center">
                   {/* Macbook - Left Side */}
-                  <div className="absolute left-[-5%] lg:left-0 bottom-[-10%] lg:bottom-[-5%] w-[35%] lg:w-[30%] z-10 rotate-[-5deg]">
+                  <div className="absolute left-[-10%] lg:left-[5%] bottom-[5%] lg:bottom-[10%] w-[45%] lg:w-[35%] z-10 rotate-[-5deg]">
                     <img src={macbookImg} alt="Macbook" className="w-full h-auto object-contain" />
                   </div>
 
                   {/* Phone - Bottom Center-ish but slightly left of center */}
-                  <div className="absolute left-[20%] lg:left-[25%] bottom-[-5%] w-[25%] lg:w-[22%] z-10">
+                  <div className="absolute left-[25%] lg:left-[30%] bottom-[-5%] w-[30%] lg:w-[25%] z-10">
                     <img src={phoneImg} alt="Phones" className="w-full h-auto object-contain" />
                   </div>
                   
                   {/* Content Container - Centered */}
                   <div className="relative z-20 space-y-4 text-center px-4">
-                    <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                    <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-7xl">
                       {slide.title}
                     </h1>
-                    <p className="text-base text-muted-foreground/80 max-w-lg mx-auto hidden sm:block">
+                    <p className="text-xl font-medium opacity-80">
                       {slide.subtitle}
                     </p>
                     
                     <Link href={slide.buttonHref}>
-                      <Button size="sm" className="rounded-full px-8 h-10 text-base font-bold mt-2">
+                      <Button size="lg" className="rounded-full px-12 h-14 text-lg font-bold mt-4 bg-[#0066FF] hover:bg-[#0055DD] text-white border-none">
                         {slide.buttonText}
                       </Button>
                     </Link>
                   </div>
 
                   {/* Controller - Far Right Bottom/Side */}
-                  <div className="absolute right-[-10%] lg:right-[-5%] bottom-[-15%] w-[40%] lg:w-[35%] z-10 rotate-[10deg]">
+                  <div className="absolute right-[-10%] lg:right-[5%] top-[15%] lg:top-[10%] w-[45%] lg:w-[35%] z-10 rotate-[10deg]">
                     <img src={controllerImg} alt="Controller" className="w-full h-auto object-contain" />
                   </div>
                 </div>
