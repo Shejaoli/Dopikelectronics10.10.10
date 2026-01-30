@@ -113,7 +113,7 @@ const HomeHero = () => {
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         pagination={{ clickable: true }}
         navigation={true}
-        className="h-[250px] sm:h-[320px] lg:h-[380px]"
+        className="h-[220px] sm:h-[280px] lg:h-[340px]"
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
@@ -126,7 +126,7 @@ const HomeHero = () => {
               {slide.isFirst ? (
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full relative flex items-center justify-center">
                   {/* Macbook - Left Side */}
-                  <div className="absolute left-[-15%] lg:left-[-5%] bottom-[-5%] lg:bottom-[-2%] w-[45%] lg:w-[32%] z-10 rotate-[-5deg]">
+                  <div className="absolute left-[-22%] lg:left-[-12%] bottom-[-5%] lg:bottom-[-2%] w-[45%] lg:w-[32%] z-10 rotate-[-5deg]">
                     <img src={macbookImg} alt="Macbook" className="w-full h-auto object-contain" />
                   </div>
 
@@ -152,7 +152,7 @@ const HomeHero = () => {
                   </div>
 
                   {/* Controller - Far Right Bottom/Side */}
-                  <div className="absolute right-[-15%] lg:right-[-8%] top-[10%] lg:top-[5%] w-[45%] lg:w-[35%] z-10 rotate-[15deg]">
+                  <div className="absolute right-[-22%] lg:right-[-12%] top-[10%] lg:top-[5%] w-[45%] lg:w-[35%] z-10 rotate-[15deg]">
                     <img src={controllerImg} alt="Controller" className="w-full h-auto object-contain" />
                   </div>
                 </div>
