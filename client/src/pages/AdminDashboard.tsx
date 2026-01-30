@@ -68,31 +68,35 @@ function AdminVideoList() {
   if (isLoading) return <div>Loading videos...</div>;
 
   return (
-    <div className="grid gap-2">
+    <div className="divide-y">
       {videos?.map((video) => (
-        <div key={video.id} className="flex items-center justify-between p-3 border rounded-md bg-card">
-          <div className="flex items-center gap-3">
-            <div className="w-16 aspect-video bg-muted rounded overflow-hidden">
+        <div key={video.id} className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="w-20 aspect-video bg-muted rounded-md overflow-hidden shadow-sm ring-1 ring-border">
               <video src={video.url} className="w-full h-full object-cover" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{video.title}</span>
-              <span className="text-xs text-muted-foreground">{video.isActive ? 'Active' : 'Inactive'}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-semibold tracking-tight">{video.title}</span>
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${video.isActive ? 'bg-green-500' : 'bg-slate-300'}`}></span>
+                <span className="text-xs font-medium text-muted-foreground">{video.isActive ? 'Active' : 'Inactive'}</span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
-              size="icon"
-              className={video.isActive ? "text-primary" : "text-muted-foreground"}
+              variant="outline"
+              size="sm"
+              className={`h-8 gap-2 transition-all ${video.isActive ? "border-primary/20 bg-primary/5 text-primary" : "text-muted-foreground"}`}
               onClick={() => toggleMutation.mutate({ id: video.id, isActive: !video.isActive })}
             >
-              {video.isActive ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+              {video.isActive ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
+              <span className="text-xs font-bold uppercase tracking-wider">{video.isActive ? 'Active' : 'Inactive'}</span>
             </Button>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               onClick={() => {
                 if (confirm("Delete this video?")) {
                   deleteMutation.mutate(video.id);
@@ -104,7 +108,11 @@ function AdminVideoList() {
           </div>
         </div>
       ))}
-      {videos?.length === 0 && <p className="text-sm text-muted-foreground">No videos uploaded yet.</p>}
+      {videos?.length === 0 && (
+        <div className="p-8 text-center text-muted-foreground">
+          <p className="text-sm font-medium">No videos uploaded yet.</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -278,66 +286,79 @@ export default function AdminDashboard() {
             ) : activeTab === "Orders" ? (
               <AdminOrders />
             ) : activeTab === "Circular Economy" ? (
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Manage Videos</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-6">
-                      <div className="flex flex-col gap-4 p-4 border rounded-lg bg-muted/30">
-                        <h3 className="font-semibold text-sm">Upload New Video</h3>
-                        <div className="grid gap-2">
-                          <label className="text-sm">Video File (MP4/WebM)</label>
-                          <input 
-                            type="file" 
-                            accept="video/mp4,video/webm"
-                            className="text-sm"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              
-                              const formData = new FormData();
-                              formData.append("video", file);
-                              formData.append("title", file.name);
+              <div className="space-y-8 max-w-4xl mx-auto">
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-xl font-bold tracking-tight">Circular Economy Settings</h2>
+                  <p className="text-sm text-muted-foreground">Manage your sustainable electronics promotion videos.</p>
+                </div>
 
-                              try {
-                                toast({ title: "Uploading...", description: "Please wait while your video is uploaded." });
-                                const response = await fetch("/api/admin/videos/upload", {
-                                  method: "POST",
-                                  body: formData
-                                });
+                <div className="grid gap-8">
+                  <Card className="border-none shadow-md bg-primary/5 ring-1 ring-primary/20">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-bold uppercase tracking-wider text-primary">Upload New Video</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4">
+                        <div className="flex items-center justify-center w-full">
+                          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-colors border-primary/30">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Recycle className="w-8 h-8 mb-3 text-primary/60" />
+                              <p className="mb-2 text-sm font-medium">Click to upload or drag and drop</p>
+                              <p className="text-xs text-muted-foreground">MP4, WebM (Max 50MB)</p>
+                            </div>
+                            <input 
+                              type="file" 
+                              accept="video/mp4,video/webm"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
                                 
-                                if (response.ok) {
-                                  toast({ title: "Success!", description: "Video uploaded successfully." });
-                                  queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
-                                } else {
-                                  const error = await response.json();
-                                  toast({ variant: "destructive", title: "Upload Failed", description: error.message });
+                                const formData = new FormData();
+                                formData.append("video", file);
+                                formData.append("title", file.name);
+
+                                try {
+                                  toast({ title: "Uploading...", description: "Please wait while your video is uploaded." });
+                                  const response = await fetch("/api/admin/videos/upload", {
+                                    method: "POST",
+                                    body: formData
+                                  });
+                                  
+                                  if (response.ok) {
+                                    toast({ title: "Success!", description: "Video uploaded successfully." });
+                                    queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+                                  } else {
+                                    const error = await response.json();
+                                    toast({ variant: "destructive", title: "Upload Failed", description: error.message });
+                                  }
+                                } catch (err) {
+                                  toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
                                 }
-                              } catch (err) {
-                                toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
-                              }
-                            }}
-                          />
+                              }}
+                            />
+                          </label>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
 
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-sm">Active Videos</h3>
+                  <div className="grid gap-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Active Videos</h3>
+                    <Card className="border-none shadow-sm ring-1 ring-border/50">
+                      <CardContent className="p-0">
                         <AdminVideoList />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Website Preview</CardTitle>
-                  </CardHeader>
-                  <CardContent className="bg-slate-950 rounded-lg p-0 overflow-hidden">
-                    <CircularEconomy />
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="grid gap-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Live Website Preview</h3>
+                    <Card className="border-none shadow-2xl overflow-hidden bg-slate-950">
+                      <CircularEconomy />
+                    </Card>
+                  </div>
+                </div>
               </div>
             ) : activeTab === "Audit Log" ? (
               <AdminAuditLog />
