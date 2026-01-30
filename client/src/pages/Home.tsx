@@ -550,119 +550,165 @@ export const CircularEconomy = () => {
   });
 
   const activeDbVideos = dbVideos?.filter(v => v.isActive) || [];
+  
+  // Prioritize featured videos if they exist
   const featuredVideos = activeDbVideos.filter(v => v.isFeatured);
   const displayVideos = featuredVideos.length >= 2 
     ? featuredVideos 
     : [...featuredVideos, ...activeDbVideos.filter(v => !v.isFeatured)].slice(0, 2);
 
   const videoRef1 = useRef<HTMLVideoElement>(null);
+  const videoRef2 = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [activeVideo, setActiveVideo] = useState(1);
 
+  // Use display videos if available, fallback to defaults
   const video1Url = displayVideos?.[0]?.url || "/videos/economy.mp4";
+  const video2Url = displayVideos?.[1]?.url || "/videos/iphone17.mp4";
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.5
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (activeVideo === 1) {
+            videoRef1.current?.play().catch(() => {});
+          } else {
+            videoRef2.current?.play().catch(() => {});
+          }
+        } else {
+          videoRef1.current?.pause();
+          videoRef2.current?.pause();
+        }
+      });
+    }, options);
+
+    const currentRef = activeVideo === 1 ? videoRef1.current : videoRef2.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (videoRef1.current) observer.unobserve(videoRef1.current);
+      if (videoRef2.current) observer.unobserve(videoRef2.current);
+    };
+  }, [activeVideo, displayVideos]);
+
+  const handleVideo1End = () => {
+    if (displayVideos && displayVideos.length > 1) {
+      setActiveVideo(2);
+      setTimeout(() => {
+        videoRef2.current?.play().catch(() => {});
+      }, 100);
+    } else {
+      videoRef1.current?.play().catch(() => {});
+    }
+  };
+
+  const handleVideo2End = () => {
+    setActiveVideo(1);
+    setTimeout(() => {
+      videoRef1.current?.play().catch(() => {});
+    }, 100);
+  };
 
   if (isLoading) return null;
 
   return (
-    <section className="py-20 bg-slate-950 text-white relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5"></div>
+    <section className="py-16 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none"></div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-16 items-center">
-          {/* Left: Content */}
-          <div className="lg:w-1/2 space-y-8">
-            <div className="space-y-4">
-              <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Our Mission</Badge>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter leading-none">
-                Join the <span className="text-primary italic">Circular</span> Economy
-              </h2>
-              <p className="text-xl text-slate-400 leading-relaxed max-w-xl">
-                By choosing refurbished, you're not just saving money—you're saving the planet. 
-                Learn how your purchase reduces e-waste and CO₂ emissions in Rwanda.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
-                <div className="h-10 w-10 shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <Star className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg leading-tight">Save Money</h3>
-                  <p className="text-sm text-slate-400 mt-1">Premium tech at up to 70% less than new.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
-                <div className="h-10 w-10 shrink-0 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg leading-tight">Save Planet</h3>
-                  <p className="text-sm text-slate-400 mt-1">Reduce CO₂ emissions with every purchase.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group sm:col-span-2">
-                <div className="h-10 w-10 shrink-0 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                  <Users className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg leading-tight">Impact Rwanda</h3>
-                  <p className="text-sm text-slate-400 mt-1">Directly reducing electronic waste in our local communities.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-4 pt-4">
-              <Link href="/about">
-                <Button size="lg" className="rounded-full px-10 h-14 text-lg font-bold shadow-xl shadow-primary/20">
-                  Why Refurbished?
-                </Button>
-              </Link>
-              <Link href="/shop">
-                <Button size="lg" variant="outline" className="rounded-full border-white/20 text-white hover:bg-white/10 h-14 px-10 font-bold">
-                  Browse Gear
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Right: Video/Visual */}
-          <div className="lg:w-1/2 relative">
-            <div className="relative group aspect-[4/5] w-full max-w-[450px] mx-auto overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl">
-              <div className="absolute inset-0 bg-primary/20 opacity-20 group-hover:opacity-0 transition-opacity duration-700 z-10"></div>
-              <video 
-                ref={videoRef1}
-                src={video1Url} 
-                muted={isMuted}
-                autoPlay
-                loop
-                playsInline
-                className="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
-              />
-              
-              {/* Play Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-                <div className="h-20 w-20 rounded-full bg-primary/90 backdrop-blur-md flex items-center justify-center text-white shadow-2xl shadow-primary/40">
-                  <Volume2 className="h-8 w-8" />
-                </div>
-              </div>
-
-              {/* Mute Toggle */}
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute bottom-8 right-8 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-30 transition-all hover:scale-110 active:scale-95 shadow-xl"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsMuted(!isMuted);
-                }}
-              >
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        <div className="flex flex-col md:flex-row gap-12 items-center">
+          <div className="md:w-6/12 lg:w-7/12 space-y-6">
+            <h2 className="text-3xl md:text-5xl font-bold">Join the Circular Economy</h2>
+            <p className="text-lg text-slate-300 leading-relaxed">
+              By choosing refurbished, you're not just saving money—you're saving the planet. 
+              Every device refurbished is one less device in a landfill. Learn how your purchase 
+              reduces e-waste and CO₂ emissions.
+            </p>
+            <Link href="/about">
+              <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 h-14 px-8 font-bold">
+                Learn More
               </Button>
+            </Link>
+          </div>
+          <div className="md:w-6/12 lg:w-5/12 flex justify-center gap-4">
+            {/* Video 1 */}
+            <div className={`relative group w-full max-w-[240px] transition-all duration-500 ${activeVideo === 1 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
+              <div className={`absolute -inset-1 bg-gradient-to-r from-primary to-cyan-400 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 ${activeVideo === 1 ? 'opacity-40' : 'opacity-0'}`}></div>
+              <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">
+                <video 
+                  ref={videoRef1}
+                  src={video1Url} 
+                  muted={isMuted}
+                  playsInline
+                  onEnded={handleVideo1End}
+                  className="w-full h-full object-cover block cursor-pointer"
+                  onClick={() => {
+                    setActiveVideo(1);
+                    videoRef2.current?.pause();
+                    videoRef1.current?.play().catch(() => {});
+                  }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+                {activeVideo === 1 && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsMuted(!isMuted);
+                    }}
+                  >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </Button>
+                )}
+              </div>
             </div>
-            
-            {/* Decorative Elements */}
-            <div className="absolute -top-6 -right-6 h-32 w-32 bg-primary/20 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-10 -left-10 h-40 w-40 bg-emerald-500/20 rounded-full blur-3xl"></div>
+
+            {/* Video 2 (Only show if we have a second video or are using default) */}
+            {(activeDbVideos?.length !== 1) && (
+              <div className={`relative group w-full max-w-[240px] transition-all duration-500 ${activeVideo === 2 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 grayscale'}`}>
+                <div className={`absolute -inset-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 ${activeVideo === 2 ? 'opacity-40' : 'opacity-0'}`}></div>
+                <div className="relative bg-slate-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl aspect-[4/5]">
+                  <video 
+                    ref={videoRef2}
+                    src={video2Url} 
+                    muted={isMuted}
+                    playsInline
+                    onEnded={handleVideo2End}
+                    className="w-full h-full object-cover block cursor-pointer"
+                    onClick={() => {
+                      setActiveVideo(2);
+                      videoRef1.current?.pause();
+                      videoRef2.current?.play().catch(() => {});
+                    }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                  {activeVideo === 2 && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="absolute bottom-4 right-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white z-20 transition-all hover:scale-110 active:scale-95 shadow-xl"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMuted(!isMuted);
+                      }}
+                    >
+                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
