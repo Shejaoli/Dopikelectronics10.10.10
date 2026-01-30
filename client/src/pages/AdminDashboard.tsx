@@ -335,6 +335,12 @@ export default function AdminDashboard() {
                               const file = input.files?.[0];
                               if (!file) return;
                               
+                              const allowedTypes = ["video/mp4", "video/webm"];
+                              if (!allowedTypes.includes(file.type)) {
+                                toast({ variant: "destructive", title: "Unsupported format", description: "Please upload MP4 or WebM videos." });
+                                return;
+                              }
+
                               const formData = new FormData();
                               formData.append("video", file);
                               formData.append("title", file.name);
@@ -342,32 +348,58 @@ export default function AdminDashboard() {
                               const btn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
                               btn.disabled = true;
 
-                              try {
-                                toast({ title: "Uploading...", description: "Please wait while your video is uploaded." });
-                                const response = await fetch("/api/admin/videos/upload", {
-                                  method: "POST",
-                                  body: formData
-                                });
-                                
-                                if (response.ok) {
+                              const xhr = new XMLHttpRequest();
+                              xhr.open("POST", "/api/admin/videos/upload", true);
+
+                              const progressContainer = document.getElementById('upload-progress-container');
+                              const progressBar = document.getElementById('upload-progress-bar');
+                              if (progressContainer) progressContainer.classList.remove('hidden');
+
+                              xhr.upload.onprogress = (e) => {
+                                if (e.lengthComputable && progressBar) {
+                                  const percentComplete = (e.loaded / e.total) * 100;
+                                  progressBar.style.width = percentComplete + "%";
+                                }
+                              };
+
+                              xhr.onload = () => {
+                                if (xhr.status === 201) {
                                   toast({ title: "Success!", description: "Video uploaded successfully." });
                                   queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
                                   input.value = "";
                                   const label = input.parentElement?.querySelector('p.mb-1') as HTMLParagraphElement;
                                   if (label) label.textContent = "Click to upload or drag and drop";
+                                  if (progressContainer) progressContainer.classList.add('hidden');
+                                  if (progressBar) progressBar.style.width = "0%";
                                 } else {
-                                  const error = await response.json();
-                                  toast({ variant: "destructive", title: "Upload Failed", description: error.message });
+                                  let message = "Upload failed";
+                                  try {
+                                    const error = JSON.parse(xhr.responseText);
+                                    message = error.message;
+                                  } catch (e) {}
+                                  toast({ variant: "destructive", title: "Upload Failed", description: message });
                                   btn.disabled = false;
+                                  if (progressContainer) progressContainer.classList.add('hidden');
                                 }
-                              } catch (err) {
+                              };
+
+                              xhr.onerror = () => {
                                 toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
                                 btn.disabled = false;
-                              }
+                                if (progressContainer) progressContainer.classList.add('hidden');
+                              };
+
+                              xhr.send(formData);
                             }}
                           >
                             Upload Video
                           </Button>
+                          <div id="upload-progress-container" className="w-full hidden space-y-2">
+                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                              <div id="upload-progress-bar" className="h-full bg-primary transition-all duration-300 w-0"></div>
+                            </div>
+                            <p className="text-[10px] text-center uppercase tracking-tighter font-bold text-muted-foreground">Uploading video...</p>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
