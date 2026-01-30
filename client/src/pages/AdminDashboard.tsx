@@ -25,6 +25,7 @@ import AdminAddProduct from "./AdminAddProduct";
 import AdminEditProduct from "./AdminEditProduct";
 import AdminOrders from "./AdminOrders";
 import AdminAuditLog from "./AdminAuditLog";
+import { CircularEconomy } from "./Home";
 import { 
   BarChart, 
   Bar, 
@@ -36,6 +37,7 @@ import {
   LineChart,
   Line,
 } from "recharts";
+import { Recycle } from "lucide-react";
 
 export function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-RW", {
@@ -110,6 +112,7 @@ export default function AdminDashboard() {
     { title: "Dashboard", icon: LayoutDashboard },
     { title: "Products", icon: Package },
     { title: "Orders", icon: ShoppingCart },
+    { title: "Circular Economy", icon: Recycle },
     { title: "Audit Log", icon: History },
   ];
 
@@ -204,6 +207,17 @@ export default function AdminDashboard() {
               )
             ) : activeTab === "Orders" ? (
               <AdminOrders />
+            ) : activeTab === "Circular Economy" ? (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Circular Economy Preview</CardTitle>
+                  </CardHeader>
+                  <CardContent className="bg-slate-950 rounded-lg p-0 overflow-hidden">
+                    <CircularEconomy />
+                  </CardContent>
+                </Card>
+              </div>
             ) : activeTab === "Audit Log" ? (
               <AdminAuditLog />
             ) : (

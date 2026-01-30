@@ -472,7 +472,7 @@ const GamingPreview = () => {
     </section>
   );
 };
-const CircularEconomy = () => {
+export const CircularEconomy = () => {
   const videoRef1 = useRef<HTMLVideoElement>(null);
   const videoRef2 = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
