@@ -306,10 +306,7 @@ export default function AdminDashboard() {
                                 <Recycle className="w-8 h-8 text-primary" />
                               </div>
                               <p className="mb-1 text-sm font-bold tracking-tight">
-                                {(() => {
-                                  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-                                  return selectedFile ? selectedFile.name : "Click to upload or drag and drop";
-                                })()}
+                                Click to upload or drag and drop
                               </p>
                               <p className="text-xs text-muted-foreground font-medium">MP4 or WebM · Max 50MB</p>
                             </div>
