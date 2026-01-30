@@ -6,9 +6,10 @@ import { z } from "zod";
 import { hashPassword, verifyPassword, requireAdminAuth } from "./auth";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
-import { insertProductSchema, insertOrderSchema, orders } from "@shared/schema";
+import { insertProductSchema, insertOrderSchema, orders, insertVideoSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import express from "express";
 import Stripe from "stripe";
 import { Buffer } from "buffer";
@@ -55,6 +56,27 @@ const upload = multer({
   },
 });
 
+const video_storage_config = multer.diskStorage({
+  destination: "./public/uploads/videos/",
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "video-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const uploadVideo = multer({
+  storage: video_storage_config,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB for videos
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = ["video/mp4", "video/webm", "video/ogg"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only .mp4, .webm and .ogg video formats allowed!"));
+    }
+  },
+});
+
 declare module "express-session" {
   interface SessionData {
     adminId: number;
@@ -65,6 +87,14 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Ensure upload directories exist
+  const dirs = ["./public/uploads/products", "./public/uploads/videos"];
+  dirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+
   // Serve uploaded files
   app.use("/uploads", express.static("public/uploads"));
 
@@ -83,6 +113,49 @@ export async function registerRoutes(
       const imageUrl = `/uploads/products/${req.file.filename}`;
       res.status(200).json({ url: imageUrl });
     });
+  });
+
+  app.post("/api/admin/videos/upload", requireAdminAuth, (req, res) => {
+    uploadVideo.single("video")(req, res, async (err) => {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ message: `Multer error: ${err.message}` });
+      } else if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      
+      if (!req.file) {
+        return res.status(400).json({ message: "No video file uploaded" });
+      }
+      
+      try {
+        const videoUrl = `/uploads/videos/${req.file.filename}`;
+        const videoData = insertVideoSchema.parse({
+          title: req.body.title || req.file.originalname,
+          url: videoUrl,
+          isActive: true,
+          order: parseInt(req.body.order || "0")
+        });
+        
+        const video = await storage.createVideo(videoData);
+        res.status(201).json(video);
+      } catch (error) {
+        res.status(400).json({ message: error instanceof Error ? error.message : "Invalid video data" });
+      }
+    });
+  });
+
+  app.get("/api/videos", async (_req, res) => {
+    const videos = await storage.getVideos();
+    res.json(videos);
+  });
+
+  app.delete("/api/admin/videos/:id", requireAdminAuth, async (req, res) => {
+    try {
+      await storage.deleteVideo(Number(req.params.id));
+      res.sendStatus(200);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete video" });
+    }
   });
 
   app.get("/api/admin/protected", requireAdminAuth, (req, res) => {

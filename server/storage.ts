@@ -26,6 +26,11 @@ export interface IStorage {
   // Audit methods
   getAuditLogs(): Promise<AuditLog[]>;
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+
+  // Video methods
+  getVideos(): Promise<Video[]>;
+  createVideo(video: InsertVideo): Promise<Video>;
+  deleteVideo(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -410,6 +415,19 @@ export class DatabaseStorage implements IStorage {
   async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
     const [newLog] = await db.insert(auditLogs).values(log).returning();
     return newLog;
+  }
+
+  async getVideos(): Promise<Video[]> {
+    return await db.select().from(videos).orderBy(desc(videos.order), desc(videos.createdAt));
+  }
+
+  async createVideo(video: InsertVideo): Promise<Video> {
+    const [newVideo] = await db.insert(videos).values(video).returning();
+    return newVideo;
+  }
+
+  async deleteVideo(id: number): Promise<void> {
+    await db.delete(videos).where(eq(videos.id, id));
   }
 }
 
