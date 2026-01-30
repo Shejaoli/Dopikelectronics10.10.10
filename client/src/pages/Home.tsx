@@ -194,40 +194,40 @@ const TrustBar = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="bg-white dark:bg-slate-900 border-b py-6 relative z-30"
+      className="bg-white dark:bg-slate-900 border-b py-3 relative z-30"
     >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 items-center justify-items-center">
-            <div className="flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
-                <ShieldCheck className="w-5 h-5" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4 items-center justify-items-center">
+            <div className="flex items-center gap-2 group">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <ShieldCheck className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-bold leading-none mb-1">12-Month Warranty</span>
                 <span className="text-[10px] text-muted-foreground/70">Genuine protection</span>
               </div>
             </div>
-            <div className="flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
-                <Check className="w-5 h-5" />
+            <div className="flex items-center gap-2 group">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <Check className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-bold leading-none mb-1">Quality Checked</span>
                 <span className="text-[10px] text-muted-foreground/70">Rigorously tested</span>
               </div>
             </div>
-            <div className="flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
-                <MapPin className="w-5 h-5" />
+            <div className="flex items-center gap-2 group">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                <MapPin className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-bold leading-none mb-1">Kigali Support</span>
                 <span className="text-[10px] text-muted-foreground/70">Local expert help</span>
               </div>
             </div>
-            <div className="flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-400/10 text-yellow-600 transition-transform group-hover:scale-110">
-                <Star className="w-5 h-5 fill-yellow-600" />
+            <div className="flex items-center gap-2 group">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400/10 text-yellow-600 transition-transform group-hover:scale-110">
+                <Star className="w-4 h-4 fill-yellow-600" />
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-bold leading-none mb-1">4.7 Google Reviews</span>
