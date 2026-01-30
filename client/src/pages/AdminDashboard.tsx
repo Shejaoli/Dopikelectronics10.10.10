@@ -296,35 +296,50 @@ export default function AdminDashboard() {
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupContent className="p-2">
-                <SidebarMenu>
+                <SidebarMenu className="space-y-1">
                   {menuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
-                      <TooltipProvider delayDuration={0}>
+                      <TooltipProvider delayDuration={100}>
                         <ShadcnTooltip>
                           <TooltipTrigger asChild>
                             <SidebarMenuButton 
                               onClick={() => setActiveTab(item.title)}
                               isActive={activeTab === item.title}
+                              data-testid={`sidebar-menu-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                               className={`
-                                w-full transition-all duration-300 group/item relative overflow-hidden
+                                w-full transition-all duration-200 ease-out group/item relative rounded-lg
                                 ${activeTab === item.title 
-                                  ? "bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 scale-[1.02] active-elevate-2" 
-                                  : "hover:bg-primary/10 hover:text-primary hover-elevate"
+                                  ? "bg-primary/15 text-primary font-semibold ring-1 ring-primary/20 shadow-sm" 
+                                  : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                                 }
                               `}
                             >
-                              <item.icon className={`w-4 h-4 mr-2 transition-transform duration-300 group-hover/item:scale-125 group-hover/item:rotate-12 ${activeTab === item.title ? "text-primary-foreground" : "text-muted-foreground group-hover/item:text-primary"}`} />
-                              <span className="group-data-[collapsible=icon]:hidden transition-all duration-300 group-hover/item:translate-x-1">{item.title}</span>
+                              <motion.div
+                                className="flex items-center w-full"
+                                whileHover={{ x: 2 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                              >
+                                <item.icon className={`w-4 h-4 mr-3 transition-all duration-200 ${activeTab === item.title ? "text-primary" : "text-muted-foreground group-hover/item:text-primary"}`} />
+                                <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                              </motion.div>
                               {activeTab === item.title && (
                                 <motion.div 
-                                  layoutId="active-pill"
-                                  className="absolute left-0 w-1.5 h-6 bg-primary-foreground rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                                  layoutId="active-indicator"
+                                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" 
+                                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                 />
                               )}
                             </SidebarMenuButton>
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="bg-slate-900 text-white border-white/10 font-medium text-xs">
-                            {item.description}
+                          <TooltipContent 
+                            side="right" 
+                            sideOffset={8}
+                            className="bg-slate-900 text-white border-slate-700 font-medium text-xs px-3 py-2 shadow-xl"
+                          >
+                            <div className="flex flex-col gap-0.5">
+                              <span className="font-semibold">{item.title}</span>
+                              <span className="text-slate-400 text-[10px]">{item.description}</span>
+                            </div>
                           </TooltipContent>
                         </ShadcnTooltip>
                       </TooltipProvider>
@@ -335,16 +350,30 @@ export default function AdminDashboard() {
             </SidebarGroup>
           </SidebarContent>
           <SidebarFooter className="p-4 border-t group-data-[collapsible=icon]:p-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => logoutMutation.mutate()}
-              disabled={logoutMutation.isPending}
-              className="w-full justify-start hover-elevate group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-            >
-              <LogOut className="w-4 h-4 mr-2 group-data-[collapsible=icon]:mr-0" />
-              <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-            </Button>
+            <TooltipProvider delayDuration={100}>
+              <ShadcnTooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => logoutMutation.mutate()}
+                    disabled={logoutMutation.isPending}
+                    data-testid="button-logout"
+                    className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                  >
+                    <LogOut className="w-4 h-4 mr-2 group-data-[collapsible=icon]:mr-0 transition-transform duration-200 group-hover:scale-110" />
+                    <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent 
+                  side="right" 
+                  sideOffset={8}
+                  className="bg-slate-900 text-white border-slate-700 font-medium text-xs px-3 py-2 shadow-xl"
+                >
+                  Sign out of admin panel
+                </TooltipContent>
+              </ShadcnTooltip>
+            </TooltipProvider>
           </SidebarFooter>
         </Sidebar>
 
