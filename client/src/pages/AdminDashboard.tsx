@@ -423,7 +423,7 @@ export default function AdminDashboard() {
                           <Button 
                             id="upload-submit-btn"
                             disabled
-                            className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover-elevate active-elevate-2"
+                            className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 hover-elevate active-elevate-2 bg-blue-700 hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
                             onClick={async () => {
                               const input = document.getElementById('video-upload-input') as HTMLInputElement;
                               const file = input.files?.[0];
@@ -498,6 +498,9 @@ export default function AdminDashboard() {
                           >
                             Upload Video
                           </Button>
+                          <p className="text-[10px] text-muted-foreground font-medium text-center italic">
+                            Your video will appear instantly on the website
+                          </p>
                           <div id="upload-progress-container" className="w-full hidden space-y-2">
                             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                               <div id="upload-progress-bar" className="h-full bg-primary transition-all duration-300 w-0"></div>
