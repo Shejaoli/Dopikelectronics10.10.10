@@ -556,7 +556,8 @@ const CircularEconomy = () => {
                   className="w-full h-full object-cover block cursor-pointer"
                   onClick={() => {
                     setActiveVideo(1);
-                    videoRef1.current?.play();
+                    videoRef2.current?.pause();
+                    videoRef1.current?.play().catch(() => {});
                   }}
                 >
                   Your browser does not support the video tag.
@@ -590,12 +591,13 @@ const CircularEconomy = () => {
                   className="w-full h-full object-cover block cursor-pointer"
                   onClick={() => {
                     setActiveVideo(2);
-                    videoRef2.current?.play();
+                    videoRef1.current?.pause();
+                    videoRef2.current?.play().catch(() => {});
                   }}
                 >
                   Your browser does not support the video tag.
                 </video>
-                {activeVideo === 2 && (activeVideo === 2) && (
+                {activeVideo === 2 && (
                   <Button
                     size="icon"
                     variant="secondary"
