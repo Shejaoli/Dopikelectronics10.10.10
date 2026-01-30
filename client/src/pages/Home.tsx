@@ -113,7 +113,7 @@ const HomeHero = () => {
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         pagination={{ clickable: true }}
         navigation={true}
-        className="h-[300px] sm:h-[400px] lg:h-[450px]"
+        className="h-[250px] sm:h-[320px] lg:h-[380px]"
       >
         {slides.map((slide, index) => (
           <SwiperSlide key={index}>
@@ -126,7 +126,7 @@ const HomeHero = () => {
               {slide.isFirst ? (
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full h-full relative flex items-center justify-center">
                   {/* Macbook - Left Side */}
-                  <div className="absolute left-[-10%] lg:left-[5%] bottom-[5%] lg:bottom-[10%] w-[45%] lg:w-[35%] z-10 rotate-[-5deg]">
+                  <div className="absolute left-[-15%] lg:left-[-5%] bottom-[-5%] lg:bottom-[-2%] w-[45%] lg:w-[32%] z-10 rotate-[-5deg]">
                     <img src={macbookImg} alt="Macbook" className="w-full h-auto object-contain" />
                   </div>
 
@@ -136,23 +136,23 @@ const HomeHero = () => {
                   </div>
                   
                   {/* Content Container - Centered */}
-                  <div className="relative z-20 space-y-4 text-center px-4">
-                    <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-7xl">
+                  <div className="relative z-20 space-y-3 text-center px-4">
+                    <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
                       {slide.title}
                     </h1>
-                    <p className="text-xl font-medium opacity-80">
+                    <p className="text-lg font-medium opacity-80">
                       {slide.subtitle}
                     </p>
                     
                     <Link href={slide.buttonHref}>
-                      <Button size="lg" className="rounded-full px-12 h-14 text-lg font-bold mt-4 bg-[#0066FF] hover:bg-[#0055DD] text-white border-none">
+                      <Button size="lg" className="rounded-full px-10 h-12 text-base font-bold mt-2 bg-[#0066FF] hover:bg-[#0055DD] text-white border-none">
                         {slide.buttonText}
                       </Button>
                     </Link>
                   </div>
 
                   {/* Controller - Far Right Bottom/Side */}
-                  <div className="absolute right-[-10%] lg:right-[5%] top-[15%] lg:top-[10%] w-[45%] lg:w-[35%] z-10 rotate-[10deg]">
+                  <div className="absolute right-[-15%] lg:right-[-8%] top-[10%] lg:top-[5%] w-[45%] lg:w-[35%] z-10 rotate-[15deg]">
                     <img src={controllerImg} alt="Controller" className="w-full h-auto object-contain" />
                   </div>
                 </div>
