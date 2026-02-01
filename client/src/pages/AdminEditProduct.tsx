@@ -23,6 +23,34 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
   const [isUploading, setIsUploading] = useState(false);
   const [specEntries, setSpecEntries] = useState<{ key: string; value: string }[]>([]);
 
+  const handleAdditionalImagesUpload = async (files: FileList) => {
+    const formData = new FormData();
+    Array.from(files).forEach((file) => formData.append("images", file));
+
+    setIsUploading(true);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      const currentImages = form.getValues("additionalImages") || [];
+      form.setValue("additionalImages", [...currentImages, ...data.urls]);
+      toast({ title: "Images uploaded" });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "Failed to upload images.",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const { data: product, isLoading: isLoadingProduct } = useQuery<Product>({
     queryKey: [`/api/products/${productId}`],
   });
@@ -335,6 +363,53 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
                     </FormItem>
                   )}
                 />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <FormLabel>Additional Images</FormLabel>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {(form.watch("additionalImages") || []).map((url, idx) => (
+                  <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border">
+                    <img src={url} alt={`Additional ${idx}`} className="object-cover w-full h-full" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        const current = form.getValues("additionalImages") || [];
+                        form.setValue("additionalImages", current.filter((_, i) => i !== idx));
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="flex items-center justify-center">
+                  <Input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.length) {
+                        handleAdditionalImagesUpload(e.target.files);
+                      }
+                    }}
+                    className="hidden"
+                    id="additional-images-upload-edit"
+                    disabled={isUploading}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full aspect-square border-dashed"
+                    onClick={() => document.getElementById("additional-images-upload-edit")?.click()}
+                    disabled={isUploading}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
