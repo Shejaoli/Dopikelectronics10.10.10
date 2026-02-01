@@ -51,7 +51,7 @@ function AdminVideoList() {
   const displayVideos = featuredVideo 
     ? [featuredVideo, ...activeDbVideos.filter(v => v.id !== featuredVideo.id)].slice(0, 2)
     : activeDbVideos.slice(0, 2);
-  
+
   const displayVideoIds = displayVideos.map(v => v.id);
 
   const deleteMutation = useMutation({
@@ -215,6 +215,175 @@ export function formatCurrency(amount: number) {
     currency: "RWF",
     maximumFractionDigits: 0,
   }).format(amount);
+}
+
+function VideoUploadForm() {
+  const { toast } = useToast();
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState("");
+
+  const uploadMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      setIsUploading(true);
+      setUploadStatus("uploading");
+      setUploadProgress(0);
+
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/admin/videos/upload", true);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setUploadProgress((e.loaded / e.total) * 100);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status === 201) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            try {
+              const error = JSON.parse(xhr.responseText);
+              reject(new Error(error.message || "Upload failed"));
+            } catch (e) {
+              reject(new Error("Upload failed"));
+            }
+          }
+        };
+
+        xhr.onerror = () => reject(new Error("Network error"));
+        xhr.send(formData);
+      });
+    },
+    onSuccess: () => {
+      setUploadStatus("success");
+      toast({ title: "Success!", description: "Video uploaded successfully." });
+      queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+      setSelectedFileName("");
+
+      const input = document.getElementById('video-upload-input') as HTMLInputElement;
+      if (input) input.value = "";
+
+      setTimeout(() => {
+        setUploadStatus("idle");
+        setIsUploading(false);
+        setUploadProgress(0);
+      }, 3000);
+    },
+    onError: (error: Error) => {
+      setUploadStatus("error");
+      setErrorMessage(error.message);
+      toast({ variant: "destructive", title: "Upload Failed", description: error.message });
+      setIsUploading(false);
+    }
+  });
+
+  const handleFileChange = (file: File) => {
+    if (file) {
+      setSelectedFileName(file.name);
+      setErrorMessage("");
+      const input = document.getElementById('video-upload-input') as HTMLInputElement;
+      if (input) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        input.files = dataTransfer.files;
+      }
+    }
+  };
+
+  return (
+    <Card className="border-none shadow-md bg-primary/5 ring-1 ring-primary/20 hover:shadow-lg transition-shadow duration-300">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-bold uppercase tracking-wider text-primary">Upload New Video</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4">
+          <div className="flex flex-col gap-4 items-center">
+            <motion.label 
+              whileHover={{ scale: 1.005 }}
+              whileTap={{ scale: 0.995 }}
+              tabIndex={0}
+              role="button"
+              className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/40 group/upload focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.add('ring-2', 'ring-primary', 'bg-primary/10');
+              }}
+              onDragLeave={(e) => {
+                e.currentTarget.classList.remove('ring-2', 'ring-primary', 'bg-primary/10');
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove('ring-2', 'ring-primary', 'bg-primary/10');
+                const file = e.dataTransfer.files?.[0];
+                if (file) handleFileChange(file);
+              }}
+              onClick={() => document.getElementById('video-upload-input')?.click()}
+            >
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <div className="p-3 rounded-full bg-primary/10 group-hover/upload:bg-primary/20 transition-colors mb-3">
+                  <Recycle className="w-8 h-8 text-primary" />
+                </div>
+                <p className="mb-1 text-sm font-semibold tracking-tight">
+                  {selectedFileName || "Click to upload or drag and drop"}
+                </p>
+                <p className="text-xs text-muted-foreground">MP4 or WebM · Max 50MB</p>
+              </div>
+              <input 
+                type="file" 
+                id="video-upload-input"
+                accept="video/mp4,video/webm"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileChange(file);
+                }}
+              />
+            </motion.label>
+            <Button 
+              disabled={isUploading || !selectedFileName}
+              className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => {
+                const input = document.getElementById('video-upload-input') as HTMLInputElement;
+                const file = input.files?.[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append("video", file);
+                formData.append("title", file.name);
+                uploadMutation.mutate(formData);
+              }}
+            >
+              {isUploading ? "Uploading..." : "Upload Video"}
+            </Button>
+
+            {(isUploading || uploadStatus !== "idle") && (
+              <div className="w-full space-y-2">
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-300 ${uploadStatus === "error" ? "bg-destructive" : "bg-primary"}`}
+                    style={ { width: `${uploadProgress}%` } }
+                  ></div>
+                </div>
+                <p className={`text-[10px] text-center uppercase tracking-tighter font-bold ${
+                  uploadStatus === "error" ? "text-destructive" : 
+                  uploadStatus === "success" ? "text-green-600 dark:text-green-400" : 
+                  "text-muted-foreground"
+                }`}>
+                  {uploadStatus === "uploading" ? `Uploading... ${Math.round(uploadProgress)}%` : 
+                   uploadStatus === "success" ? "Video uploaded successfully" : 
+                   uploadStatus === "error" ? `Error: ${errorMessage}` : "Preparing..."}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default function AdminDashboard() {
@@ -389,7 +558,7 @@ export default function AdminDashboard() {
           <header className="h-16 border-b flex items-center justify-between px-6 bg-card">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="hover-elevate" />
-              <h1 className="text-lg font-semibold">DOPIK ELECTRONICS â€“ Admin</h1>
+              <h1 className="text-lg font-semibold">DOPIK ELECTRONICS – Admin</h1>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-muted-foreground hidden sm:inline-block">
@@ -405,7 +574,7 @@ export default function AdminDashboard() {
               </Button>
             </div>
           </header>
-          
+
           <main className="flex-1 overflow-auto p-6">
             {activeTab === "Products" ? (
               editingProductId ? (
@@ -436,198 +605,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid gap-8">
-                  <Card className="border-none shadow-md bg-primary/5 ring-1 ring-primary/20 hover:shadow-lg transition-shadow duration-300">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-bold uppercase tracking-wider text-primary">Upload New Video</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-4">
-                        <div className="flex flex-col gap-4 items-center">
-                          <motion.label 
-                            whileHover={{ scale: 1.005 }}
-                            whileTap={{ scale: 0.995 }}
-                            tabIndex={0}
-                            role="button"
-                            aria-label="Upload video file. Click or press Enter to browse files. You can also drag and drop."
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                document.getElementById('video-upload-input')?.click();
-                              }
-                            }}
-                            onDragOver={(e) => {
-                              e.preventDefault();
-                              e.currentTarget.classList.add('ring-2', 'ring-primary', 'bg-primary/10');
-                            }}
-                            onDragLeave={(e) => {
-                              e.currentTarget.classList.remove('ring-2', 'ring-primary', 'bg-primary/10');
-                            }}
-                            onDrop={(e) => {
-                              e.preventDefault();
-                              e.currentTarget.classList.remove('ring-2', 'ring-primary', 'bg-primary/10');
-                              const file = e.dataTransfer.files?.[0];
-                              if (file) {
-                                const input = document.getElementById('video-upload-input') as HTMLInputElement;
-                                const dataTransfer = new DataTransfer();
-                                dataTransfer.items.add(file);
-                                input.files = dataTransfer.files;
-                                const btn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
-                                const label = e.currentTarget.querySelector('p.mb-1') as HTMLParagraphElement;
-                                if (btn) btn.disabled = false;
-                                if (label) label.textContent = file.name;
-                              }
-                            }}
-                            className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted/50 transition-all duration-200 border-primary/40 group/upload focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                          >
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <div className="p-3 rounded-full bg-primary/10 group-hover/upload:bg-primary/20 transition-colors mb-3" aria-hidden="true">
-                                <Recycle className="w-8 h-8 text-primary" />
-                              </div>
-                              <p className="mb-1 text-sm font-semibold tracking-tight">
-                                Click to upload or drag and drop
-                              </p>
-                              <p className="text-xs text-muted-foreground">MP4 or WebM Â· Max 50MB</p>
-                            </div>
-                            <input 
-                              type="file" 
-                              id="video-upload-input"
-                              accept="video/mp4,video/webm"
-                              className="sr-only"
-                              aria-describedby="upload-help-text"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  const btn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
-                                  const label = e.target.parentElement?.querySelector('p.mb-1') as HTMLParagraphElement;
-                                  if (btn) btn.disabled = false;
-                                  if (label) label.textContent = file.name;
-                                }
-                              }}
-                            />
-                          </motion.label>
-                          <Button 
-                            id="upload-submit-btn"
-                            disabled
-                            data-testid="button-upload-video"
-                            className="w-full h-11 font-bold uppercase tracking-widest shadow-lg shadow-primary/20 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                            onClick={async () => {
-                              const input = document.getElementById('video-upload-input') as HTMLInputElement;
-                              const file = input.files?.[0];
-                              if (!file) return;
-                              
-                              const allowedTypes = ["video/mp4", "video/webm"];
-                              if (!allowedTypes.includes(file.type)) {
-                                toast({ variant: "destructive", title: "Unsupported format", description: "Please upload MP4 or WebM videos." });
-                                return;
-                              }
-
-                              const maxSize = 50 * 1024 * 1024; // 50MB
-                              if (file.size > maxSize) {
-                                toast({ 
-                                  variant: "destructive", 
-                                  title: "File too large", 
-                                  description: "Maximum video size is 50MB. Please optimize your video before uploading." 
-                                });
-                                return;
-                              }
-
-                              const formData = new FormData();
-                              formData.append("video", file);
-                              formData.append("title", file.name);
-
-                              const btn = document.getElementById('upload-submit-btn') as HTMLButtonElement;
-                              btn.disabled = true;
-
-                              const xhr = new XMLHttpRequest();
-                              xhr.open("POST", "/api/admin/videos/upload", true);
-
-                              const progressContainer = document.getElementById('upload-progress-container');
-                              const progressBar = document.getElementById('upload-progress-bar');
-                              if (progressContainer) progressContainer.classList.remove('hidden');
-
-                              xhr.upload.onprogress = (e) => {
-                                if (e.lengthComputable && progressBar) {
-                                  const percentComplete = (e.loaded / e.total) * 100;
-                                  progressBar.style.width = percentComplete + "%";
-                                }
-                              };
-
-                              xhr.onload = () => {
-                                if (xhr.status === 201) {
-                                  const statusText = document.getElementById('upload-status-text');
-                                  const progressIcon = document.getElementById('upload-progress-icon');
-                                  if (statusText) {
-                                    statusText.textContent = "Video uploaded successfully";
-                                    statusText.className = "text-[10px] text-center uppercase tracking-tighter font-bold text-green-600 dark:text-green-400";
-                                  }
-                                  if (progressIcon) {
-                                    progressIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-green-600 dark:text-green-400"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                                  }
-                                  
-                                  toast({ title: "Success!", description: "Video uploaded successfully." });
-                                  queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
-                                  input.value = "";
-                                  const label = input.parentElement?.querySelector('p.mb-1') as HTMLParagraphElement;
-                                  if (label) label.textContent = "Click to upload or drag and drop";
-                                  
-                                  setTimeout(() => {
-                                    if (progressContainer) progressContainer.classList.add('hidden');
-                                    if (progressBar) progressBar.style.width = "0%";
-                                    if (statusText) {
-                                      statusText.textContent = "Uploading video...";
-                                      statusText.className = "text-[10px] text-center uppercase tracking-tighter font-bold text-muted-foreground";
-                                    }
-                                    if (progressIcon) progressIcon.innerHTML = '';
-                                  }, 3000);
-                                } else {
-                                  let message = "Upload failed";
-                                  try {
-                                    const error = JSON.parse(xhr.responseText);
-                                    message = error.message;
-                                  } catch (e) {}
-                                  
-                                  const statusText = document.getElementById('upload-status-text');
-                                  if (statusText) {
-                                    statusText.textContent = `Error: ${message}`;
-                                    statusText.className = "text-[10px] text-center uppercase tracking-tighter font-bold text-destructive";
-                                  }
-                                  
-                                  toast({ variant: "destructive", title: "Upload Failed", description: message });
-                                  btn.disabled = false;
-                                }
-                              };
-
-                              xhr.onerror = () => {
-                                const statusText = document.getElementById('upload-status-text');
-                                if (statusText) {
-                                  statusText.textContent = "Error: An unexpected error occurred";
-                                  statusText.className = "text-[10px] text-center uppercase tracking-tighter font-bold text-destructive";
-                                }
-                                toast({ variant: "destructive", title: "Error", description: "An unexpected error occurred." });
-                                btn.disabled = false;
-                              };
-
-                              xhr.send(formData);
-                            }}
-                          >
-                            Upload Video
-                          </Button>
-                          <p id="upload-help-text" className="text-xs text-muted-foreground text-center">
-                            Your video will appear instantly on the website
-                          </p>
-                          <div id="upload-progress-container" className="w-full hidden space-y-2">
-                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                              <div id="upload-progress-bar" className="h-full bg-primary transition-all duration-300 w-0"></div>
-                            </div>
-                            <div className="flex items-center justify-center gap-2">
-                              <div id="upload-progress-icon"></div>
-                              <p id="upload-status-text" className="text-[10px] text-center uppercase tracking-tighter font-bold text-muted-foreground">Uploading video...</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <VideoUploadForm />
 
                   <div className="grid gap-4">
                     <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Active Videos</h3>
@@ -643,7 +621,7 @@ export default function AdminDashboard() {
                       <div className="flex flex-col gap-1">
                         <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Live Website Preview</h3>
                         <p className="text-xs text-muted-foreground">
-                          Homepage â€“ Circular Economy Section
+                          Homepage – Circular Economy Section
                         </p>
                       </div>
                       <div className="flex items-center gap-2" role="group" aria-label="Preview mode toggle">
@@ -699,105 +677,4 @@ export default function AdminDashboard() {
               <div className="grid gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card className="hover-elevate">
-                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Orders</CardTitle>
-                      <ShoppingCart className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats?.totalOrders ?? 0}</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="hover-elevate">
-                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
-                      <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(stats?.totalRevenue ?? 0)}</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="hover-elevate">
-                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Products in Stock</CardTitle>
-                      <Package className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats?.totalProducts ?? 0}</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="hover-elevate">
-                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Pending Orders</CardTitle>
-                      <ShoppingCart className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-primary">{stats?.pendingOrders ?? 0}</div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card className="p-4">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Orders Over Time</CardTitle>
-                    </CardHeader>
-                    <CardContent className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={analytics}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                          <RechartsTooltip 
-                            contentStyle={ { backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" } }
-                            itemStyle={ { color: "hsl(var(--foreground))" } }
-                          />
-                          <Bar dataKey="orders" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="p-4">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Revenue Over Time</CardTitle>
-                    </CardHeader>
-                    <CardContent className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={analytics}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis 
-                            fontSize={12} 
-                            tickLine={false} 
-                            axisLine={false} 
-                            tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
-                          />
-                          <RechartsTooltip 
-                            contentStyle={ { backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))", borderRadius: "8px" } }
-                            formatter={(value: number) => formatCurrency(value)}
-                          />
-                          <Line 
-                            type="monotone" 
-                            dataKey="revenue" 
-                            stroke="hsl(var(--primary))" 
-                            strokeWidth={2} 
-                            dot={ { r: 4, fill: "hsl(var(--primary))" } }
-                            activeDot={ { r: 6 } }
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <div className="p-8 border-2 border-dashed rounded-lg flex items-center justify-center text-muted-foreground bg-muted/30">
-                  Welcome to the Admin Dashboard. Select a tab from the sidebar to manage your store.
-                </div>
-              </div>
-            )}
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
-  );
-}
+                    <CardHeader className="flex flex-row items-center justify-between
