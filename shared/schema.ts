@@ -10,7 +10,7 @@ export const products = pgTable("products", {
   category: text("category").notNull(),
   brand: text("brand").notNull(),
   imageUrl: text("image_url").notNull(),
-  additionalImages: text("additional_images").array(),
+  additionalImages: text("additional_images").array().default([]),
   stockStatus: text("stock_status").notNull().default("in_stock"), // in_stock, out_of_stock, pre_order
   isFeatured: boolean("is_featured").default(false),
   specs: jsonb("specs").$type<Record<string, string>>(), // Key-value pairs for specs
