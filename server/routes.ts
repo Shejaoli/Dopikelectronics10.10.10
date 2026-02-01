@@ -126,11 +126,11 @@ export async function registerRoutes(
       } else if (err) {
         return res.status(400).json({ message: err.message });
       }
-      
+
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
-      
+
       const imageUrl = `/uploads/products/${req.file.filename}`;
       res.status(200).json({ url: imageUrl });
     });
@@ -146,7 +146,7 @@ export async function registerRoutes(
       } else if (err) {
         return res.status(400).json({ message: err.message });
       }
-      
+
       if (!req.file) {
         return res.status(400).json({ message: "No video file uploaded" });
       }
@@ -163,18 +163,18 @@ export async function registerRoutes(
         fs.unlinkSync(req.file.path);
         return res.status(400).json({ message: "File too large. Maximum size is 50MB." });
       }
-      
+
       try {
         const admin = await storage.getAdminById(req.session.adminId!);
         const originalFilename = req.file.filename;
         const originalPath = req.file.path;
         const originalUrl = `/uploads/videos/${originalFilename}`;
-        
+
         // Compress video for web delivery
         const compressedFilename = `compressed-${originalFilename}`;
         const compressedPath = `./public/uploads/videos/${compressedFilename}`;
         const compressedUrl = `/uploads/videos/${compressedFilename}`;
-        
+
         let finalUrl = originalUrl;
         let finalSize = req.file.size;
         let isCompressed = false;
@@ -184,7 +184,7 @@ export async function registerRoutes(
           try {
             await compressVideo(originalPath, compressedPath);
             const compressedStats = fs.statSync(compressedPath);
-            
+
             // Use compressed version if it's smaller
             if (compressedStats.size < req.file.size) {
               finalUrl = compressedUrl;
@@ -211,9 +211,9 @@ export async function registerRoutes(
           isCompressed,
           order: parseInt(req.body.order || "0")
         });
-        
+
         const video = await storage.createVideo(videoData);
-        
+
         // Log video upload with metadata
         await storage.createAuditLog({
           action: `Video Uploaded: ${video.title}`,
@@ -245,7 +245,7 @@ export async function registerRoutes(
     try {
       const id = Number(req.params.id);
       const video = await db.select().from(videos).where(eq(videos.id, id)).then(res => res[0]);
-      
+
       if (!video) {
         return res.status(404).json({ message: "Video not found" });
       }
@@ -255,7 +255,7 @@ export async function registerRoutes(
       if (fs.existsSync(videoPath)) {
         fs.unlinkSync(videoPath);
       }
-      
+
       // Also remove original if compressed version exists
       if (video.originalUrl) {
         const originalPath = `./public${video.originalUrl}`;
@@ -266,7 +266,7 @@ export async function registerRoutes(
 
       await storage.deleteVideo(id);
       const admin = await storage.getAdminById(req.session.adminId!);
-      
+
       // Log video deletion with metadata
       await storage.createAuditLog({
         action: `Video Deleted: ${video.title}`,
@@ -313,7 +313,7 @@ export async function registerRoutes(
   app.post("/api/admin/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      
+
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
       }
@@ -500,11 +500,11 @@ export async function registerRoutes(
   app.post("/api/orders", async (req, res) => {
     try {
       const data = insertOrderSchema.parse(req.body);
-      
+
       // Calculate total amount from items to ensure accuracy
       const items = data.items || [];
       const calculatedTotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-      
+
       const order = await storage.createOrder({
         ...data,
         totalAmount: calculatedTotal
@@ -518,7 +518,7 @@ export async function registerRoutes(
   app.post("/api/orders/create", async (req, res) => {
     try {
       const data = insertOrderSchema.parse(req.body);
-      
+
       if (data.paymentMethod === "Card Payment" || data.paymentMethod === "PayPal") {
         if (!req.body.paymentReference) {
           return res.status(400).json({ message: "Payment reference is required for online payments" });
@@ -542,13 +542,13 @@ export async function registerRoutes(
       const id = Number(req.params.id);
       const { status: nextStatus } = req.body;
       const order = await storage.getOrder(id);
-      
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
 
       const currentStatus = order.status;
-      
+
       // Strict transition rules
       const validTransitions: Record<string, string[]> = {
         "paid": ["processing", "cancelled"],
@@ -559,7 +559,7 @@ export async function registerRoutes(
       };
 
       const allowedNext = validTransitions[currentStatus] || [];
-      
+
       if (!allowedNext.includes(nextStatus)) {
         return res.status(400).json({ 
           message: `Invalid status transition: ${currentStatus} -> ${nextStatus}. Allowed: ${allowedNext.join(", ")}` 
@@ -568,7 +568,7 @@ export async function registerRoutes(
 
       const updated = await storage.updateOrderStatus(id, nextStatus);
       const admin = await storage.getAdminById(req.session.adminId!);
-      
+
       // Detailed audit log for status change
       await storage.createAuditLog({
         action: `Order Status Updated: Order #${id} from ${currentStatus} to ${nextStatus}`,
@@ -584,7 +584,7 @@ export async function registerRoutes(
       // This is a bit tricky since storage.updateOrderStatus is atomic.
       // We could pass adminEmail to updateOrderStatus if we wanted to be more precise.
       // For now, the main action is logged with the correct admin email.
-      
+
       res.json(updated);
     } catch (error) {
       res.status(500).json({ message: error instanceof Error ? error.message : "Failed to update order status" });
@@ -706,7 +706,7 @@ export async function registerRoutes(
       request.requestBody({});
 
       const capture = await paypalClient.execute(request);
-      
+
       if (capture.result.status === "COMPLETED") {
         res.json({ status: "COMPLETED", ...capture.result });
       } else {
@@ -731,13 +731,13 @@ export async function registerRoutes(
       }
 
       const order = await storage.getOrder(orderId);
-      
+
       // We need to check if any of the items or customer info matches the email
       // Since the order table has customerPhone but might not have email directly in the row 
       // let's check if the email was provided during checkout in shippingData
       // Based on Checkout.tsx, email is part of shippingData but not explicitly in orders table.
       // Wait, let's check schema.ts again.
-      
+
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
       }
@@ -748,15 +748,15 @@ export async function registerRoutes(
       // However, it's a common requirement. Let's assume for now we might need to match something else 
       // or the user expects us to use phone if email isn't there.
       // BUT the prompt says POST /api/orders/lookup with email and orderNumber.
-      
+
       // For this specific task, I'll allow lookup by order number and a placeholder check 
       // because I cannot change schema right now without careful migration.
       // Actually, I can check if any item has a name that matches? No.
-      
+
       // I'll check if the provided "email" matches the customerName (as a fallback) 
       // or just return the order if the ID matches for this demo.
       // Actually, I should probably check if I can find the email in the payment metadata if it exists.
-      
+
       res.json(order);
     } catch (error) {
       res.status(500).json({ message: "Lookup failed" });
@@ -782,7 +782,7 @@ export async function registerRoutes(
     if (event.type === 'payment_intent.succeeded') {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       const [order] = await db.select().from(orders).where(eq(orders.paymentReference, paymentIntent.id));
-      
+
       if (order && order.status !== 'paid') {
         await storage.updateOrderStatus(order.id, 'paid');
       }
@@ -798,10 +798,10 @@ export async function registerRoutes(
     if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
       const resource = event.resource;
       const orderId = event.resource.custom_id || event.resource.supplementary_data?.related_ids?.order_id;
-      
+
       // In a real app, verify with PayPal API here. For sandbox, we check the reference.
       const [order] = await db.select().from(orders).where(eq(orders.paymentReference, orderId));
-      
+
       if (order && order.status !== 'paid') {
         await storage.updateOrderStatus(order.id, 'paid');
       }
@@ -814,7 +814,7 @@ export async function registerRoutes(
   try {
     const existingProducts = await storage.getProducts();
     const existingAdmins = await storage.getAdminByEmail("admin@dopik.com");
-    
+
     if (existingProducts.length === 0 || !existingAdmins) {
       console.log("Database empty or missing admin, running seed logic...");
       await seedDatabase();
@@ -911,13 +911,25 @@ async function seedDatabase() {
   // Seed Admin
   const adminEmail = "admin@dopik.com";
   const existingAdmin = await storage.getAdminByEmail(adminEmail);
+  const targetPassword = "Admin-Dopic-1!2@";
+
   if (!existingAdmin) {
-    const hashedPassword = await hashPassword("admin123");
+    const hashedPassword = await hashPassword(targetPassword);
     await storage.createAdmin({
       email: adminEmail,
       passwordHash: hashedPassword,
       role: "admin"
     });
+  } else {
+    // Ensure password is always the specified one
+    const isValid = await verifyPassword(targetPassword, existingAdmin.passwordHash);
+    if (!isValid) {
+      console.log("Updating admin password to match required persistent password...");
+      const hashedPassword = await hashPassword(targetPassword);
+      await db.update(admins)
+        .set({ passwordHash: hashedPassword })
+        .where(eq(admins.id, existingAdmin.id));
+    }
   }
 
   // Seed Orders if none exist
