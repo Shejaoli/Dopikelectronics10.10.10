@@ -118,7 +118,7 @@ export default function ProductDetails() {
     return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF' }).format(price);
   };
 
-  const whatsappMessage = `Hello DOPIK ELECTRONICS, Iâ€™m interested in buying ${quantity}x ${product.name} (${selectedStorage}${selectedColor ? `, ${selectedColor}` : ""}) priced at ${formatPrice(totalPrice)}. Is it available?`;
+  const whatsappMessage = `Hello DOPIK ELECTRONICS, I’m interested in buying ${quantity}x ${product.name} (${selectedStorage}${selectedColor ? `, ${selectedColor}` : ""}) priced at ${formatPrice(totalPrice)}. Is it available?`;
   const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(whatsappMessage)}`;
 
   // Parse specs if they are stored as JSON, otherwise use empty object
@@ -141,15 +141,15 @@ export default function ProductDetails() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex gap-4 sticky top-8"
+            className="flex flex-col md:flex-row gap-4 sticky top-8"
           >
             {/* Thumbnails */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-row md:flex-col gap-2 md:gap-4 order-2 md:order-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
               {[product.imageUrl, ...(product.additionalImages || [])].map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(img)}
-                  className={`h-20 w-20 overflow-hidden rounded-xl border-2 transition-all hover:scale-105 ${
+                  className={`h-16 w-16 md:h-20 md:w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all hover:scale-105 ${
                     selectedImage === img ? "border-primary shadow-md" : "border-border opacity-70 hover:opacity-100"
                   }`}
                 >
@@ -159,12 +159,17 @@ export default function ProductDetails() {
             </div>
 
             {/* Main Image */}
-            <div className="flex-1 aspect-square overflow-hidden rounded-3xl border border-border bg-card p-8">
-              <img 
+            <div className="flex-1 aspect-square overflow-hidden rounded-3xl border border-border bg-card p-4 md:p-8 order-1 md:order-2 relative group">
+              <motion.img 
+                key={selectedImage}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
                 src={selectedImage} 
                 alt={product.name} 
-                className="h-full w-full object-contain transition-all duration-300"
+                className="h-full w-full object-contain"
               />
+              {/* Zoom or Fullscreen indicator could go here */}
             </div>
           </motion.div>
 
