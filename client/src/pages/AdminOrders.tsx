@@ -751,4 +751,302 @@ export default function AdminOrders() {
                       )}
                     >
                       {getStatusIcon(order.status)}
-                      {order.status.charAt(0).toUpperCase() + order
+                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground py-4">
+                    {format(new Date(order.createdAt), "MMM d, yyyy")}
+                  </TableCell>
+                  <TableCell className="py-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedOrder(order);
+                              }} 
+                              className="hover-elevate gap-2"
+                            >
+                              <Eye className="h-4 w-4" />
+                              View
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Order Details</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {paginatedOrders.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-24 text-center">
+                    No orders found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t bg-muted/20">
+            <div className="text-sm text-muted-foreground">
+              Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedOrders.length)} of {filteredAndSortedOrders.length} items
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </Button>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Order Details - #{selectedOrder?.id}</DialogTitle>
+            <DialogDescription>Full details for the selected customer order.</DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4 border p-4 rounded-lg bg-muted/30">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Customer Name</p>
+                  <p className="text-base font-semibold">{selectedOrder.customerName}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Customer Phone</p>
+                  <p className="text-base">{selectedOrder.customerPhone}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Order Date</p>
+                  <p className="text-base">{format(new Date(selectedOrder.createdAt), "PPpp")}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge 
+                      className={cn(
+                        "font-medium flex items-center w-fit px-2 py-0.5 rounded-full border shadow-sm",
+                        getStatusColor(selectedOrder.status)
+                      )}
+                    >
+                      {getStatusIcon(selectedOrder.status)}
+                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                    </Badge>
+
+                    {getValidNextStatuses(selectedOrder.status).length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Select 
+                          value={pendingStatus || ""}
+                          onValueChange={(value) => {
+                            setPendingStatus(value);
+                            setIsUpdatingStatus(true);
+                          }}
+                        >
+                          <SelectTrigger className="h-7 w-[130px] text-xs">
+                            <SelectValue placeholder="Update Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getValidNextStatuses(selectedOrder.status).map((s) => (
+                              <SelectItem key={s} value={s} className="text-xs">
+                                {s.charAt(0).toUpperCase() + s.slice(1)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {isUpdatingStatus && (
+                          <div className="flex gap-1">
+                            <Button 
+                              size="sm" 
+                              className="h-7 px-2 text-xs" 
+                              onClick={() => statusMutation.mutate({ id: selectedOrder.id, status: pendingStatus! })}
+                              disabled={statusMutation.isPending}
+                            >
+                              Confirm
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-7 px-2 text-xs" 
+                              onClick={() => {
+                                setIsUpdatingStatus(false);
+                                setPendingStatus(null);
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border p-4 rounded-lg bg-muted/30">
+                <h4 className="font-semibold mb-4 text-sm text-muted-foreground uppercase tracking-wider">Order Timeline</h4>
+                <div className="relative space-y-4 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                  {[
+                    { label: "Order Created", status: "created", icon: FileText, color: "text-blue-500" },
+                    { label: "Payment Pending", status: "pending", icon: Clock, color: "text-yellow-500" },
+                    { label: "Paid", status: "paid", icon: CheckCircle2, color: "text-green-500" },
+                    { label: "Completed / Delivered", status: "completed", icon: ShoppingCart, color: "text-purple-500" }
+                  ].map((step, idx) => {
+                    const isCompleted = 
+                      (step.status === "created") || 
+                      (step.status === "pending" && ["pending", "paid", "processing", "shipped", "completed"].includes(selectedOrder.status)) ||
+                      (step.status === "paid" && ["paid", "processing", "shipped", "completed"].includes(selectedOrder.status)) ||
+                      (step.status === "completed" && ["completed"].includes(selectedOrder.status));
+
+                    return (
+                      <div key={idx} className="relative flex items-center gap-4">
+                        <div className={cn(
+                          "flex h-10 w-10 items-center justify-center rounded-full border-2 bg-background z-10 transition-colors duration-200",
+                          isCompleted ? "border-primary" : "border-muted"
+                        )}>
+                          <step.icon className={cn("h-5 w-5", isCompleted ? step.color : "text-muted-foreground")} />
+                        </div>
+                        <div className="flex flex-col">
+                          <p className={cn("text-sm font-semibold", isCompleted ? "text-foreground" : "text-muted-foreground")}>
+                            {step.label}
+                          </p>
+                          {isCompleted && step.status === "created" && (
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(selectedOrder.createdAt), "MMM d, yyyy HH:mm")}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2 text-sm text-muted-foreground uppercase tracking-wider">Order Items</h4>
+                <div className="border rounded-lg overflow-hidden bg-card">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="w-[40%]">Product</TableHead>
+                        <TableHead>Storage</TableHead>
+                        <TableHead>Color</TableHead>
+                        <TableHead className="text-center">Qty</TableHead>
+                        <TableHead className="text-right">Price</TableHead>
+                        <TableHead className="text-right">Subtotal</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                        selectedOrder.items.map((item: any, index: number) => (
+                          <TableRow key={`${item.productId}-${index}`}>
+                            <TableCell className="font-medium">{item.name}</TableCell>
+                            <TableCell>{item.storage || "-"}</TableCell>
+                            <TableCell>{item.color || "-"}</TableCell>
+                            <TableCell className="text-center">{item.quantity}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
+                            <TableCell className="text-right font-semibold">
+                              {formatCurrency(item.price * item.quantity)}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                            <div className="flex flex-col items-center justify-center gap-2">
+                              <Info className="h-6 w-6 text-muted-foreground/50" />
+                              <p>This is an older order without itemized tracking.</p>
+                              <Button variant="link" size="sm" className="h-auto p-0" onClick={() => window.alert(`Order Summary for #${selectedOrder.id}: ${formatCurrency(selectedOrder.totalAmount)}`)}>
+                                View legacy order summary
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mt-4">
+                <div className="space-y-2">
+                  {showWhatsappPreview && (
+                    <div className="bg-zinc-50 dark:bg-zinc-800 p-3 rounded-lg border text-xs font-mono whitespace-pre-wrap max-w-md animate-in fade-in slide-in-from-bottom-2">
+                      <p className="text-muted-foreground mb-2 font-sans font-bold uppercase tracking-wider">Message Preview</p>
+                      {whatsappMessage}
+                    </div>
+                  )}
+                  <Button
+                    onClick={() => {
+                      if (!showWhatsappPreview) {
+                        setShowWhatsAppPreview(true);
+                        return;
+                      }
+                      const phone = selectedOrder.customerPhone.replace(/\D/g, '');
+                      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappMessage)}`, '_blank');
+                      setShowWhatsAppPreview(false);
+                    }}
+                    disabled={!selectedOrder?.customerPhone}
+                    variant={showWhatsappPreview ? "default" : "outline"}
+                    className="gap-2"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-4 h-4 text-[#25D366]"
+                    >
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+                    {showWhatsappPreview ? "Send Message Now" : "Preview WhatsApp Update"}
+                  </Button>
+                </div>
+                <div className="bg-primary/5 border border-primary/10 rounded-lg px-6 py-3 text-right min-w-[200px]">
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest mb-1">Total Amount</p>
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(selectedOrder.totalAmount)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
