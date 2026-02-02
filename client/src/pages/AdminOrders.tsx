@@ -1,3 +1,5 @@
+import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Table,
@@ -49,7 +51,7 @@ export default function AdminOrders() {
   const { data: ordersResponse, isLoading } = useQuery<PaginatedOrders>({
     queryKey: ["/api/admin/orders"],
   });
-  
+
   const orders = ordersResponse?.data || [];
 
   const [search, setSearch] = useState("");
@@ -324,8 +326,47 @@ export default function AdminOrders() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <Skeleton className="h-10 flex-1" />
+                <Skeleton className="h-10 w-40" />
+                <Skeleton className="h-10 w-40" />
+              </div>
+              <div className="rounded-xl border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                        <TableHead key={i}><Skeleton className="h-4 w-20" /></TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <TableRow key={i}>
+                        {[1, 2, 3, 4, 5, 6, 7].map((j) => (
+                          <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -717,12 +758,31 @@ export default function AdminOrders() {
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {paginatedOrders.map((order, index) => (
-                <TableRow 
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`}>
+                  <TableCell className="py-4"><Skeleton className="h-4 w-4" /></TableCell>
+                  <TableCell className="py-4"><Skeleton className="h-4 w-12" /></TableCell>
+                  <TableCell className="py-4"><Skeleton className="h-4 w-32" /></TableCell>
+                  <TableCell className="py-4"><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell className="py-4"><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell className="py-4"><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                  <TableCell className="py-4"><Skeleton className="h-4 w-16" /></TableCell>
+                  <TableCell className="py-4"><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell className="py-4 text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                </TableRow>
+              ))
+            ) : paginatedOrders.length > 0 ? (
+              paginatedOrders.map((order, index) => (
+                <motion.tr 
                   key={order.id} 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
+                  whileHover={{ backgroundColor: "hsl(var(--muted) / 0.5)" }}
                   className={cn(
-                    "hover:bg-muted/50 transition-colors cursor-pointer",
+                    "transition-colors cursor-pointer border-b",
                     index % 2 === 0 ? "bg-white dark:bg-zinc-900" : "bg-zinc-50/50 dark:bg-zinc-800/30",
                     selectedOrderIds.has(order.id) && "bg-primary/5 dark:bg-primary/10"
                   )}
@@ -769,7 +829,7 @@ export default function AdminOrders() {
                                 e.stopPropagation();
                                 setSelectedOrder(order);
                               }} 
-                              className="hover-elevate gap-2"
+                              className="hover-elevate active-elevate-2 gap-2"
                             >
                               <Eye className="h-4 w-4" />
                               View
@@ -782,16 +842,33 @@ export default function AdminOrders() {
                       </TooltipProvider>
                     </div>
                   </TableCell>
-                </TableRow>
-              ))}
-              {paginatedOrders.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center">
-                    No orders found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+                </motion.tr>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={9} className="h-48 text-center">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center gap-3 py-12"
+                  >
+                    <div className="h-16 w-16 rounded-full bg-muted/30 flex items-center justify-center">
+                      <ShoppingCart className="h-8 w-8 text-muted-foreground/30" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-lg font-semibold">No orders match your filters</p>
+                      <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                        Try adjusting your search terms or status filters to find what you're looking for.
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={clearFilters} className="hover-elevate active-elevate-2 mt-2">
+                      Clear All Filters
+                    </Button>
+                  </motion.div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
           </Table>
         </div>
 
