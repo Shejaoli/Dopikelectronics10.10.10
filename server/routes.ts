@@ -482,22 +482,36 @@ export async function registerRoutes(
     res.json(order);
   });
 
-  app.get("/api/admin/audit-logs", requireAdminAuth, async (_req, res) => {
+  app.get("/api/admin/audit-logs", requireAdminAuth, async (req, res) => {
+    const { page, limit, actionType } = req.query;
+    
+    // Use pagination if page or limit is provided
+    if (page || limit) {
+      const result = await storage.getAuditLogsPaginated({
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 50,
+        actionType: actionType as string,
+      });
+      return res.json(result);
+    }
+    
+    // Fallback to non-paginated for backward compatibility
     const logs = await storage.getAuditLogs();
     res.json(logs);
   });
 
   app.get("/api/admin/orders", requireAdminAuth, async (req, res) => {
     try {
-      const { search, status, startDate, endDate } = req.query;
-      const orders = await storage.getOrders({ 
+      const { search, status, startDate, endDate, page, limit } = req.query;
+      const result = await storage.getOrdersPaginated({ 
         search: search as string, 
         status: status as string, 
         startDate: startDate as string, 
-        endDate: endDate as string 
+        endDate: endDate as string,
+        page: page ? parseInt(page as string) : 1,
+        limit: limit ? parseInt(limit as string) : 20,
       });
-      // Return list with necessary fields for Step 5
-      res.json(orders);
+      res.json(result);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });
     }
@@ -547,6 +561,16 @@ export async function registerRoutes(
     try {
       const id = Number(req.params.id);
       const { status: nextStatus } = req.body;
+      const admin = await storage.getAdminById(req.session.adminId!);
+      
+      // Role-based access: Staff can only update to "processing" or "shipped"
+      const staffAllowedStatuses = ["processing", "shipped"];
+      if (admin?.role === "staff" && !staffAllowedStatuses.includes(nextStatus)) {
+        return res.status(403).json({ 
+          message: `Staff can only update orders to: ${staffAllowedStatuses.join(", ")}. Contact an admin for other status changes.` 
+        });
+      }
+
       const order = await storage.getOrder(id);
 
       if (!order) {
@@ -573,7 +597,6 @@ export async function registerRoutes(
       }
 
       const updated = await storage.updateOrderStatus(id, nextStatus);
-      const admin = await storage.getAdminById(req.session.adminId!);
 
       // Detailed audit log for status change
       await storage.createAuditLog({
@@ -869,94 +892,4 @@ async function seedDatabase() {
         category: "Audio",
         brand: "Beats",
         imageUrl: "/images/beats-pill.jpg",
-        stockStatus: "in_stock",
-        isFeatured: true,
-        specs: { "Battery": "Up to 24 hours", "Connectivity": "Bluetooth & USB-C", "Water Resistance": "IP67" }
-      },
-      {
-        name: "UGREEN 6-in-1 USB-C Hub",
-        description: "Expand your connectivity with HDMI 4K, USB 3.0, SD Card reader and PD charging.",
-        price: 65000,
-        category: "Accessories",
-        brand: "UGREEN",
-        imageUrl: "/images/ugreen-adapter.jpg",
-        stockStatus: "in_stock",
-        isFeatured: false,
-        specs: { "Ports": "HDMI, 3x USB 3.0, SD/TF", "Power": "100W PD" }
-      },
-      {
-        name: "Saramonic Blink 500",
-        description: "Ultracompact 2.4GHz Dual-Channel Wireless Microphone System for Cameras and Mobile Devices.",
-        price: 280000,
-        category: "Creator Gear",
-        brand: "Saramonic",
-        imageUrl: "/images/saramonic-mic.jpg",
-        stockStatus: "in_stock",
-        isFeatured: true,
-        specs: { "Range": "100m", "Channels": "Dual", "Battery": "Built-in" }
-      },
-      {
-        name: "iPhone 16",
-        description: "Dynamic Island, 48MP Main camera, and USB-C. A total powerhouse.",
-        price: 1200000,
-        category: "Smartphones",
-        brand: "Apple",
-        imageUrl: "/images/iphone-16.png",
-        stockStatus: "in_stock",
-        isFeatured: true,
-        specs: { "Storage": "128GB/256GB", "Chip": "A18", "Display": "6.1-inch Super Retina XDR" }
-      }
-    ];
-
-    for (const product of seedProducts) {
-      // @ts-ignore - Specs type compatibility for seed data
-      await storage.createProduct(product);
-    }
-  }
-
-  // Seed Admin
-  const adminEmail = "admin@dopik.com";
-  const existingAdmin = await storage.getAdminByEmail(adminEmail);
-  const targetPassword = "Admin-Dopic-1!2@";
-
-  if (!existingAdmin) {
-    const hashedPassword = await hashPassword(targetPassword);
-    await storage.createAdmin({
-      email: adminEmail,
-      passwordHash: hashedPassword,
-      role: "admin"
-    });
-  } else {
-    // Ensure password is always the specified one
-    const isValid = await verifyPassword(targetPassword, existingAdmin.passwordHash);
-    if (!isValid) {
-      console.log("Updating admin password to match required persistent password...");
-      const hashedPassword = await hashPassword(targetPassword);
-      await db.update(admins)
-        .set({ passwordHash: hashedPassword })
-        .where(eq(admins.id, existingAdmin.id));
-    }
-  }
-
-  // Seed Orders if none exist
-  const existingOrders = await storage.getOrders();
-  if (existingOrders.length === 0) {
-    const seedOrders = [
-      {
-        customerName: "Jean Paul",
-        customerPhone: "0788123456",
-        totalAmount: 1800000,
-        status: "pending",
-      },
-      {
-        customerName: "Marie Claire",
-        customerPhone: "0788654321",
-        totalAmount: 120000,
-        status: "paid",
-      },
-    ];
-    for (const order of seedOrders) {
-      await storage.createOrder(order);
-    }
-  }
-}
+        stockStatus: "in_
