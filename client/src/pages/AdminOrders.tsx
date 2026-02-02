@@ -57,6 +57,7 @@ export default function AdminOrders() {
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [showWhatsappPreview, setShowWhatsAppPreview] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState<Set<number>>(new Set());
+  const [isExporting, setIsExporting] = useState(false);
 
   const whatsappMessage = useMemo(() => {
     if (!selectedOrder) return "";
@@ -72,30 +73,55 @@ export default function AdminOrders() {
       `Thank you for shopping with DOPIK ELECTRONICS!`;
   }, [selectedOrder]);
 
-  const exportCSV = () => {
+  const exportCSV = async (useFiltered: boolean = true) => {
     if (!orders) return;
-    const headers = ["Order ID", "Customer Name", "Customer Phone", "Total Amount", "Status", "Date"];
+    
+    setIsExporting(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const ordersToExport = useFiltered ? filteredAndSortedOrders : orders;
+    
+    const headers = ["Order ID", "Customer Name", "Customer Phone", "Total Amount", "Status", "Date", "Payment Provider", "Delivery Location"];
     const csvContent = [
       headers.join(","),
-      ...orders.map(o => [
+      ...ordersToExport.map(o => [
         o.id,
         `"${o.customerName}"`,
         `"${o.customerPhone}"`,
         o.totalAmount,
         o.status,
-        format(new Date(o.createdAt), "yyyy-MM-dd")
+        format(new Date(o.createdAt), "yyyy-MM-dd HH:mm"),
+        `"${o.paymentProvider || o.paymentMethod || ''}"`,
+        `"${o.deliveryLocation || ''}"`
       ].join(","))
     ].join("\n");
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
+    
+    let filename = "orders";
+    if (useFiltered && (status !== "all" || startDate || endDate || search)) {
+      if (status !== "all") filename += `_${status}`;
+      if (startDate) filename += `_from${format(startDate, "yyyyMMdd")}`;
+      if (endDate) filename += `_to${format(endDate, "yyyyMMdd")}`;
+    }
+    filename += `_${format(new Date(), "yyyyMMdd_HHmm")}.csv`;
+    
     link.setAttribute("href", url);
-    link.setAttribute("download", `orders_export_${format(new Date(), "yyyyMMdd")}.csv`);
+    link.setAttribute("download", filename);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    setIsExporting(false);
+    
+    toast({
+      title: "Export complete",
+      description: `${ordersToExport.length} orders exported to CSV.`,
+    });
   };
 
   const filteredAndSortedOrders = useMemo(() => {
@@ -269,7 +295,7 @@ export default function AdminOrders() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     toast({
       title: "Export complete",
       description: `${selectedOrders.length} orders exported to CSV.`,
@@ -341,12 +367,86 @@ export default function AdminOrders() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <h2 className="text-3xl font-extrabold tracking-tight">Orders</h2>
-        <Button onClick={exportCSV} variant="outline" size="sm" className="hover-elevate">
-          <Download className="w-4 h-4 mr-2" />
-          Export CSV
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="hover-elevate gap-2" disabled={isExporting} data-testid="button-export-menu">
+              {isExporting ? (
+                <>
+                  <RefreshCcw className="w-4 h-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Export CSV
+                </>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-3" align="end">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <h4 className="font-medium text-sm">Export Options</h4>
+                <p className="text-xs text-muted-foreground">Choose what to include in export</p>
+              </div>
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start gap-2"
+                  onClick={() => exportCSV(true)}
+                  disabled={isExporting}
+                  data-testid="button-export-filtered"
+                >
+                  <FileText className="h-4 w-4" />
+                  <div className="text-left">
+                    <div className="text-sm">Export Filtered</div>
+                    <div className="text-xs text-muted-foreground">
+                      {filteredAndSortedOrders.length} orders
+                      {status !== "all" && ` (${status})`}
+                      {(startDate || endDate) && " with date range"}
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start gap-2"
+                  onClick={() => exportCSV(false)}
+                  disabled={isExporting}
+                  data-testid="button-export-all"
+                >
+                  <Download className="h-4 w-4" />
+                  <div className="text-left">
+                    <div className="text-sm">Export All</div>
+                    <div className="text-xs text-muted-foreground">{orders?.length || 0} total orders</div>
+                  </div>
+                </Button>
+              </div>
+              {(status !== "all" || startDate || endDate || search) && (
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-muted-foreground mb-2">Active filters:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {status !== "all" && (
+                      <Badge variant="secondary" className="text-xs">{status}</Badge>
+                    )}
+                    {startDate && (
+                      <Badge variant="secondary" className="text-xs">From: {format(startDate, "MMM d")}</Badge>
+                    )}
+                    {endDate && (
+                      <Badge variant="secondary" className="text-xs">To: {format(endDate, "MMM d")}</Badge>
+                    )}
+                    {search && (
+                      <Badge variant="secondary" className="text-xs">Search: {search}</Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -420,7 +520,7 @@ export default function AdminOrders() {
                 data-testid="input-search-orders"
               />
             </div>
-            
+
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger className={cn(
                 "w-[160px] h-10 border-muted-foreground/20 font-medium transition-all",
@@ -760,7 +860,7 @@ export default function AdminOrders() {
                       {getStatusIcon(selectedOrder.status)}
                       {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                     </Badge>
-                    
+
                     {getValidNextStatuses(selectedOrder.status).length > 0 && (
                       <div className="flex items-center gap-2">
                         <Select 
@@ -825,7 +925,7 @@ export default function AdminOrders() {
                       (step.status === "pending" && ["pending", "paid", "processing", "shipped", "completed"].includes(selectedOrder.status)) ||
                       (step.status === "paid" && ["paid", "processing", "shipped", "completed"].includes(selectedOrder.status)) ||
                       (step.status === "completed" && ["completed"].includes(selectedOrder.status));
-                    
+
                     return (
                       <div key={idx} className="relative flex items-center gap-4">
                         <div className={cn(
