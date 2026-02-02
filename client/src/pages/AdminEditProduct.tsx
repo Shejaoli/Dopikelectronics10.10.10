@@ -148,7 +148,7 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
     }
 
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("images", file);
 
     setIsUploading(true);
     try {
@@ -164,8 +164,12 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
       }
 
       const data = await res.json();
-      form.setValue("imageUrl", data.url);
-      return data.url;
+      const imageUrl = data.url || (data.urls && data.urls[0]);
+      if (imageUrl) {
+        form.setValue("imageUrl", imageUrl, { shouldValidate: true });
+        return imageUrl;
+      }
+      throw new Error("No URL returned from server");
     } catch (error) {
       toast({
         variant: "destructive",
@@ -207,17 +211,7 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
   };
 
   const onSubmit = async (data: InsertProduct) => {
-    const fileInput = document.getElementById("image-upload-edit") as HTMLInputElement;
-    const file = fileInput?.files?.[0];
-
-    let imageUrl = data.imageUrl;
-
-    // Only upload if it's a data URL (newly selected but not yet uploaded)
-    if (file && imageUrl.startsWith("data:")) {
-      const uploadedUrl = await handleImageUpload(file);
-      if (!uploadedUrl) return;
-      imageUrl = uploadedUrl;
-    }
+    const imageUrl = data.imageUrl;
 
     if (!imageUrl || imageUrl.startsWith("data:")) {
       toast({
@@ -228,13 +222,20 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
       return;
     }
 
-    // Convert spec entries to object and merge with laptop specs if any
-    const specs: Record<string, string> = { ...(data.specs as Record<string, string> || {}) };
+    // Convert spec entries to object
+    const specs: Record<string, string> = {};
     specEntries.forEach(entry => {
       if (entry.key.trim()) {
         specs[entry.key.trim()] = entry.value.trim();
       }
     });
+
+    // Merge with laptop specs if any
+    const laptopSpecs = data.specs as Record<string, string> || {};
+    Object.assign(specs, laptopSpecs);
+
+    // Update form state with final imageUrl to ensure validation passes
+    form.setValue("imageUrl", imageUrl, { shouldValidate: true });
 
     updateMutation.mutate({ ...data, imageUrl, specs });
   };
@@ -403,7 +404,17 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
                     type="button"
                     variant="outline"
                     className="w-full h-11 border-dashed"
-                    onClick={() => document.getElementById("image-upload-edit")?.click()}
+                    onClick={async () => {
+                      const input = document.getElementById("image-upload-edit") as HTMLInputElement;
+                      input?.click();
+                      
+                      input.onchange = async (e: any) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          await handleImageUpload(file);
+                        }
+                      };
+                    }}
                     disabled={isUploading}
                   >
                     {isUploading ? (
