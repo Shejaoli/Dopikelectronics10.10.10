@@ -141,7 +141,7 @@ export default function ProductDetails() {
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex flex-col md:flex-row gap-4 sticky top-8"
+            className="flex flex-col md:flex-row gap-4 md:sticky top-8"
           >
             {/* Thumbnails */}
             <div className="flex flex-row md:flex-col gap-2 md:gap-4 order-2 md:order-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
@@ -259,13 +259,13 @@ export default function ProductDetails() {
 
             {/* Technical Specs (General) */}
             {product.category !== "Laptops" && Object.keys(specs).length > 0 && (
-              <div className="mb-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6">
+              <div className="mb-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 overflow-hidden">
                 <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">Technical Specifications</h3>
                 <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
                   {Object.entries(specs).map(([key, value]) => (
-                    <div key={key} className="border-b border-border pb-2 group transition-colors hover:border-primary/30">
-                      <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">{key}</dt>
-                      <dd className="text-sm font-semibold text-foreground">{value}</dd>
+                    <div key={key} className="border-b border-border pb-2 group transition-colors hover:border-primary/30 overflow-hidden">
+                      <dt className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5 truncate">{key}</dt>
+                      <dd className="text-sm font-semibold text-foreground break-words">{value}</dd>
                     </div>
                   ))}
                 </dl>
