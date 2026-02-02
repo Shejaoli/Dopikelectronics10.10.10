@@ -16,7 +16,7 @@ export interface IStorage {
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
   deleteProduct(id: number): Promise<void>;
-  
+
   // Admin methods
   getAdminByEmail(email: string): Promise<Admin | undefined>;
   getAdminById(id: number): Promise<Admin | undefined>;
@@ -46,7 +46,7 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   async getProducts(filters?: { category?: string; featured?: boolean; search?: string; stockStatus?: string }): Promise<Product[]> {
     let conditions = [];
-    
+
     if (filters?.category) {
       conditions.push(eq(products.category, filters.category));
     }
@@ -63,7 +63,7 @@ export class DatabaseStorage implements IStorage {
     if (conditions.length > 0) {
       return await db.select().from(products).where(and(...conditions));
     }
-    
+
     return await db.select().from(products);
   }
 
@@ -124,7 +124,7 @@ export class DatabaseStorage implements IStorage {
 
     // Correcting search condition for OR
     let query = db.select().from(orders);
-    
+
     let searchConditions = [];
     if (filters?.search) {
       searchConditions.push(like(orders.customerName, `%${filters.search}%`));
@@ -402,7 +402,7 @@ export class DatabaseStorage implements IStorage {
         .set({ status: nextStatus })
         .where(eq(orders.id, id))
         .returning();
-      
+
       return updatedOrder;
     });
   }
@@ -418,7 +418,7 @@ export class DatabaseStorage implements IStorage {
   async getAdminStats(): Promise<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }> {
     const allOrders = await db.select().from(orders);
     const allProducts = await db.select().from(products);
-    
+
     const totalOrders = allOrders.length;
     const totalProducts = allProducts.length;
     const pendingOrders = allOrders.filter(o => o.status === "pending").length;
@@ -431,17 +431,17 @@ export class DatabaseStorage implements IStorage {
 
   async getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>{
     const allOrders = await db.select().from(orders);
-    
+
     // Group by date
     const dailyData: Record<string, { orders: number; revenue: number }> = {};
-    
+
     allOrders.forEach(order => {
       const date = order.createdAt.toISOString().split('T')[0];
-      
+
       if (!dailyData[date]) {
         dailyData[date] = { orders: 0, revenue: 0 };
       }
-      
+
       dailyData[date].orders += 1;
       if (order.status === "paid" || order.status === "delivered") {
         dailyData[date].revenue += order.totalAmount;
