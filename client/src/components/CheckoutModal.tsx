@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { insertOrderSchema, type InsertOrder, type Product } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -27,7 +28,12 @@ export function CheckoutModal({ product, quantity, open, onOpenChange, selectedS
   const totalAmount = unitPrice * quantity;
 
   const form = useForm<InsertOrder>({
-    resolver: zodResolver(insertOrderSchema),
+    resolver: zodResolver(
+      insertOrderSchema.extend({
+        customerName: z.string().min(3, "Name must be at least 3 characters").max(50, "Name is too long"),
+        customerPhone: z.string().regex(/^(07[2389])[0-9]{7}$/, "Enter a valid Rwandan phone number (e.g., 0788XXXXXX)"),
+      })
+    ),
     defaultValues: {
       customerName: "",
       customerPhone: "",
@@ -60,14 +66,14 @@ export function CheckoutModal({ product, quantity, open, onOpenChange, selectedS
         title: "Order placed successfully!",
         description: "Redirecting to WhatsApp for confirmation...",
       });
-      
+
       const formatPrice = (price: number) => {
         return new Intl.NumberFormat('en-RW', { style: 'currency', currency: 'RWF', maximumFractionDigits: 0 }).format(price);
       };
 
       const message = `Hello DOPIK ELECTRONICS, my name is ${order.customerName}. I have placed an order for ${quantity}x ${product.name}. Total amount: ${order.totalAmount} RWF. Order ID: #${order.id}. Thank you.`;
       const whatsappUrl = `https://wa.me/250783562143?text=${encodeURIComponent(message)}`;
-      
+
       localStorage.removeItem("cart"); // Clear cart if single product checkout
       onOpenChange(false);
       form.reset();
