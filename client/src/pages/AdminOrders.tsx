@@ -16,10 +16,11 @@ import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo } from "react";
-import { Search, X, Calendar as CalendarIcon, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, FileText, Download, Eye } from "lucide-react";
+import { Search, X, Calendar as CalendarIcon, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, FileText, Download, Eye, ShoppingCart, CheckCircle2, Clock, DollarSign } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-RW", {
@@ -148,6 +149,17 @@ export default function AdminOrders() {
     setCurrentPage(1);
   };
 
+  const stats = useMemo(() => {
+    if (!orders) return { total: 0, paid: 0, pending: 0, revenue: 0 };
+    return orders.reduce((acc, order) => {
+      acc.total++;
+      if (order.status === "paid" || order.status === "completed") acc.paid++;
+      if (order.status === "pending") acc.pending++;
+      acc.revenue += order.totalAmount;
+      return acc;
+    }, { total: 0, paid: 0, pending: 0, revenue: 0 });
+  }, [orders]);
+
   const statusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: number; status: string }) => {
       await apiRequest("PATCH", `/api/orders/${id}/status`, { status });
@@ -201,14 +213,72 @@ export default function AdminOrders() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">Orders</h2>
-        <Button onClick={exportCSV} variant="outline" size="sm">
+        <h2 className="text-3xl font-extrabold tracking-tight">Orders</h2>
+        <Button onClick={exportCSV} variant="outline" size="sm" className="hover-elevate">
           <Download className="w-4 h-4 mr-2" />
           Export CSV
         </Button>
       </div>
 
-      <div className="flex flex-col gap-4 bg-muted/30 p-4 rounded-lg border">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-none shadow-md bg-white dark:bg-zinc-900 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md bg-white dark:bg-zinc-900 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Paid</p>
+                <p className="text-2xl font-bold">{stats.paid}</p>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md bg-white dark:bg-zinc-900 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold">{stats.pending}</p>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-yellow-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md bg-white dark:bg-zinc-900 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <p className="text-2xl font-bold">{formatCurrency(stats.revenue)}</p>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-blue-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex flex-col gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border-none shadow-sm">
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -280,7 +350,7 @@ export default function AdminOrders() {
         </div>
       </div>
 
-      <div className="rounded-md border bg-card overflow-hidden">
+      <div className="rounded-xl border-none bg-white dark:bg-zinc-900 shadow-md overflow-hidden">
         <div className="overflow-x-auto relative max-h-[600px]">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-card shadow-sm">
