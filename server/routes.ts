@@ -892,4 +892,94 @@ async function seedDatabase() {
         category: "Audio",
         brand: "Beats",
         imageUrl: "/images/beats-pill.jpg",
-        stockStatus: "in_
+        stockStatus: "in_stock",
+        isFeatured: true,
+        specs: { "Battery": "Up to 24 hours", "Connectivity": "Bluetooth & USB-C", "Water Resistance": "IP67" }
+      },
+      {
+        name: "UGREEN 6-in-1 USB-C Hub",
+        description: "Expand your connectivity with HDMI 4K, USB 3.0, SD Card reader and PD charging.",
+        price: 65000,
+        category: "Accessories",
+        brand: "UGREEN",
+        imageUrl: "/images/ugreen-adapter.jpg",
+        stockStatus: "in_stock",
+        isFeatured: false,
+        specs: { "Ports": "HDMI, 3x USB 3.0, SD/TF", "Power": "100W PD" }
+      },
+      {
+        name: "Saramonic Blink 500",
+        description: "Ultracompact 2.4GHz Dual-Channel Wireless Microphone System for Cameras and Mobile Devices.",
+        price: 280000,
+        category: "Creator Gear",
+        brand: "Saramonic",
+        imageUrl: "/images/saramonic-mic.jpg",
+        stockStatus: "in_stock",
+        isFeatured: true,
+        specs: { "Range": "100m", "Channels": "Dual", "Battery": "Built-in" }
+      },
+      {
+        name: "iPhone 16",
+        description: "Dynamic Island, 48MP Main camera, and USB-C. A total powerhouse.",
+        price: 1200000,
+        category: "Smartphones",
+        brand: "Apple",
+        imageUrl: "/images/iphone-16.png",
+        stockStatus: "in_stock",
+        isFeatured: true,
+        specs: { "Storage": "128GB/256GB", "Chip": "A18", "Display": "6.1-inch Super Retina XDR" }
+      }
+    ];
+
+    for (const product of seedProducts) {
+      // @ts-ignore - Specs type compatibility for seed data
+      await storage.createProduct(product);
+    }
+  }
+
+  // Seed Admin
+  const adminEmail = "admin@dopik.com";
+  const existingAdmin = await storage.getAdminByEmail(adminEmail);
+  const targetPassword = "Admin-Dopic-1!2@";
+
+  if (!existingAdmin) {
+    const hashedPassword = await hashPassword(targetPassword);
+    await storage.createAdmin({
+      email: adminEmail,
+      passwordHash: hashedPassword,
+      role: "admin"
+    });
+  } else {
+    // Ensure password is always the specified one
+    const isValid = await verifyPassword(targetPassword, existingAdmin.passwordHash);
+    if (!isValid) {
+      console.log("Updating admin password to match required persistent password...");
+      const hashedPassword = await hashPassword(targetPassword);
+      await db.update(admins)
+        .set({ passwordHash: hashedPassword })
+        .where(eq(admins.id, existingAdmin.id));
+    }
+  }
+
+  // Seed Orders if none exist
+  const existingOrders = await storage.getOrders();
+  if (existingOrders.length === 0) {
+    const seedOrders = [
+      {
+        customerName: "Jean Paul",
+        customerPhone: "0788123456",
+        totalAmount: 1800000,
+        status: "pending",
+      },
+      {
+        customerName: "Marie Claire",
+        customerPhone: "0788654321",
+        totalAmount: 120000,
+        status: "paid",
+      },
+    ];
+    for (const order of seedOrders) {
+      await storage.createOrder(order);
+    }
+  }
+}
