@@ -127,13 +127,18 @@ export async function registerRoutes(
         return res.status(400).json({ message: err.message });
       }
 
-      if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
-        return res.status(400).json({ message: "No files uploaded" });
+      if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+        const files = req.files as Express.Multer.File[];
+        const urls = files.map(file => `/uploads/products/${file.filename}`);
+        return res.status(200).json({ urls, url: urls[0] });
       }
 
-      const files = req.files as Express.Multer.File[];
-      const urls = files.map(file => `/uploads/products/${file.filename}`);
-      res.status(200).json({ urls });
+      if (req.file) {
+        const url = `/uploads/products/${req.file.filename}`;
+        return res.status(200).json({ url, urls: [url] });
+      }
+
+      return res.status(400).json({ message: "No files uploaded" });
     });
   });
 
