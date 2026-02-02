@@ -178,12 +178,28 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
     }
   };
 
+  const CATEGORIES = [
+    "Smartphones",
+    "Phones Accessories",
+    "Laptops",
+    "Tablets",
+    "Gaming Consoles",
+    "Smartwatches",
+    "Audio",
+    "Cameras"
+  ];
+
+  const BRANDS_BY_CATEGORY: Record<string, string[]> = {
+    "Smartphones": ["Apple", "Samsung", "Google", "Huawei", "Sony", "Xiaomi", "Oppo", "OnePlus"],
+    "Laptops": ["Apple", "Dell", "HP", "Lenovo", "Microsoft", "Acer", "Asus", "Toshiba", "MSI", "Samsung", "Huawei", "Fujitsu"],
+  };
+
   const onSubmit = async (data: InsertProduct) => {
     const fileInput = document.getElementById("image-upload-edit") as HTMLInputElement;
     const file = fileInput?.files?.[0];
-    
+
     let imageUrl = data.imageUrl;
-    
+
     // Only upload if it's a data URL (newly selected but not yet uploaded)
     if (file && imageUrl.startsWith("data:")) {
       const uploadedUrl = await handleImageUpload(file);
@@ -247,13 +263,31 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
               />
               <FormField
                 control={form.control}
-                name="brand"
+                name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormLabel>Category</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Reset brand ONLY if user manually changes category
+                        if (form.getValues("brand") !== "" && !BRANDS_BY_CATEGORY[value]?.includes(form.getValues("brand"))) {
+                          form.setValue("brand", "");
+                        }
+                      }} 
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CATEGORIES.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -262,50 +296,32 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
 
             <FormField
               control={form.control}
-              name="description"
+              name="brand"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Brand</FormLabel>
                   <FormControl>
-                    <Textarea className="min-h-[120px]" {...field} />
+                    {BRANDS_BY_CATEGORY[form.watch("category")] ? (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select brand" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {BRANDS_BY_CATEGORY[form.watch("category")].map(brand => (
+                            <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input {...field} />
+                    )}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price (RWF)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <div className="space-y-4">
               <FormLabel>Product Image</FormLabel>
