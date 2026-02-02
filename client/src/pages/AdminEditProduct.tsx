@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { insertProductSchema, type InsertProduct, type Product } from "@shared/schema";
@@ -68,8 +68,12 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
       isFeatured: false,
       additionalImages: [],
       specs: {},
+      variations: { storage: [], colors: [] },
     },
   });
+
+  const storageFields = useFieldArray({ control: form.control, name: "variations.storage" as any });
+  const colorFields = useFieldArray({ control: form.control, name: "variations.colors" as any });
 
   useEffect(() => {
     if (product) {
@@ -84,6 +88,7 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
         isFeatured: product.isFeatured || false,
         additionalImages: product.additionalImages || [],
         specs: product.specs || {},
+        variations: (product.variations as any) || { storage: [], colors: [] },
       });
 
       if (product.specs) {
@@ -407,7 +412,7 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
                     onClick={async () => {
                       const input = document.getElementById("image-upload-edit") as HTMLInputElement;
                       input?.click();
-                      
+
                       input.onchange = async (e: any) => {
                         const file = e.target.files?.[0];
                         if (file) {
@@ -584,6 +589,66 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
                 )}
               </div>
             </div>
+
+            {form.watch("category") === "Smartphones" && (
+              <div className="space-y-6 pt-4 border-t">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <FormLabel className="text-base">Storage Variations</FormLabel>
+                    <Button type="button" variant="outline" size="sm" onClick={() => (storageFields as any).append({ option: "", priceOffset: 0, stock: 0 })}>
+                      <Plus className="w-4 h-4 mr-2" /> Add Storage
+                    </Button>
+                  </div>
+                  {storageFields.fields.map((field, index) => (
+                    <div key={field.id} className="flex gap-3 items-end">
+                      <div className="flex-1 space-y-2">
+                        <FormLabel className="text-xs">Capacity</FormLabel>
+                        <Input {...form.register(`variations.storage.${index}.option` as any)} placeholder="128GB" />
+                      </div>
+                      <div className="w-24 space-y-2">
+                        <FormLabel className="text-xs">Price +</FormLabel>
+                        <Input type="number" {...form.register(`variations.storage.${index}.priceOffset` as any, { valueAsNumber: true })} />
+                      </div>
+                      <div className="w-20 space-y-2">
+                        <FormLabel className="text-xs">Stock</FormLabel>
+                        <Input type="number" {...form.register(`variations.storage.${index}.stock` as any, { valueAsNumber: true })} />
+                      </div>
+                      <Button type="button" variant="ghost" size="icon" onClick={() => storageFields.remove(index)} className="text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <FormLabel className="text-base">Color Variations</FormLabel>
+                    <Button type="button" variant="outline" size="sm" onClick={() => (colorFields as any).append({ name: "", value: "#000000", stock: 0 })}>
+                      <Plus className="w-4 h-4 mr-2" /> Add Color
+                    </Button>
+                  </div>
+                  {colorFields.fields.map((field, index) => (
+                    <div key={field.id} className="flex gap-3 items-end">
+                      <div className="flex-1 space-y-2">
+                        <FormLabel className="text-xs">Color Name</FormLabel>
+                        <Input {...form.register(`variations.colors.${index}.name` as any)} placeholder="Space Black" />
+                      </div>
+                      <div className="w-16 space-y-2">
+                        <FormLabel className="text-xs">Hex</FormLabel>
+                        <Input type="color" {...form.register(`variations.colors.${index}.value` as any)} className="h-10 p-1" />
+                      </div>
+                      <div className="w-20 space-y-2">
+                        <FormLabel className="text-xs">Stock</FormLabel>
+                        <Input type="number" {...form.register(`variations.colors.${index}.stock` as any, { valueAsNumber: true })} />
+                      </div>
+                      <Button type="button" variant="ghost" size="icon" onClick={() => colorFields.remove(index)} className="text-destructive">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {form.watch("category") === "Laptops" && (
               <div className="space-y-4 pt-4 border-t">
