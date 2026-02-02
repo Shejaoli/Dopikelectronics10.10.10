@@ -22,6 +22,34 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [specEntries, setSpecEntries] = useState<{ key: string; value: string }[]>([]);
 
+  const handleAdditionalImagesUpload = async (files: FileList) => {
+    const formData = new FormData();
+    Array.from(files).forEach((file) => formData.append("images", file));
+
+    setIsUploading(true);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      const currentImages = form.getValues("additionalImages") || [];
+      form.setValue("additionalImages", [...currentImages, ...data.urls]);
+      toast({ title: "Images uploaded" });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "Failed to upload images.",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
     defaultValues: {
@@ -119,6 +147,22 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
     }
   };
 
+  const CATEGORIES = [
+    "Smartphones",
+    "Phones Accessories",
+    "Laptops",
+    "Tablets",
+    "Gaming Consoles",
+    "Smartwatches",
+    "Audio",
+    "Cameras"
+  ];
+
+  const BRANDS_BY_CATEGORY: Record<string, string[]> = {
+    "Smartphones": ["Apple", "Samsung", "Google", "Huawei", "Sony", "Xiaomi", "Oppo", "OnePlus"],
+    "Laptops": ["Apple", "Dell", "HP", "Lenovo", "Microsoft", "Acer", "Asus", "Toshiba", "MSI", "Samsung", "Huawei", "Fujitsu"],
+  };
+
   const onSubmit = async (data: InsertProduct) => {
     const fileInput = document.getElementById("image-upload") as HTMLInputElement;
     const file = fileInput?.files?.[0];
@@ -180,13 +224,28 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
               />
               <FormField
                 control={form.control}
-                name="brand"
+                name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Apple" {...field} />
-                    </FormControl>
+                    <FormLabel>Category</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.setValue("brand", ""); // Reset brand when category changes
+                      }} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CATEGORIES.map(cat => (
+                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -195,55 +254,32 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
 
             <FormField
               control={form.control}
-              name="description"
+              name="brand"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Brand</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Detailed product description..." 
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
+                    {BRANDS_BY_CATEGORY[form.watch("category")] ? (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select brand" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {BRANDS_BY_CATEGORY[form.watch("category")].map(brand => (
+                            <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input placeholder="Apple" {...field} />
+                    )}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price (RWF)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="0" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Smartphones" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <div className="space-y-4">
               <FormLabel>Product Image</FormLabel>
@@ -301,6 +337,53 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
                     </FormItem>
                   )}
                 />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <FormLabel>Additional Images</FormLabel>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {(form.watch("additionalImages") || []).map((url, idx) => (
+                  <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border">
+                    <img src={url} alt={`Additional ${idx}`} className="object-cover w-full h-full" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        const current = form.getValues("additionalImages") || [];
+                        form.setValue("additionalImages", current.filter((_, i) => i !== idx));
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="flex items-center justify-center">
+                  <Input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.length) {
+                        handleAdditionalImagesUpload(e.target.files);
+                      }
+                    }}
+                    className="hidden"
+                    id="additional-images-upload"
+                    disabled={isUploading}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full aspect-square border-dashed"
+                    onClick={() => document.getElementById("additional-images-upload")?.click()}
+                    disabled={isUploading}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
