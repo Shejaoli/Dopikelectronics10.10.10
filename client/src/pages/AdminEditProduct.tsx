@@ -209,9 +209,9 @@ export default function AdminEditProduct({ productId, onBack }: AdminEditProduct
   const onSubmit = async (data: InsertProduct) => {
     const fileInput = document.getElementById("image-upload-edit") as HTMLInputElement;
     const file = fileInput?.files?.[0];
-    
+
     let imageUrl = data.imageUrl;
-    
+
     // Only upload if it's a data URL (newly selected but not yet uploaded)
     if (file && imageUrl.startsWith("data:")) {
       const uploadedUrl = await handleImageUpload(file);
