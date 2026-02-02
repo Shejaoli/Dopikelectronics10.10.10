@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { Order, Product } from "@shared/schema";
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -43,7 +44,7 @@ export default function AdminOrders() {
   const [status, setStatus] = useState("all");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  
+
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,16 +80,16 @@ export default function AdminOrders() {
 
   const filteredAndSortedOrders = useMemo(() => {
     if (!orders) return [];
-    
+
     let filtered = orders.filter(order => {
       const matchesSearch = 
         order.customerName.toLowerCase().includes(search.toLowerCase()) ||
         order.customerPhone.includes(search);
       const matchesStatus = status === "all" || order.status === status;
-      
+
       let matchesDate = true;
       const orderDate = new Date(order.createdAt);
-      
+
       if (startDate && endDate) {
         matchesDate = isWithinInterval(orderDate, {
           start: startOfDay(startDate),
@@ -106,7 +107,7 @@ export default function AdminOrders() {
     return filtered.sort((a, b) => {
       let aValue: any = a[sortField];
       let bValue: any = b[sortField];
-      
+
       if (typeof aValue === "string") aValue = aValue.toLowerCase();
       if (aValue instanceof Date) aValue = aValue.getTime();
       if (bValue instanceof Date) bValue = bValue.getTime();
@@ -278,77 +279,97 @@ export default function AdminOrders() {
         </Card>
       </div>
 
-      <div className="flex flex-col gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border-none shadow-sm">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search customer name or phone..."
-              className="pl-8"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              data-testid="input-search-orders"
-            />
-          </div>
-          
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="processing">Processing</SelectItem>
-              <SelectItem value="shipped">Shipped</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
+      <Card className="border-none shadow-sm bg-white dark:bg-zinc-900 overflow-hidden">
+        <CardContent className="p-6">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search customer name or phone..."
+                className="pl-9 h-10 border-muted-foreground/20 focus-visible:ring-primary/20"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                data-testid="input-search-orders"
+              />
+            </div>
+            
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className={cn(
+                "w-[160px] h-10 border-muted-foreground/20 font-medium transition-all",
+                status === "paid" && "text-green-600 bg-green-50 dark:bg-green-900/20 border-green-200",
+                status === "processing" && "text-blue-600 bg-blue-50 dark:bg-blue-900/20 border-blue-200",
+                status === "shipped" && "text-purple-600 bg-purple-50 dark:bg-purple-900/20 border-purple-200",
+                status === "completed" && "text-zinc-600 bg-zinc-50 dark:bg-zinc-900/20 border-zinc-200",
+                status === "cancelled" && "text-red-600 bg-red-50 dark:bg-red-900/20 border-red-200"
+              )}>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="paid" className="text-green-600">Paid</SelectItem>
+                <SelectItem value="processing" className="text-blue-600">Processing</SelectItem>
+                <SelectItem value="shipped" className="text-purple-600">Shipped</SelectItem>
+                <SelectItem value="completed" className="text-zinc-600">Completed</SelectItem>
+                <SelectItem value="cancelled" className="text-red-600">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
 
-          <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 w-[150px] justify-start font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "PP") : "Start Date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            <span className="text-muted-foreground">-</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 w-[150px] justify-start font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "PP") : "End Date"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="h-10 w-[160px] pl-9 justify-start font-normal border-muted-foreground/20">
+                      {startDate ? format(startDate, "PP") : "Start Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-          {(search || status !== "all" || startDate || endDate) && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 px-2 lg:px-3">
-              Reset
-              <X className="ml-2 h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
+              <span className="text-muted-foreground font-medium">to</span>
+
+              <div className="relative">
+                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="h-10 w-[160px] pl-9 justify-start font-normal border-muted-foreground/20">
+                      {endDate ? format(endDate, "PP") : "End Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {(search || status !== "all" || startDate || endDate) && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearFilters} 
+                className="h-10 px-4 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Reset Filters
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="rounded-xl border-none bg-white dark:bg-zinc-900 shadow-md overflow-hidden">
         <div className="overflow-x-auto relative max-h-[600px]">
@@ -507,7 +528,7 @@ export default function AdminOrders() {
                     <Badge variant={getStatusColor(selectedOrder.status) as any}>
                       {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                     </Badge>
-                    
+
                     {getValidNextStatuses(selectedOrder.status).length > 0 && (
                       <Select 
                         onValueChange={(value) => {
@@ -576,14 +597,14 @@ export default function AdminOrders() {
                       const itemsText = selectedOrder.items?.map((item: any) => 
                         `- ${item.name}${item.storage ? ` (${item.storage})` : ''}${item.color ? ` (${item.color})` : ''} x${item.quantity}: ${formatCurrency(item.price * item.quantity)}`
                       ).join('\n') || 'No items listed';
-                      
+
                       const message = `*Order Update - #${selectedOrder.id}*\n\n` +
                         `Hello ${selectedOrder.customerName},\n` +
                         `Your order is currently: *${selectedOrder.status.toUpperCase()}*\n\n` +
                         `*Items:*\n${itemsText}\n\n` +
                         `*Order Total: ${formatCurrency(selectedOrder.totalAmount)}*\n\n` +
                         `Thank you for shopping with DOPIK ELECTRONICS!`;
-                      
+
                       const phone = selectedOrder.customerPhone.replace(/\D/g, '');
                       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
                     }}
