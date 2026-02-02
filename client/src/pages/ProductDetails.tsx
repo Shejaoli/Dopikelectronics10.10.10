@@ -48,7 +48,7 @@ export default function ProductDetails() {
   useEffect(() => {
     if (product?.imageUrl) {
       setSelectedImage(product.imageUrl);
-      
+
       // Update recently viewed
       const viewedIds = JSON.parse(localStorage.getItem("recentlyViewed") || "[]") as number[];
       const updatedViewed = [product.id, ...viewedIds.filter(id => id !== product.id)].slice(0, 10);
@@ -72,7 +72,7 @@ export default function ProductDetails() {
 
   const currentStorage = storageOptions.find(s => s.option === selectedStorage);
   const currentColor = colorOptions.find(c => c.name === selectedColor);
-  
+
   const isOutOfStock = (currentStorage?.stock === 0) || (currentColor?.stock === 0);
   const maxStock = Math.min(currentStorage?.stock ?? 99, currentColor?.stock ?? 99);
 
@@ -187,9 +187,9 @@ export default function ProductDetails() {
                  <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-500">In Stock</span>
                )}
             </div>
-            
+
             <h1 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">{product.name}</h1>
-            
+
             <div className="mb-6 text-3xl font-bold text-primary">
               {formatPrice(totalPrice)}
             </div>
@@ -240,8 +240,25 @@ export default function ProductDetails() {
               {product.description}
             </p>
 
-            {/* Specs */}
-            {Object.keys(specs).length > 0 && (
+            {/* Laptop Specs */}
+            {product.category === "Laptops" && specs && Object.keys(specs).length > 0 && (
+              <div className="mb-8 rounded-2xl border border-border bg-primary/5 p-6">
+                <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">Laptop Configuration</h3>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                  {Object.entries(specs).map(([key, value]) => (
+                    <div key={key} className="flex flex-col">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground opacity-70">
+                        {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      </span>
+                      <span className="text-sm font-semibold">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Technical Specs (General) */}
+            {product.category !== "Laptops" && Object.keys(specs).length > 0 && (
               <div className="mb-8 rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6">
                 <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-primary">Technical Specifications</h3>
                 <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
@@ -389,7 +406,7 @@ export default function ProductDetails() {
                 </Button>
               </Link>
             </div>
-            
+
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {recommendations.map((item) => (
                 <ProductCard key={item.id} product={item} />
