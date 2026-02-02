@@ -163,12 +163,24 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
     "Laptops": ["Apple", "Dell", "HP", "Lenovo", "Microsoft", "Acer", "Asus", "Toshiba", "MSI", "Samsung", "Huawei", "Fujitsu"],
   };
 
+  const LAPTOP_OPTIONS = {
+    batteryHealth: ["100%", "90%+", "80%+"],
+    charger: ["Included", "Not Included"],
+    color: ["Aluminum", "Black", "Carbon Fiber", "Gold", "Gray", "Matte Black"],
+    condition: ["Premium", "Excellent", "Good", "Acceptable"],
+    cpu: ["Apple M1 / M2 / M3", "Intel i3 / i5 / i7 / i9", "AMD Ryzen"],
+    ram: ["8GB", "16GB", "32GB", "64GB"],
+    screenSize: ["12\"", "13\"", "14\"", "15\"", "16\""],
+    storage: ["128GB", "256GB", "512GB", "1TB", "2TB"],
+    touchBar: ["Touch Bar", "No Touch Bar"]
+  };
+
   const onSubmit = async (data: InsertProduct) => {
     const fileInput = document.getElementById("image-upload") as HTMLInputElement;
     const file = fileInput?.files?.[0];
-    
+
     let imageUrl = data.imageUrl;
-    
+
     // Only upload if it's a data URL (newly selected but not yet uploaded)
     if (file && imageUrl.startsWith("data:")) {
       const uploadedUrl = await handleImageUpload(file);
@@ -185,8 +197,8 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
       return;
     }
 
-    // Convert spec entries to object
-    const specs: Record<string, string> = {};
+    // Convert spec entries to object and merge with laptop specs if any
+    const specs: Record<string, string> = { ...(data.specs as Record<string, string> || {}) };
     specEntries.forEach(entry => {
       if (entry.key.trim()) {
         specs[entry.key.trim()] = entry.value.trim();
@@ -470,6 +482,36 @@ export default function AdminAddProduct({ onBack }: AdminAddProductProps) {
                 )}
               </div>
             </div>
+
+            {form.watch("category") === "Laptops" && (
+              <div className="space-y-4 pt-4 border-t">
+                <FormLabel className="text-base">Laptop Specifications</FormLabel>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(LAPTOP_OPTIONS).map(([key, options]) => (
+                    <div key={key} className="space-y-2">
+                      <FormLabel className="text-xs capitalize">{key.replace(/([A-Z])/g, ' $1')}</FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          const currentSpecs = form.getValues("specs") as Record<string, string> || {};
+                          form.setValue("specs", { ...currentSpecs, [key]: value });
+                        }}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={`Select ${key}`} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {options.map(opt => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Button 
               type="submit" 
