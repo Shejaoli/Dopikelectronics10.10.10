@@ -292,7 +292,7 @@ export default function AdminOrders() {
                 data-testid="input-search-orders"
               />
             </div>
-            
+
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger className={cn(
                 "w-[160px] h-10 border-muted-foreground/20 font-medium transition-all",
@@ -391,7 +391,7 @@ export default function AdminOrders() {
                 <TableHead>Phone</TableHead>
                 <TableHead>Provider</TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:text-primary transition-colors"
+                  className="cursor-pointer hover:text-primary transition-colors text-right"
                   onClick={() => toggleSort("totalAmount")}
                 >
                   Total Amount <SortIndicator field="totalAmount" />
@@ -408,33 +408,39 @@ export default function AdminOrders() {
                 >
                   Date <SortIndicator field="createdAt" />
                 </TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-mono text-sm">#{order.id}</TableCell>
-                  <TableCell className="font-medium">{order.customerName}</TableCell>
-                  <TableCell>{order.customerPhone}</TableCell>
-                  <TableCell className="uppercase text-xs font-bold">{order.paymentProvider || order.paymentMethod || "-"}</TableCell>
-                  <TableCell>
+              {paginatedOrders.map((order, index) => (
+                <TableRow 
+                  key={order.id} 
+                  className={cn(
+                    "hover:bg-muted/50 transition-colors",
+                    index % 2 === 0 ? "bg-white dark:bg-zinc-900" : "bg-zinc-50/50 dark:bg-zinc-800/30"
+                  )}
+                >
+                  <TableCell className="font-mono text-xs text-muted-foreground py-4">#{order.id}</TableCell>
+                  <TableCell className="font-medium py-4">{order.customerName}</TableCell>
+                  <TableCell className="py-4">{order.customerPhone}</TableCell>
+                  <TableCell className="uppercase text-xs font-bold py-4">{order.paymentProvider || order.paymentMethod || "-"}</TableCell>
+                  <TableCell className="text-right py-4 font-medium">
                     {new Intl.NumberFormat("en-RW", {
                       style: "currency",
                       currency: "RWF",
                       maximumFractionDigits: 0,
                     }).format(order.totalAmount)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-4">
                     <Badge variant={getStatusColor(order.status) as any}>
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground py-4">
                     {format(new Date(order.createdAt), "MMM d, yyyy")}
                   </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedOrder(order)}>
+                  <TableCell className="py-4 text-right">
+                    <Button variant="ghost" size="icon" onClick={() => setSelectedOrder(order)} className="hover-elevate">
                       <Eye className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -442,7 +448,7 @@ export default function AdminOrders() {
               ))}
               {paginatedOrders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     No orders found.
                   </TableCell>
                 </TableRow>
