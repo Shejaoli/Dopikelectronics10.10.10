@@ -484,7 +484,7 @@ export async function registerRoutes(
 
   app.get("/api/admin/audit-logs", requireAdminAuth, async (req, res) => {
     const { page, limit, actionType } = req.query;
-    
+
     // Use pagination if page or limit is provided
     if (page || limit) {
       const result = await storage.getAuditLogsPaginated({
@@ -494,7 +494,7 @@ export async function registerRoutes(
       });
       return res.json(result);
     }
-    
+
     // Fallback to non-paginated for backward compatibility
     const logs = await storage.getAuditLogs();
     res.json(logs);
@@ -562,7 +562,7 @@ export async function registerRoutes(
       const id = Number(req.params.id);
       const { status: nextStatus } = req.body;
       const admin = await storage.getAdminById(req.session.adminId!);
-      
+
       // Role-based access: Staff can only update to "processing" or "shipped"
       const staffAllowedStatuses = ["processing", "shipped"];
       if (admin?.role === "staff" && !staffAllowedStatuses.includes(nextStatus)) {
