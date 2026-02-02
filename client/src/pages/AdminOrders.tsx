@@ -17,7 +17,7 @@ import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useMemo } from "react";
-import { Search, X, Calendar as CalendarIcon, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, FileText, Download, Eye, ShoppingCart, CheckCircle2, Clock, DollarSign } from "lucide-react";
+import { Search, X, Calendar as CalendarIcon, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, FileText, Download, Eye, ShoppingCart, CheckCircle2, Clock, DollarSign, XCircle, AlertCircle, RefreshCcw } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -191,22 +191,43 @@ export default function AdminOrders() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "paid": return "default";
-      case "processing": return "secondary";
-      case "shipped": return "outline";
-      case "completed": return "default";
-      case "cancelled": return "destructive";
-      default: return "secondary";
+      case "pending": return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800 animate-pulse";
+      case "paid": return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800";
+      case "processing": return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800";
+      case "shipped": return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800";
+      case "completed": return "bg-zinc-100 text-zinc-800 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700";
+      case "cancelled": return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800";
+      case "failed": return "bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800";
+      case "refunded": return "bg-zinc-100 text-zinc-800 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700";
+      default: return "bg-zinc-100 text-zinc-800 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    const iconProps = { className: "w-3 h-3 mr-1" };
+    switch (status) {
+      case "pending": return <Clock {...iconProps} />;
+      case "paid": return <CheckCircle2 {...iconProps} />;
+      case "processing": return <RefreshCcw {...iconProps} className={`${iconProps.className} animate-spin-slow`} />;
+      case "shipped": return <ShoppingCart {...iconProps} />;
+      case "completed": return <CheckCircle2 {...iconProps} />;
+      case "cancelled": return <XCircle {...iconProps} />;
+      case "failed": return <AlertCircle {...iconProps} />;
+      case "refunded": return <RefreshCcw {...iconProps} />;
+      default: return <Clock {...iconProps} />;
     }
   };
 
   const getValidNextStatuses = (currentStatus: string) => {
     const transitions: Record<string, string[]> = {
-      "paid": ["processing", "cancelled"],
-      "processing": ["shipped", "cancelled"],
-      "shipped": ["completed", "cancelled"],
-      "completed": [],
+      "pending": ["paid", "cancelled", "failed"],
+      "paid": ["processing", "cancelled", "refunded"],
+      "processing": ["shipped", "cancelled", "refunded"],
+      "shipped": ["completed", "cancelled", "refunded"],
+      "completed": ["refunded"],
       "cancelled": [],
+      "failed": ["pending", "cancelled"],
+      "refunded": []
     };
     return transitions[currentStatus] || [];
   };
@@ -432,7 +453,13 @@ export default function AdminOrders() {
                     }).format(order.totalAmount)}
                   </TableCell>
                   <TableCell className="py-4">
-                    <Badge variant={getStatusColor(order.status) as any}>
+                    <Badge 
+                      className={cn(
+                        "font-medium flex items-center w-fit px-2 py-0.5 rounded-full border shadow-sm transition-all",
+                        getStatusColor(order.status)
+                      )}
+                    >
+                      {getStatusIcon(order.status)}
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </Badge>
                   </TableCell>
@@ -531,10 +558,16 @@ export default function AdminOrders() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Status</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant={getStatusColor(selectedOrder.status) as any}>
+                    <Badge 
+                      className={cn(
+                        "font-medium flex items-center w-fit px-2 py-0.5 rounded-full border shadow-sm",
+                        getStatusColor(selectedOrder.status)
+                      )}
+                    >
+                      {getStatusIcon(selectedOrder.status)}
                       {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                     </Badge>
-
+                    
                     {getValidNextStatuses(selectedOrder.status).length > 0 && (
                       <Select 
                         onValueChange={(value) => {
