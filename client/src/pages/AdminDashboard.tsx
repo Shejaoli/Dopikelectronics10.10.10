@@ -900,7 +900,19 @@ export default function AdminDashboard() {
                                 ))}
                                 {(!stats?.recentOrders || stats.recentOrders.length === 0) && (
                                   <tr>
-                                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground font-medium italic">No recent orders</td>
+                                    <td colSpan={4} className="px-4 py-8 text-center">
+                                      <div className="flex flex-col items-center justify-center gap-1">
+                                        <p className="text-muted-foreground font-medium italic">No paid orders yet</p>
+                                        <Button 
+                                          variant="link" 
+                                          size="sm" 
+                                          onClick={() => setActiveTab("Orders")}
+                                          className="text-[10px] font-black uppercase tracking-tighter h-auto p-0"
+                                        >
+                                          Review pending orders
+                                        </Button>
+                                      </div>
+                                    </td>
                                   </tr>
                                 )}
                               </tbody>
