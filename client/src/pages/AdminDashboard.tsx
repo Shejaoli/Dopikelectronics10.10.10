@@ -17,7 +17,7 @@ import {
 import { Tooltip as ShadcnTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone, ChevronUp, ChevronDown, Clock, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone, ChevronUp, ChevronDown, Clock, DollarSign, TrendingUp, TrendingDown, AlertTriangle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -494,6 +494,10 @@ export default function AdminDashboard() {
     totalRevenue: number; 
     totalProducts: number; 
     pendingOrders: number;
+    lowStockCount: number;
+    recentOrders: any[];
+    pendingOrdersList: any[];
+    lowStockProducts: any[];
     trends: {
       orders: number;
       revenue: number;
@@ -772,7 +776,7 @@ export default function AdminDashboard() {
                     </h2>
                     <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Monitor your business metrics in real-time</p>
                   </div>
-                  
+
                   <div className="flex flex-wrap items-center gap-2 p-1 bg-muted/30 rounded-lg border border-border/50">
                     <Button 
                       variant={timeRange === "today" ? "default" : "ghost"} 
@@ -823,38 +827,144 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <StatsCard 
-                      title="Total Orders" 
-                      value={stats?.totalOrders || 0} 
-                      icon={ShoppingCart} 
-                      color="text-primary" 
-                      trend={stats?.trends?.orders}
-                      onClick={() => setActiveTab("Orders")}
-                    />
-                    <StatsCard 
-                      title="Total Revenue" 
-                      value={formatCurrency(stats?.totalRevenue || 0)} 
-                      icon={DollarSign} 
-                      color="text-green-500" 
-                      trend={stats?.trends?.revenue}
-                    />
-                    <StatsCard 
-                      title="Products" 
-                      value={stats?.totalProducts || 0} 
-                      icon={Package} 
-                      color="text-blue-500" 
-                      trend={stats?.trends?.products}
-                      onClick={() => setActiveTab("Products")}
-                    />
-                    <StatsCard 
-                      title="Pending" 
-                      value={stats?.pendingOrders || 0} 
-                      icon={Clock} 
-                      color="text-amber-500" 
-                      trend={stats?.trends?.pending}
-                      onClick={() => setActiveTab("Orders")}
-                    />
-                  </div>
+                      <StatsCard 
+                        title="Total Orders" 
+                        value={stats?.totalOrders || 0} 
+                        icon={ShoppingCart} 
+                        color="text-primary" 
+                        trend={stats?.trends?.orders}
+                        onClick={() => setActiveTab("Orders")}
+                      />
+                      <StatsCard 
+                        title="Total Revenue" 
+                        value={formatCurrency(stats?.totalRevenue || 0)} 
+                        icon={DollarSign} 
+                        color="text-green-500" 
+                        trend={stats?.trends?.revenue}
+                      />
+                      <StatsCard 
+                        title="Low Stock" 
+                        value={stats?.lowStockCount || 0} 
+                        icon={AlertTriangle} 
+                        color="text-red-500" 
+                      />
+                      <StatsCard 
+                        title="Pending" 
+                        value={stats?.pendingOrders || 0} 
+                        icon={Clock} 
+                        color="text-amber-500" 
+                        trend={stats?.trends?.pending}
+                        onClick={() => setActiveTab("Orders")}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <Card className="lg:col-span-2 overflow-hidden border-none shadow-md bg-card">
+                        <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
+                          <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                            <ShoppingCart className="w-4 h-4 text-primary" />
+                            Recent Orders
+                          </CardTitle>
+                          <Button variant="ghost" size="sm" onClick={() => setActiveTab("Orders")} className="text-[10px] font-black uppercase tracking-tighter gap-1">
+                            View All <ArrowRight className="w-3 h-3" />
+                          </Button>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs">
+                              <thead>
+                                <tr className="bg-muted/30 border-b border-border/50 text-muted-foreground font-bold uppercase tracking-tighter">
+                                  <th className="px-4 py-3">Order ID</th>
+                                  <th className="px-4 py-3">Customer</th>
+                                  <th className="px-4 py-3">Amount</th>
+                                  <th className="px-4 py-3">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-border/50">
+                                {stats?.recentOrders?.map((order) => (
+                                  <tr key={order.id} className="hover:bg-muted/20 transition-colors">
+                                    <td className="px-4 py-3 font-black">#{order.id}</td>
+                                    <td className="px-4 py-3 font-medium">{order.customerName}</td>
+                                    <td className="px-4 py-3 font-bold">{formatCurrency(order.totalAmount)}</td>
+                                    <td className="px-4 py-3">
+                                      <span className={cn(
+                                        "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter ring-1",
+                                        order.status === 'pending' ? "bg-amber-500/10 text-amber-600 ring-amber-500/30" :
+                                        order.status === 'paid' ? "bg-green-500/10 text-green-600 ring-green-500/30" :
+                                        "bg-muted text-muted-foreground ring-border"
+                                      )}>
+                                        {order.status}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                                {(!stats?.recentOrders || stats.recentOrders.length === 0) && (
+                                  <tr>
+                                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground font-medium italic">No recent orders</td>
+                                  </tr>
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <div className="space-y-6">
+                        <Card className="overflow-hidden border-none shadow-md bg-card ring-1 ring-red-500/10">
+                          <CardHeader className="bg-red-500/5 border-b border-red-500/10 pb-3">
+                            <CardTitle className="text-xs font-black uppercase tracking-widest text-red-600 flex items-center gap-2">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                              Low Stock Alert
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-0">
+                            <div className="divide-y divide-border/50">
+                              {stats?.lowStockProducts?.map((product) => (
+                                <div key={product.id} className="p-3 hover:bg-red-500/5 transition-colors flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="text-[11px] font-bold truncate leading-tight">{product.name}</p>
+                                    <p className="text-[9px] text-muted-foreground uppercase font-black tracking-tighter mt-0.5">{product.brand}</p>
+                                  </div>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-primary shrink-0" onClick={() => setActiveTab("Products")}>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+                              ))}
+                              {(!stats?.lowStockProducts || stats.lowStockProducts.length === 0) && (
+                                <div className="p-8 text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Stock is healthy</div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="overflow-hidden border-none shadow-md bg-card ring-1 ring-amber-500/10">
+                          <CardHeader className="bg-amber-500/5 border-b border-amber-500/10 pb-3">
+                            <CardTitle className="text-xs font-black uppercase tracking-widest text-amber-600 flex items-center gap-2">
+                              <Clock className="w-3.5 h-3.5" />
+                              Pending Action
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="p-0">
+                            <div className="divide-y divide-border/50">
+                              {stats?.pendingOrdersList?.map((order) => (
+                                <div key={order.id} className="p-3 hover:bg-amber-500/5 transition-colors flex items-center justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="text-[11px] font-bold truncate leading-tight">Order #{order.id}</p>
+                                    <p className="text-[9px] text-muted-foreground uppercase font-black tracking-tighter mt-0.5">{order.customerName}</p>
+                                  </div>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-primary shrink-0" onClick={() => setActiveTab("Orders")}>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+                              ))}
+                              {(!stats?.pendingOrdersList || stats.pendingOrdersList.length === 0) && (
+                                <div className="p-8 text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">No pending orders</div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card className="p-4">
