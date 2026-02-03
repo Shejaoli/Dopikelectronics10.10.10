@@ -36,6 +36,10 @@ export interface IStorage {
     pendingOrders: number;
     averageOrderValue: number;
     conversionRate: number;
+    lowStockCount: number;
+    recentOrders: Order[];
+    pendingOrdersList: Order[];
+    lowStockProducts: Product[];
     trends: {
       orders: number;
       revenue: number;
@@ -489,6 +493,17 @@ export class DatabaseStorage implements IStorage {
     const averageOrderValue = successfulOrders.length > 0 ? Math.round(totalRevenue / successfulOrders.length) : 0;
     const conversionRate = totalOrders > 0 ? Math.round((successfulOrders.length / totalOrders) * 100) : 0;
 
+    const lowStockProducts = allProducts.filter(p => {
+      if (!p.variations) return false;
+      const variations = p.variations as any;
+      const hasLowStockStorage = variations.storage?.some((s: any) => s.stock !== undefined && s.stock < 10);
+      const hasLowStockColor = variations.colors?.some((c: any) => c.stock !== undefined && c.stock < 10);
+      return hasLowStockStorage || hasLowStockColor;
+    });
+
+    const recentOrders = [...allOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
+    const pendingOrdersList = allOrders.filter(o => o.status === "pending").slice(0, 5);
+
     return { 
       totalOrders, 
       totalRevenue, 
@@ -496,6 +511,10 @@ export class DatabaseStorage implements IStorage {
       pendingOrders, 
       averageOrderValue, 
       conversionRate,
+      lowStockCount: lowStockProducts.length,
+      recentOrders,
+      pendingOrdersList,
+      lowStockProducts: lowStockProducts.slice(0, 5),
       trends: {
         orders: calculateTrend(currentPeriodOrders.length, previousPeriodOrders.length),
         revenue: calculateTrend(currentRevenue, previousRevenue),
