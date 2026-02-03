@@ -227,7 +227,7 @@ function StatsCard({
   onClick?: () => void;
 }) {
   const isPositive = trend !== undefined && trend > 0;
-  
+
   // Define gradient background based on color
   const gradientClass = color.includes("primary") 
     ? "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent"
