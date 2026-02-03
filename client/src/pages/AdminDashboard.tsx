@@ -17,7 +17,7 @@ import {
 import { Tooltip as ShadcnTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone, ChevronUp, ChevronDown, Clock, DollarSign } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone, ChevronUp, ChevronDown, Clock, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -216,35 +216,64 @@ function StatsCard({
   value, 
   icon: Icon, 
   color, 
-  trend 
+  trend,
+  onClick
 }: { 
   title: string; 
   value: string | number; 
   icon: any; 
   color: string;
   trend?: number;
+  onClick?: () => void;
 }) {
+  const isPositive = trend !== undefined && trend > 0;
+  
+  // Define gradient background based on color
+  const gradientClass = color.includes("primary") 
+    ? "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent"
+    : color.includes("green")
+    ? "bg-gradient-to-br from-green-500/10 via-green-500/5 to-transparent"
+    : color.includes("blue")
+    ? "bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent"
+    : "bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent";
+
+  const iconBgClass = color.includes("primary")
+    ? "bg-primary/20 text-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]"
+    : color.includes("green")
+    ? "bg-green-500/20 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+    : color.includes("blue")
+    ? "bg-blue-500/20 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+    : "bg-amber-500/20 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]";
+
   return (
-    <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300 hover-elevate bg-card group">
+    <Card 
+      onClick={onClick}
+      className={cn(
+        "border-none shadow-md transition-all duration-300 group overflow-hidden relative cursor-pointer",
+        "hover:shadow-xl hover:-translate-y-1 active:scale-[0.98]",
+        gradientClass
+      )}
+    >
+      <div className="absolute top-0 left-0 w-1 h-full bg-current opacity-20 group-hover:opacity-100 transition-opacity" style={ { color: color.replace('text-', '') } } />
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{title}</p>
+          <div className="space-y-1">
+            <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.15em] opacity-80">{title}</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold tracking-tight">{value}</p>
+              <p className="text-3xl font-black tracking-tighter tabular-nums">{value}</p>
               {trend !== undefined && trend !== 0 && (
                 <div className={cn(
-                  "flex items-center text-[10px] font-bold",
-                  trend > 0 ? "text-green-500" : "text-red-500"
+                  "flex items-center text-[11px] font-bold px-1.5 py-0.5 rounded-full",
+                  isPositive ? "text-green-600 bg-green-500/10" : "text-red-600 bg-red-500/10"
                 )}>
-                  {trend > 0 ? <ChevronUp className="w-3 h-3 mr-0.5" /> : <ChevronDown className="w-3 h-3 mr-0.5" />}
+                  {isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
                   {Math.abs(trend)}%
                 </div>
               )}
             </div>
           </div>
-          <div className={cn("p-3 rounded-2xl bg-muted/50 transition-colors group-hover:bg-primary/10", color)}>
-            <Icon className="w-5 h-5" />
+          <div className={cn("p-4 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3", iconBgClass)}>
+            <Icon className="w-6 h-6 stroke-[2.5px]" />
           </div>
         </div>
       </CardContent>
@@ -736,6 +765,7 @@ export default function AdminDashboard() {
                       icon={ShoppingCart} 
                       color="text-primary" 
                       trend={stats?.trends?.orders}
+                      onClick={() => setActiveTab("Orders")}
                     />
                     <StatsCard 
                       title="Total Revenue" 
@@ -750,6 +780,7 @@ export default function AdminDashboard() {
                       icon={Package} 
                       color="text-blue-500" 
                       trend={stats?.trends?.products}
+                      onClick={() => setActiveTab("Products")}
                     />
                     <StatsCard 
                       title="Pending" 
@@ -757,6 +788,7 @@ export default function AdminDashboard() {
                       icon={Clock} 
                       color="text-amber-500" 
                       trend={stats?.trends?.pending}
+                      onClick={() => setActiveTab("Orders")}
                     />
                   </div>
 
