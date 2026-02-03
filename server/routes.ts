@@ -581,11 +581,14 @@ export async function registerRoutes(
 
       // Strict transition rules
       const validTransitions: Record<string, string[]> = {
-        "paid": ["processing", "cancelled"],
-        "processing": ["shipped", "cancelled"],
-        "shipped": ["completed", "cancelled"],
-        "completed": [], // Terminal
+        "pending": ["paid", "cancelled", "failed"],
+        "paid": ["processing", "cancelled", "refunded"],
+        "processing": ["shipped", "cancelled", "refunded"],
+        "shipped": ["completed", "cancelled", "refunded"],
+        "completed": ["refunded"], // Terminal but allow refund
         "cancelled": [], // Terminal
+        "failed": ["pending", "cancelled"],
+        "refunded": []
       };
 
       const allowedNext = validTransitions[currentStatus] || [];
