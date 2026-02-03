@@ -17,7 +17,7 @@ import {
 import { Tooltip as ShadcnTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone, ChevronUp, ChevronDown, Clock, DollarSign } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -206,6 +206,49 @@ function AdminVideoList() {
         </table>
       </div>
     </div>
+  );
+}
+
+const cn = (...classes: string[]) => classes.filter(Boolean).join(" ");
+
+function StatsCard({ 
+  title, 
+  value, 
+  icon: Icon, 
+  color, 
+  trend 
+}: { 
+  title: string; 
+  value: string | number; 
+  icon: any; 
+  color: string;
+  trend?: number;
+}) {
+  return (
+    <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300 hover-elevate bg-card group">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{title}</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold tracking-tight">{value}</p>
+              {trend !== undefined && trend !== 0 && (
+                <div className={cn(
+                  "flex items-center text-[10px] font-bold",
+                  trend > 0 ? "text-green-500" : "text-red-500"
+                )}>
+                  {trend > 0 ? <ChevronUp className="w-3 h-3 mr-0.5" /> : <ChevronDown className="w-3 h-3 mr-0.5" />}
+                  {Math.abs(trend)}%
+                </div>
+              )}
+            </div>
+          </div>
+          <div className={cn("p-3 rounded-2xl bg-muted/50 transition-colors group-hover:bg-primary/10", color)}>
+            <Icon className="w-5 h-5" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -411,7 +454,18 @@ export default function AdminDashboard() {
     retry: false,
   });
 
-  const { data: stats } = useQuery<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }>({
+  const { data: stats } = useQuery<{ 
+    totalOrders: number; 
+    totalRevenue: number; 
+    totalProducts: number; 
+    pendingOrders: number;
+    trends: {
+      orders: number;
+      revenue: number;
+      products: number;
+      pending: number;
+    };
+  }>({
     queryKey: ["/api/admin/stats"],
     enabled: activeTab === "Dashboard",
   });
@@ -675,44 +729,36 @@ export default function AdminDashboard() {
               <AdminAuditLog />
             ) : (
               <div className="grid gap-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Card className="hover-elevate">
-                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Orders</CardTitle>
-                      <ShoppingCart className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats?.totalOrders ?? 0}</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="hover-elevate">
-                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
-                      <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(stats?.totalRevenue ?? 0)}</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="hover-elevate">
-                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Products in Stock</CardTitle>
-                      <Package className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats?.totalProducts ?? 0}</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="hover-elevate">
-                    <CardHeader className="flex flex-row items-center justify-between gap-1 space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Pending Orders</CardTitle>
-                      <ShoppingCart className="w-4 h-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-primary">{stats?.pendingOrders ?? 0}</div>
-                    </CardContent>
-                  </Card>
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatsCard 
+                      title="Total Orders" 
+                      value={stats?.totalOrders || 0} 
+                      icon={ShoppingCart} 
+                      color="text-primary" 
+                      trend={stats?.trends?.orders}
+                    />
+                    <StatsCard 
+                      title="Total Revenue" 
+                      value={formatCurrency(stats?.totalRevenue || 0)} 
+                      icon={DollarSign} 
+                      color="text-green-500" 
+                      trend={stats?.trends?.revenue}
+                    />
+                    <StatsCard 
+                      title="Products" 
+                      value={stats?.totalProducts || 0} 
+                      icon={Package} 
+                      color="text-blue-500" 
+                      trend={stats?.trends?.products}
+                    />
+                    <StatsCard 
+                      title="Pending" 
+                      value={stats?.pendingOrders || 0} 
+                      icon={Clock} 
+                      color="text-amber-500" 
+                      trend={stats?.trends?.pending}
+                    />
+                  </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <Card className="p-4">
