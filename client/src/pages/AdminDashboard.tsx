@@ -483,6 +483,12 @@ export default function AdminDashboard() {
     retry: false,
   });
 
+  const [timeRange, setTimeRange] = useState<"today" | "7days" | "30days" | "custom">("30days");
+  const [customRange, setCustomRange] = useState<{ start: string; end: string }>({
+    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    end: new Date().toISOString().split('T')[0]
+  });
+
   const { data: stats } = useQuery<{ 
     totalOrders: number; 
     totalRevenue: number; 
@@ -495,12 +501,12 @@ export default function AdminDashboard() {
       pending: number;
     };
   }>({
-    queryKey: ["/api/admin/stats"],
+    queryKey: ["/api/admin/stats", { timeRange, customRange }],
     enabled: activeTab === "Dashboard",
   });
 
   const { data: analytics } = useQuery<{ date: string; orders: number; revenue: number }[]>({
-    queryKey: ["/api/admin/analytics"],
+    queryKey: ["/api/admin/analytics", { timeRange, customRange }],
     enabled: activeTab === "Dashboard",
   });
 
@@ -757,8 +763,66 @@ export default function AdminDashboard() {
             ) : activeTab === "Audit Log" ? (
               <AdminAuditLog />
             ) : (
-              <div className="grid gap-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-wrap items-center justify-between gap-4 bg-card/50 p-4 rounded-xl border border-border/50 backdrop-blur-sm shadow-sm">
+                  <div className="space-y-1">
+                    <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
+                      <LayoutDashboard className="w-5 h-5 text-primary" />
+                      Performance Overview
+                    </h2>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Monitor your business metrics in real-time</p>
+                  </div>
+                  
+                  <div className="flex flex-wrap items-center gap-2 p-1 bg-muted/30 rounded-lg border border-border/50">
+                    <Button 
+                      variant={timeRange === "today" ? "default" : "ghost"} 
+                      size="sm" 
+                      onClick={() => setTimeRange("today")}
+                      className="text-xs font-bold uppercase tracking-tight h-8 px-4"
+                    >
+                      Today
+                    </Button>
+                    <Button 
+                      variant={timeRange === "7days" ? "default" : "ghost"} 
+                      size="sm" 
+                      onClick={() => setTimeRange("7days")}
+                      className="text-xs font-bold uppercase tracking-tight h-8 px-4"
+                    >
+                      7 Days
+                    </Button>
+                    <Button 
+                      variant={timeRange === "30days" ? "default" : "ghost"} 
+                      size="sm" 
+                      onClick={() => setTimeRange("30days")}
+                      className="text-xs font-bold uppercase tracking-tight h-8 px-4"
+                    >
+                      30 Days
+                    </Button>
+                    <div className="flex items-center gap-2 px-2 border-l border-border/50 ml-2">
+                      <input 
+                        type="date" 
+                        value={customRange.start}
+                        onChange={(e) => {
+                          setCustomRange(prev => ({ ...prev, start: e.target.value }));
+                          setTimeRange("custom");
+                        }}
+                        className="bg-transparent text-xs font-bold border-none focus:ring-0 p-0 h-8 w-28 uppercase"
+                      />
+                      <span className="text-[10px] font-black opacity-30">TO</span>
+                      <input 
+                        type="date" 
+                        value={customRange.end}
+                        onChange={(e) => {
+                          setCustomRange(prev => ({ ...prev, end: e.target.value }));
+                          setTimeRange("custom");
+                        }}
+                        className="bg-transparent text-xs font-bold border-none focus:ring-0 p-0 h-8 w-28 uppercase"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <StatsCard 
                       title="Total Orders" 
                       value={stats?.totalOrders || 0} 
