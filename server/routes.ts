@@ -645,18 +645,54 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/admin/stats", requireAdminAuth, async (_req, res) => {
+  app.get("/api/admin/stats", requireAdminAuth, async (req, res) => {
     try {
-      const stats = await storage.getAdminStats();
+      const { timeRange, customRange } = req.query;
+      let startDate: string | undefined;
+      let endDate: string | undefined;
+
+      const now = new Date();
+      if (timeRange === "today") {
+        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        endDate = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+      } else if (timeRange === "7days") {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (timeRange === "30days") {
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (timeRange === "custom" && customRange) {
+        const range = JSON.parse(customRange as string);
+        startDate = range.start;
+        endDate = range.end;
+      }
+
+      const stats = await storage.getAdminStats({ startDate, endDate });
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch admin stats" });
     }
   });
 
-  app.get("/api/admin/analytics", requireAdminAuth, async (_req, res) => {
+  app.get("/api/admin/analytics", requireAdminAuth, async (req, res) => {
     try {
-      const analytics = await storage.getDailyAnalytics();
+      const { timeRange, customRange } = req.query;
+      let startDate: string | undefined;
+      let endDate: string | undefined;
+
+      const now = new Date();
+      if (timeRange === "today") {
+        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        endDate = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+      } else if (timeRange === "7days") {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (timeRange === "30days") {
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (timeRange === "custom" && customRange) {
+        const range = JSON.parse(customRange as string);
+        startDate = range.start;
+        endDate = range.end;
+      }
+
+      const analytics = await storage.getDailyAnalytics({ startDate, endDate });
       res.json(analytics);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch analytics" });
