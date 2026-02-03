@@ -29,7 +29,20 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order>;
   getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined>;
-  getAdminStats(): Promise<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }>;
+  getAdminStats(): Promise<{ 
+    totalOrders: number; 
+    totalRevenue: number; 
+    totalProducts: number; 
+    pendingOrders: number;
+    averageOrderValue: number;
+    conversionRate: number;
+  }>;
+  getPeriodicAnalytics(period: "day" | "week" | "month"): Promise<{ 
+    period: string; 
+    orders: number; 
+    revenue: number;
+    aov: number;
+  }[]>;
   getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>;
 
   // Audit methods
@@ -415,43 +428,74 @@ export class DatabaseStorage implements IStorage {
     return product;
   }
 
-  async getAdminStats(): Promise<{ totalOrders: number; totalRevenue: number; totalProducts: number; pendingOrders: number }> {
+  async getAdminStats(): Promise<{ 
+    totalOrders: number; 
+    totalRevenue: number; 
+    totalProducts: number; 
+    pendingOrders: number;
+    averageOrderValue: number;
+    conversionRate: number;
+  }> {
     const allOrders = await db.select().from(orders);
     const allProducts = await db.select().from(products);
 
     const totalOrders = allOrders.length;
     const totalProducts = allProducts.length;
     const pendingOrders = allOrders.filter(o => o.status === "pending").length;
-    const totalRevenue = allOrders
-      .filter(o => o.status === "paid" || o.status === "delivered")
-      .reduce((sum, o) => sum + o.totalAmount, 0);
+    
+    const successfulOrders = allOrders.filter(o => ["paid", "shipped", "completed", "delivered"].includes(o.status));
+    const totalRevenue = successfulOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+    
+    const averageOrderValue = successfulOrders.length > 0 ? Math.round(totalRevenue / successfulOrders.length) : 0;
+    const conversionRate = totalOrders > 0 ? Math.round((successfulOrders.length / totalOrders) * 100) : 0;
 
-    return { totalOrders, totalRevenue, totalProducts, pendingOrders };
+    return { totalOrders, totalRevenue, totalProducts, pendingOrders, averageOrderValue, conversionRate };
   }
 
-  async getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>{
+  async getPeriodicAnalytics(period: "day" | "week" | "month"): Promise<{ 
+    period: string; 
+    orders: number; 
+    revenue: number;
+    aov: number;
+  }[]> {
     const allOrders = await db.select().from(orders);
-
-    // Group by date
-    const dailyData: Record<string, { orders: number; revenue: number }> = {};
+    const periodicData: Record<string, { orders: number; revenue: number }> = {};
 
     allOrders.forEach(order => {
-      const date = order.createdAt.toISOString().split('T')[0];
+      const date = new Date(order.createdAt);
+      let periodKey: string;
 
-      if (!dailyData[date]) {
-        dailyData[date] = { orders: 0, revenue: 0 };
+      if (period === "day") {
+        periodKey = date.toISOString().split('T')[0];
+      } else if (period === "week") {
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(date.getDate() - date.getDay());
+        periodKey = startOfWeek.toISOString().split('T')[0];
+      } else {
+        periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       }
 
-      dailyData[date].orders += 1;
-      if (order.status === "paid" || order.status === "delivered") {
-        dailyData[date].revenue += order.totalAmount;
+      if (!periodicData[periodKey]) {
+        periodicData[periodKey] = { orders: 0, revenue: 0 };
+      }
+
+      periodicData[periodKey].orders += 1;
+      if (["paid", "shipped", "completed", "delivered"].includes(order.status)) {
+        periodicData[periodKey].revenue += order.totalAmount;
       }
     });
 
-    return Object.entries(dailyData).map(([date, data]) => ({
-      date,
-      ...data
-    })).sort((a, b) => a.date.localeCompare(b.date));
+    return Object.entries(periodicData).map(([key, data]) => ({
+      period: key,
+      orders: data.orders,
+      revenue: data.revenue,
+      aov: data.orders > 0 ? Math.round(data.revenue / data.orders) : 0
+    })).sort((a, b) => a.period.localeCompare(b.period));
+  }
+
+  async getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>{
+    const analytics = await this.getPeriodicAnalytics("day");
+    return analytics.map(a => ({ date: a.period, orders: a.orders, revenue: a.revenue }));
   }
 
   async getOrder(id: number): Promise<Order | undefined> {
