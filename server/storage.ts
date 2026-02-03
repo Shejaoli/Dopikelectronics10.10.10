@@ -29,7 +29,7 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order>;
   getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined>;
-  getAdminStats(): Promise<{ 
+  getAdminStats(filters?: { startDate?: string; endDate?: string }): Promise<{ 
     totalOrders: number; 
     totalRevenue: number; 
     totalProducts: number; 
@@ -43,13 +43,13 @@ export interface IStorage {
       pending: number;
     };
   }>;
-  getPeriodicAnalytics(period: "day" | "week" | "month"): Promise<{ 
+  getPeriodicAnalytics(period: "day" | "week" | "month", filters?: { startDate?: string; endDate?: string }): Promise<{ 
     period: string; 
     orders: number; 
     revenue: number;
     aov: number;
   }[]>;
-  getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>;
+  getDailyAnalytics(filters?: { startDate?: string; endDate?: string }): Promise<{ date: string; orders: number; revenue: number }[]>;
 
   // Audit methods
   getAuditLogs(): Promise<AuditLog[]>;
@@ -434,7 +434,7 @@ export class DatabaseStorage implements IStorage {
     return product;
   }
 
-  async getAdminStats(): Promise<{ 
+  async getAdminStats(filters?: { startDate?: string; endDate?: string }): Promise<{ 
     totalOrders: number; 
     totalRevenue: number; 
     totalProducts: number; 
@@ -448,8 +448,17 @@ export class DatabaseStorage implements IStorage {
       pending: number;
     };
   }> {
-    const allOrders = await db.select().from(orders);
+    let allOrders = await db.select().from(orders);
     const allProducts = await db.select().from(products);
+
+    if (filters?.startDate || filters?.endDate) {
+      allOrders = allOrders.filter(o => {
+        const date = new Date(o.createdAt);
+        if (filters.startDate && date < new Date(filters.startDate)) return false;
+        if (filters.endDate && date > new Date(filters.endDate)) return false;
+        return true;
+      });
+    }
 
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
@@ -473,10 +482,10 @@ export class DatabaseStorage implements IStorage {
     const totalOrders = allOrders.length;
     const totalProducts = allProducts.length;
     const pendingOrders = allOrders.filter(o => o.status === "pending").length;
-    
+
     const successfulOrders = allOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status));
     const totalRevenue = successfulOrders.reduce((sum, o) => sum + o.totalAmount, 0);
-    
+
     const averageOrderValue = successfulOrders.length > 0 ? Math.round(totalRevenue / successfulOrders.length) : 0;
     const conversionRate = totalOrders > 0 ? Math.round((successfulOrders.length / totalOrders) * 100) : 0;
 
@@ -499,13 +508,21 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getPeriodicAnalytics(period: "day" | "week" | "month"): Promise<{ 
+  async getPeriodicAnalytics(period: "day" | "week" | "month", filters?: { startDate?: string; endDate?: string }): Promise<{ 
     period: string; 
     orders: number; 
     revenue: number;
     aov: number;
   }[]> {
-    const allOrders = await db.select().from(orders);
+    let allOrders = await db.select().from(orders);
+    if (filters?.startDate || filters?.endDate) {
+      allOrders = allOrders.filter(o => {
+        const date = new Date(o.createdAt);
+        if (filters.startDate && date < new Date(filters.startDate)) return false;
+        if (filters.endDate && date > new Date(filters.endDate)) return false;
+        return true;
+      });
+    }
     const periodicData: Record<string, { orders: number; revenue: number }> = {};
 
     allOrders.forEach(order => {
@@ -540,8 +557,8 @@ export class DatabaseStorage implements IStorage {
     })).sort((a, b) => a.period.localeCompare(b.period));
   }
 
-  async getDailyAnalytics(): Promise<{ date: string; orders: number; revenue: number }[]>{
-    const analytics = await this.getPeriodicAnalytics("day");
+  async getDailyAnalytics(filters?: { startDate?: string; endDate?: string }): Promise<{ date: string; orders: number; revenue: number }[]>{
+    const analytics = await this.getPeriodicAnalytics("day", filters);
     return analytics.map(a => ({ date: a.period, orders: a.orders, revenue: a.revenue }));
   }
 
