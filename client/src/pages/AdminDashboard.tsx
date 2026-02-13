@@ -479,46 +479,30 @@ export default function AdminDashboard() {
     end: new Date().toISOString().split('T')[0]
   });
 
-  const { data: stats, isLoading: statsLoading } = useQuery<{ 
-    totalOrders: number; 
-    paidOrders?: number;
-    totalRevenue: number; 
-    totalProducts: number; 
-    pendingOrders: number;
-    lowStockCount: number;
-    recentOrders: any[];
-    pendingOrdersList: any[];
-    lowStockProducts: any[];
-    trends: {
-      orders: number;
-      revenue: number;
-      products: number;
-      pending: number;
-    };
-  }>({
+  const { data: stats, isLoading: statsLoading } = useQuery<any>({
     queryKey: ["/api/admin/stats", timeRange, customRange.start, customRange.end],
-    queryFn: () => apiRequest("GET", `/api/admin/stats?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/admin/stats?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`);
+      return res.json ? await res.json() : res;
+    },
     enabled: activeTab === "Dashboard",
   });
 
-  const { data: dashboardData, isLoading: dashLoading } = useQuery<{ 
-    totalOrders: number; 
-    paidOrders: number;
-    pendingOrders: number;
-    totalRevenue: number;
-    chartData: { date: string; orders: number; revenue: number }[];
-  }>({
+  const { data: dashboardData, isLoading: dashLoading } = useQuery<any>({
     queryKey: ["/api/admin/dashboard", timeRange, customRange.start, customRange.end],
-    queryFn: () => apiRequest("GET", `/api/admin/dashboard?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/admin/dashboard?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`);
+      return res.json ? await res.json() : res;
+    },
     enabled: activeTab === "Dashboard",
   });
 
-  console.log("[Dashboard UI] Stats:", stats);
-  console.log("[Dashboard UI] DashboardData:", dashboardData);
-
-  const { data: analytics } = useQuery<{ date: string; orders: number; revenue: number }[]>({
+  const { data: analytics } = useQuery<any>({
     queryKey: ["/api/admin/analytics", timeRange, customRange.start, customRange.end],
-    queryFn: () => apiRequest("GET", `/api/admin/analytics?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
+    queryFn: async () => {
+      const res = await apiRequest("GET", `/api/admin/analytics?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`);
+      return res.json ? await res.json() : res;
+    },
     enabled: activeTab === "Dashboard",
   });
 
@@ -866,7 +850,7 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <StatsCard 
                     title="Total Revenue" 
-                    value={formatCurrency(dashboardData?.totalRevenue || 0)} 
+                    value={formatCurrency(stats?.totalRevenue || 0)} 
                     icon={DollarSign} 
                     color="text-primary" 
                     trend={stats?.trends?.revenue}
@@ -874,7 +858,7 @@ export default function AdminDashboard() {
                   />
                   <StatsCard 
                     title="Total Orders" 
-                    value={dashboardData?.totalOrders || 0} 
+                    value={stats?.totalOrders || 0} 
                     icon={ShoppingCart} 
                     color="text-blue-500" 
                     trend={stats?.trends?.orders}
@@ -882,14 +866,14 @@ export default function AdminDashboard() {
                   />
                   <StatsCard 
                     title="Paid Orders" 
-                    value={dashboardData?.paidOrders || 0} 
+                    value={stats?.paidOrders || 0} 
                     icon={CheckCircle2} 
                     color="text-green-500" 
                     onClick={() => setActiveTab("Orders")}
                   />
                   <StatsCard 
                     title="Pending Orders" 
-                    value={dashboardData?.pendingOrders || 0} 
+                    value={stats?.pendingOrders || 0} 
                     icon={Clock} 
                     color="text-amber-500" 
                     trend={stats?.trends?.pending}
@@ -906,77 +890,115 @@ export default function AdminDashboard() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
-                          <div className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart data={dashboardData?.chartData || []}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border) / 0.3)" />
-                                <XAxis 
-                                  dataKey="date" 
-                                  stroke="hsl(var(--muted-foreground))" 
-                                  fontSize={10}
-                                  tickLine={false}
-                                  axisLine={false}
-                                  tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                />
-                                <YAxis 
-                                  stroke="hsl(var(--muted-foreground))" 
-                                  fontSize={10}
-                                  tickLine={false}
-                                  axisLine={false}
-                                  tickFormatter={(value) => `?${(value / 1000)}k`}
-                                />
-                                <RechartsTooltip 
-                                  contentStyle={{ 
-                                    backgroundColor: 'hsl(var(--card))', 
-                                    border: '1px solid hsl(var(--border) / 0.5)',
-                                    borderRadius: '8px',
-                                    fontSize: '12px'
-                                  }}
-                                />
-                                <Line 
-                                  type="monotone" 
-                                  dataKey="revenue" 
-                                  stroke="hsl(var(--primary))" 
-                                  strokeWidth={3} 
-                                  dot={{ fill: 'hsl(var(--primary))', r: 4 }}
-                                  activeDot={{ r: 6, strokeWidth: 0 }}
-                                />
-                                <Line 
-                                  type="monotone" 
-                                  dataKey="orders" 
-                                  stroke="hsl(var(--blue-500))" 
-                                  strokeWidth={2} 
-                                  dot={{ fill: 'hsl(var(--blue-500))', r: 3 }}
-                                />
-                              </LineChart>
-                            </ResponsiveContainer>
+                          <div className="h-[300px] w-full flex items-center justify-center relative">
+                            {(!dashboardData?.chartData || dashboardData.chartData.length === 0) ? (
+                              <div className="flex flex-col items-center justify-center text-center p-6 bg-muted/5 rounded-xl border border-dashed border-border/50">
+                                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">No data available for selected period</p>
+                              </div>
+                            ) : (
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart data={dashboardData?.chartData || []}>
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border) / 0.3)" />
+                                  <XAxis 
+                                    dataKey="date" 
+                                    stroke="hsl(var(--muted-foreground))" 
+                                    fontSize={10}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  />
+                                  <YAxis 
+                                    stroke="hsl(var(--muted-foreground))" 
+                                    fontSize={10}
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tickFormatter={(value) => `?${(value / 1000)}k`}
+                                  />
+                                  <RechartsTooltip 
+                                    contentStyle={{ 
+                                      backgroundColor: 'hsl(var(--card))', 
+                                      border: '1px solid hsl(var(--border) / 0.5)',
+                                      borderRadius: '8px',
+                                      fontSize: '12px'
+                                    }}
+                                  />
+                                  <Line 
+                                    type="monotone" 
+                                    dataKey="revenue" 
+                                    stroke="hsl(var(--primary))" 
+                                    strokeWidth={3} 
+                                    dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                  />
+                                  <Line 
+                                    type="monotone" 
+                                    dataKey="orders" 
+                                    stroke="hsl(var(--blue-500))" 
+                                    strokeWidth={2} 
+                                    dot={{ fill: 'hsl(var(--blue-500))', r: 3 }}
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
 
                       <div className="space-y-6">
-                        <Card className="overflow-hidden border-none shadow-md bg-card ring-1 ring-red-500/10">
-                          <CardHeader className="bg-red-500/5 border-b border-red-500/10 pb-3">
-                            <CardTitle className="text-xs font-black uppercase tracking-widest text-red-600 flex items-center gap-2">
-                              <AlertTriangle className="w-3.5 h-3.5" />
-                              Low Stock Alert
+                        <Card className={cn(
+                          "overflow-hidden border-none shadow-md bg-card transition-all duration-300 ring-1",
+                          (!stats?.lowStockProducts || stats.lowStockProducts.length === 0) 
+                            ? "ring-green-500/10" 
+                            : "ring-red-500/10"
+                        )}>
+                          <CardHeader className={cn(
+                            "border-b pb-3 transition-colors",
+                            (!stats?.lowStockProducts || stats.lowStockProducts.length === 0)
+                              ? "bg-green-500/5 border-green-500/10"
+                              : "bg-red-500/5 border-red-500/10"
+                          )}>
+                            <CardTitle className={cn(
+                              "text-xs font-black uppercase tracking-widest flex items-center gap-2",
+                              (!stats?.lowStockProducts || stats.lowStockProducts.length === 0)
+                                ? "text-green-600"
+                                : "text-red-600"
+                            )}>
+                              {(!stats?.lowStockProducts || stats.lowStockProducts.length === 0) ? (
+                                <>
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  Stock Status
+                                </>
+                              ) : (
+                                <>
+                                  <AlertTriangle className="w-3.5 h-3.5" />
+                                  Low Stock Alert
+                                </>
+                              )}
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="p-0">
                             <div className="divide-y divide-border/50">
-                              {stats?.lowStockProducts?.map((product) => (
+                              {stats?.lowStockProducts?.map((product: any) => (
                                 <div key={product.id} className="p-3 hover:bg-red-500/5 transition-colors flex items-center justify-between gap-3">
                                   <div className="min-w-0">
                                     <p className="text-[11px] font-bold truncate leading-tight">{product.name}</p>
                                     <p className="text-[9px] text-muted-foreground uppercase font-black tracking-tighter mt-0.5">{product.brand}</p>
                                   </div>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 text-primary shrink-0" onClick={() => setActiveTab("Products")}>
-                                    <ArrowRight className="w-3.5 h-3.5" />
-                                  </Button>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <span className="text-[10px] font-black text-red-600 bg-red-500/10 px-1.5 py-0.5 rounded">LOW</span>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-primary" onClick={() => setActiveTab("Products")}>
+                                      <ArrowRight className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </div>
                                 </div>
                               ))}
                               {(!stats?.lowStockProducts || stats.lowStockProducts.length === 0) && (
-                                <div className="p-8 text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Stock is healthy</div>
+                                <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
+                                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                  </div>
+                                  <span className="text-[10px] text-green-600 font-bold uppercase tracking-widest">Stock is healthy</span>
+                                </div>
                               )}
                             </div>
                           </CardContent>
@@ -991,7 +1013,7 @@ export default function AdminDashboard() {
                           </CardHeader>
                           <CardContent className="p-0">
                             <div className="divide-y divide-border/50">
-                              {stats?.pendingOrdersList?.map((order) => (
+                              {stats?.pendingOrdersList?.map((order: any) => (
                                 <div key={order.id} className="p-3 hover:bg-amber-500/5 transition-colors flex items-center justify-between gap-3">
                                   <div className="min-w-0">
                                     <p className="text-[11px] font-bold truncate leading-tight">Order #{order.id}</p>
