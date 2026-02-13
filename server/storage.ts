@@ -479,12 +479,17 @@ export class DatabaseStorage implements IStorage {
       });
     }
 
-    const totalOrders = filteredOrders.length;
-    const paidOrders = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status));
+    const paidStatuses = ["paid", "shipped", "completed", "delivered", "confirmed", "processing", "pending"];
+    const totalOrders = currentPeriodOrders.length;
+    const paidOrders = currentPeriodOrders.filter(o => paidStatuses.includes(o.status));
     const totalRevenue = paidOrders.reduce((sum, o) => sum + o.totalAmount, 0);
 
+    const previousRevenue = previousPeriodOrders
+      .filter(o => paidStatuses.includes(o.status))
+      .reduce((sum, o) => sum + o.totalAmount, 0);
+
     const totalProducts = allProducts.length;
-    const pendingOrders = filteredOrders.filter(o => o.status === "pending").length;
+    const pendingOrders = currentPeriodOrders.filter(o => o.status === "pending").length;
 
     const lowStockProducts = allProducts.filter(p => {
       if (!p.variations) return false;
@@ -556,7 +561,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       periodicData[periodKey].orders += 1;
-      if (["paid", "shipped", "completed", "delivered", "confirmed"].includes(order.status)) {
+      if (["paid", "shipped", "completed", "delivered", "confirmed", "processing", "pending"].includes(order.status)) {
         periodicData[periodKey].revenue += order.totalAmount;
       }
     });
@@ -638,7 +643,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     const totalOrders = filteredOrders.length;
-    const paidOrdersList = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status));
+    const paidOrdersList = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed", "processing", "pending"].includes(o.status));
     const paidOrders = paidOrdersList.length;
     const pendingOrders = filteredOrders.filter(o => o.status === "pending").length;
 
