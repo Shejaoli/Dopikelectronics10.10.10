@@ -69,6 +69,18 @@ export const videos = pgTable("videos", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const siteVisitors = pgTable("site_visitors", {
+  id: serial("id").primaryKey(),
+  visitorId: text("visitor_id").notNull(), // Session-based or persistent ID
+  path: text("path").notNull(),
+  userAgent: text("user_agent"),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+export const insertSiteVisitorSchema = createInsertSchema(siteVisitors).omit({ id: true, timestamp: true });
+export type SiteVisitor = typeof siteVisitors.$inferSelect;
+export type InsertSiteVisitor = z.infer<typeof insertSiteVisitorSchema>;
+
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, timestamp: true });
 export const auditLogSchema = auditLogs;
 export type AuditLog = typeof auditLogs.$inferSelect;
