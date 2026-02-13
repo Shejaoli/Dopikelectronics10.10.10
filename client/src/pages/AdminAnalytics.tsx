@@ -1,15 +1,43 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line, AreaChart, Area } from "recharts";
-import { TrendingUp, Users, ShoppingCart, DollarSign, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { TrendingUp, Users, ShoppingCart, DollarSign, ArrowUpRight, ArrowDownRight, Monitor, Smartphone, Settings } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AdminAnalytics() {
-  const data = [
-    { name: 'Jan', sales: 4000, users: 2400 },
-    { name: 'Feb', sales: 3000, users: 1398 },
-    { name: 'Mar', sales: 2000, users: 9800 },
-    { name: 'Apr', sales: 2780, users: 3908 },
-    { name: 'May', sales: 1890, users: 4800 },
-    { name: 'Jun', sales: 2390, users: 3800 },
+  const { data: stats } = useQuery<any>({
+    queryKey: ["/api/admin/stats", "30days"],
+  });
+
+  const chartData = stats?.monthlyAnalytics?.map((item: any) => {
+    const [year, month] = item.period.split('-');
+    const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'short' });
+    return {
+      name: monthName,
+      sales: item.revenue,
+      users: item.orders
+    };
+  }) || [
+    { name: 'Jan', sales: 0, users: 0 },
+    { name: 'Feb', sales: 0, users: 0 },
+    { name: 'Mar', sales: 0, users: 0 },
+    { name: 'Apr', sales: 0, users: 0 },
+    { name: 'May', sales: 0, users: 0 },
+    { name: 'Jun', sales: 0, users: 0 },
+  ];
+
+  const formatRWF = (value: number) => {
+    return new Intl.NumberFormat("en-RW", {
+      style: "currency",
+      currency: "RWF",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const statsCards = [
+    { title: "Total Revenue", value: stats?.totalRevenue ? formatRWF(stats.totalRevenue) : formatRWF(0), trend: "+0%", icon: DollarSign, color: "text-primary" },
+    { title: "Total Visitors", value: stats?.totalVisitors || 0, trend: "+0%", icon: Monitor, color: "text-blue-500" },
+    { title: "Unique Visitors", value: stats?.uniqueVisitors || 0, trend: "+0%", icon: Smartphone, color: "text-green-500" },
+    { title: "Registered Users", value: stats?.totalAdmins || 0, trend: "+0%", icon: Settings, color: "text-amber-500" }
   ];
 
   return (
@@ -22,12 +50,7 @@ export default function AdminAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { title: "Total Revenue", value: "$45,231", trend: "+20.1%", icon: DollarSign, color: "text-primary" },
-          { title: "Active Users", value: "+2,350", trend: "+180.1%", icon: Users, color: "text-blue-500" },
-          { title: "Sales", value: "+12,234", trend: "+19%", icon: ShoppingCart, color: "text-green-500" },
-          { title: "Growth", value: "+24.5%", trend: "+4.3%", icon: TrendingUp, color: "text-amber-500" }
-        ].map((stat, i) => (
+        {statsCards.map((stat, i) => (
           <Card key={i} className="border-none shadow-md bg-card/50 backdrop-blur hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -51,11 +74,11 @@ export default function AdminAnalytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card className="border-none shadow-lg overflow-hidden">
           <CardHeader className="bg-muted/50 border-b">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider">Revenue Growth</CardTitle>
+            <CardTitle className="text-sm font-bold uppercase tracking-wider">Revenue Growth (RWF)</CardTitle>
           </CardHeader>
           <CardContent className="p-6 h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
@@ -64,8 +87,9 @@ export default function AdminAnalytics() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600}} tickFormatter={(value) => `FRw${value}`} />
                 <Tooltip 
+                  formatter={(value: number) => [formatRWF(value), "Revenue"]}
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{ color: 'hsl(var(--primary))', fontWeight: 'bold' }}
                 />
@@ -77,16 +101,17 @@ export default function AdminAnalytics() {
 
         <Card className="border-none shadow-lg overflow-hidden">
           <CardHeader className="bg-muted/50 border-b">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider">User Activity</CardTitle>
+            <CardTitle className="text-sm font-bold uppercase tracking-wider">Orders Count</CardTitle>
           </CardHeader>
           <CardContent className="p-6 h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
+              <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600}} />
                 <Tooltip 
                   cursor={{fill: 'hsl(var(--muted)/0.3)'}}
+                  formatter={(value: number) => [value, "Orders"]}
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                 />
                 <Bar dataKey="users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
