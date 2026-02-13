@@ -27,6 +27,7 @@ import AdminAddProduct from "./AdminAddProduct";
 import AdminEditProduct from "./AdminEditProduct";
 import AdminOrders from "./AdminOrders";
 import AdminAuditLog from "./AdminAuditLog";
+import AdminAnalytics from "./AdminAnalytics";
 import { CircularEconomy } from "./Home";
 import { 
   BarChart, 
@@ -706,6 +707,8 @@ export default function AdminDashboard() {
               )
             ) : activeTab === "Orders" ? (
               <AdminOrders />
+            ) : activeTab === "Analytics" ? (
+              <AdminAnalytics />
             ) : activeTab === "Circular Economy" ? (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
