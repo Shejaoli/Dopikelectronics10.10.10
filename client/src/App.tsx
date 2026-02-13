@@ -4,7 +4,6 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
 
 import Home from "@/pages/Home";
 import Shop from "@/pages/Shop";
@@ -36,7 +35,7 @@ function VisitorTracker() {
   useEffect(() => {
     let visitorId = localStorage.getItem("visitor_id");
     if (!visitorId) {
-      visitorId = uuidv4();
+      visitorId = Math.random().toString(36).substring(2) + Date.now().toString(36);
       localStorage.setItem("visitor_id", visitorId);
     }
 
