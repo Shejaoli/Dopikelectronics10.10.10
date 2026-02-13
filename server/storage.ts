@@ -438,25 +438,13 @@ export class DatabaseStorage implements IStorage {
     return product;
   }
 
-  async getAdminStats(filters?: { startDate?: string; endDate?: string }): Promise<{ 
-    totalOrders: number; 
-    totalRevenue: number; 
-    totalProducts: number; 
-    pendingOrders: number;
-    averageOrderValue: number;
-    conversionRate: number;
-    trends: {
-      orders: number;
-      revenue: number;
-      products: number;
-      pending: number;
-    };
-  }> {
-    let allOrders = await db.select().from(orders);
+  async getAdminStats(filters?: { startDate?: string; endDate?: string }): Promise<any> {
+    const allOrders = await db.select().from(orders);
     const allProducts = await db.select().from(products);
-
+    
+    let currentPeriodOrders = allOrders;
     if (filters?.startDate || filters?.endDate) {
-      allOrders = allOrders.filter(o => {
+      currentPeriodOrders = allOrders.filter(o => {
         const date = new Date(o.createdAt);
         if (filters.startDate && date < new Date(filters.startDate)) return false;
         if (filters.endDate && date > new Date(filters.endDate)) return false;
@@ -464,34 +452,32 @@ export class DatabaseStorage implements IStorage {
       });
     }
 
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-    const sixtyDaysAgo = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000));
+    // Previous period for trends (same duration)
+    let previousPeriodOrders: Order[] = [];
+    if (filters?.startDate) {
+      const start = new Date(filters.startDate);
+      const end = filters.endDate ? new Date(filters.endDate) : new Date();
+      const duration = end.getTime() - start.getTime();
+      const prevStart = new Date(start.getTime() - duration);
+      const prevEnd = start;
+      
+      previousPeriodOrders = allOrders.filter(o => {
+        const date = new Date(o.createdAt);
+        return date >= prevStart && date < prevEnd;
+      });
+    }
 
-    const currentPeriodOrders = allOrders.filter(o => o.createdAt >= thirtyDaysAgo);
-    const previousPeriodOrders = allOrders.filter(o => o.createdAt >= sixtyDaysAgo && o.createdAt < thirtyDaysAgo);
-
-    const calculateTrend = (current: number, previous: number) => {
-      if (previous === 0) return current > 0 ? 100 : 0;
-      return Math.round(((current - previous) / previous) * 100);
-    };
-
-    const currentRevenue = currentPeriodOrders
+    const totalOrders = currentPeriodOrders.length;
+    const totalRevenue = currentPeriodOrders
       .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
       .reduce((sum, o) => sum + o.totalAmount, 0);
+    
     const previousRevenue = previousPeriodOrders
       .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
       .reduce((sum, o) => sum + o.totalAmount, 0);
 
-    const totalOrders = allOrders.length;
     const totalProducts = allProducts.length;
-    const pendingOrders = allOrders.filter(o => o.status === "pending").length;
-
-    const successfulOrders = allOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status));
-    const totalRevenue = successfulOrders.reduce((sum, o) => sum + o.totalAmount, 0);
-
-    const averageOrderValue = successfulOrders.length > 0 ? Math.round(totalRevenue / successfulOrders.length) : 0;
-    const conversionRate = totalOrders > 0 ? Math.round((successfulOrders.length / totalOrders) * 100) : 0;
+    const pendingOrders = currentPeriodOrders.filter(o => o.status === "pending").length;
 
     const lowStockProducts = allProducts.filter(p => {
       if (!p.variations) return false;
@@ -501,26 +487,26 @@ export class DatabaseStorage implements IStorage {
       return hasLowStockStorage || hasLowStockColor;
     });
 
-    const recentOrders = [...allOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
-    const pendingOrdersList = allOrders.filter(o => o.status === "pending").slice(0, 5);
+    const calculateTrend = (curr: number, prev: number) => {
+      if (prev === 0) return curr > 0 ? 100 : 0;
+      return Math.round(((curr - prev) / prev) * 100);
+    };
 
-    return { 
-      totalOrders, 
-      totalRevenue, 
-      totalProducts, 
-      pendingOrders, 
-      averageOrderValue, 
-      conversionRate,
+    return {
+      totalOrders,
+      totalRevenue,
+      totalProducts,
+      pendingOrders,
       lowStockCount: lowStockProducts.length,
-      recentOrders,
-      pendingOrdersList,
+      recentOrders: [...currentPeriodOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
+      pendingOrdersList: currentPeriodOrders.filter(o => o.status === "pending").slice(0, 5),
       lowStockProducts: lowStockProducts.slice(0, 5),
       trends: {
-        orders: calculateTrend(currentPeriodOrders.length, previousPeriodOrders.length),
-        revenue: calculateTrend(currentRevenue, previousRevenue),
+        orders: calculateTrend(totalOrders, previousPeriodOrders.length),
+        revenue: calculateTrend(totalRevenue, previousRevenue),
         products: 0,
         pending: calculateTrend(
-          currentPeriodOrders.filter(o => o.status === "pending").length,
+          pendingOrders,
           previousPeriodOrders.filter(o => o.status === "pending").length
         )
       }
