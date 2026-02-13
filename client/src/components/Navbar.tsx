@@ -13,7 +13,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: "All Items", onClick: () => setIsMenuOpen(true) },
-    { name: "Deals 🔥", href: "/deals" },
+    { name: "Deals ??", href: "/deals" },
     { name: "iPhones", href: "/iphones" },
     { name: "Laptops", href: "/laptops" },
     { name: "Electronics", href: "/electronics" },
@@ -87,10 +87,10 @@ export function Navbar() {
                     <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Trending</h3>
                     <div className="space-y-1">
                       {[
-                        { name: "Smartphones", icon: Smartphone, href: "/shop?category=Smartphones" },
-                        { name: "Laptops", icon: Laptop, href: "/shop?category=Laptops" },
-                        { name: "Tablets", icon: Tablet, href: "/shop?category=Tablets" },
-                        { name: "Smartwatches", icon: Watch, href: "/shop?category=Smartwatches" },
+                        { name: "Smartphones", icon: Smartphone, href: "/smartphones" },
+                        { name: "Laptops", icon: Laptop, href: "/laptops" },
+                        { name: "Tablets", icon: Tablet, href: "/tablets" },
+                        { name: "Smartwatches", icon: Watch, href: "/smartwatches" },
                       ].map((item) => (
                         <Link key={item.name} href={item.href} onClick={() => setIsMenuOpen(false)}>
                           <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer">
@@ -107,9 +107,9 @@ export function Navbar() {
                     <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Shop by Department</h3>
                     <div className="space-y-1">
                       {[
-                        { name: "Electronics", icon: ElectronicsIcon, href: "/shop?category=Electronics" },
-                        { name: "Home & Kitchen", icon: HomeIcon, href: "/shop?category=Home" },
-                        { name: "Gaming", icon: Gamepad2, href: "/shop?category=Gaming" },
+                        { name: "Electronics", icon: ElectronicsIcon, href: "/electronics" },
+                        { name: "Home & Kitchen", icon: HomeIcon, href: "/home-kitchen" },
+                        { name: "Gaming", icon: Gamepad2, href: "/gaming" },
                         { name: "Tools", icon: Wrench, href: "/tools-home-improvement" },
                         { name: "Others", icon: Layers, href: "/shop" },
                       ].map((item) => (
