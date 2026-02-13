@@ -479,6 +479,18 @@ export default function AdminDashboard() {
     end: new Date().toISOString().split('T')[0]
   });
 
+  const { data: dashboardData } = useQuery<{ 
+    totalOrders: number; 
+    paidOrders: number;
+    pendingOrders: number;
+    totalRevenue: number;
+    chartData: { date: string; orders: number; revenue: number }[];
+  }>({
+    queryKey: ["/api/admin/dashboard", timeRange, customRange.start, customRange.end],
+    queryFn: () => apiRequest("GET", `/api/admin/dashboard?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
+    enabled: activeTab === "Dashboard",
+  });
+
   const { data: stats } = useQuery<{ 
     totalOrders: number; 
     totalRevenue: number; 
@@ -658,7 +670,7 @@ export default function AdminDashboard() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <div className="hidden lg:flex flex-col items-end mr-4">
                 <div className="flex items-center gap-2 mb-0.5">
@@ -667,7 +679,7 @@ export default function AdminDashboard() {
                 </div>
                 <p className="text-[9px] text-muted-foreground/60 uppercase font-bold tracking-tighter">Last Login: {new Date(admin.createdAt).toLocaleTimeString()}</p>
               </div>
-              
+
               <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-2xl border border-border/50">
                 <Button 
                   variant="ghost" 
@@ -850,28 +862,28 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <StatsCard 
                         title="Total Orders" 
-                        value={stats?.totalOrders || 0} 
+                        value={dashboardData?.totalOrders || 0} 
                         icon={ShoppingCart} 
                         color="text-primary" 
                         trend={stats?.trends?.orders}
                         onClick={() => setActiveTab("Orders")}
                       />
                       <StatsCard 
-                        title="Total Revenue" 
-                        value={formatCurrency(stats?.totalRevenue || 0)} 
-                        icon={DollarSign} 
+                        title="Paid Orders" 
+                        value={dashboardData?.paidOrders || 0} 
+                        icon={CheckCircle2} 
                         color="text-green-500" 
+                      />
+                      <StatsCard 
+                        title="Total Revenue" 
+                        value={formatCurrency(dashboardData?.totalRevenue || 0)} 
+                        icon={DollarSign} 
+                        color="text-blue-500" 
                         trend={stats?.trends?.revenue}
                       />
                       <StatsCard 
-                        title="Low Stock" 
-                        value={stats?.lowStockCount || 0} 
-                        icon={AlertTriangle} 
-                        color="text-red-500" 
-                      />
-                      <StatsCard 
-                        title="Pending" 
-                        value={stats?.pendingOrders || 0} 
+                        title="Pending Orders" 
+                        value={dashboardData?.pendingOrders || 0} 
                         icon={Clock} 
                         color="text-amber-500" 
                         trend={stats?.trends?.pending}
@@ -883,61 +895,55 @@ export default function AdminDashboard() {
                       <Card className="lg:col-span-2 overflow-hidden border-none shadow-md bg-card">
                         <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
                           <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                            <ShoppingCart className="w-4 h-4 text-primary" />
-                            Recent Orders
+                            <TrendingUp className="w-4 h-4 text-primary" />
+                            Revenue & Orders Over Time
                           </CardTitle>
-                          <Button variant="ghost" size="sm" onClick={() => setActiveTab("Orders")} className="text-[10px] font-black uppercase tracking-tighter gap-1">
-                            View All <ArrowRight className="w-3 h-3" />
-                          </Button>
                         </CardHeader>
-                        <CardContent className="p-0">
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left text-xs">
-                              <thead>
-                                <tr className="bg-muted/30 border-b border-border/50 text-muted-foreground font-bold uppercase tracking-tighter">
-                                  <th className="px-4 py-3">Order ID</th>
-                                  <th className="px-4 py-3">Customer</th>
-                                  <th className="px-4 py-3">Amount</th>
-                                  <th className="px-4 py-3">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-border/50">
-                                {stats?.recentOrders?.map((order) => (
-                                  <tr key={order.id} className="hover:bg-muted/20 transition-colors">
-                                    <td className="px-4 py-3 font-black">#{order.id}</td>
-                                    <td className="px-4 py-3 font-medium">{order.customerName}</td>
-                                    <td className="px-4 py-3 font-bold">{formatCurrency(order.totalAmount)}</td>
-                                    <td className="px-4 py-3">
-                                      <span className={cn(
-                                        "px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-tighter ring-1",
-                                        order.status === 'pending' ? "bg-amber-500/10 text-amber-600 ring-amber-500/30" :
-                                        order.status === 'paid' ? "bg-green-500/10 text-green-600 ring-green-500/30" :
-                                        "bg-muted text-muted-foreground ring-border"
-                                      )}>
-                                        {order.status}
-                                      </span>
-                                    </td>
-                                  </tr>
-                                ))}
-                                {(!stats?.recentOrders || stats.recentOrders.length === 0) && (
-                                  <tr>
-                                    <td colSpan={4} className="px-4 py-8 text-center">
-                                      <div className="flex flex-col items-center justify-center gap-1">
-                                        <p className="text-muted-foreground font-medium italic">No paid orders yet</p>
-                                        <Button 
-                                          variant="link" 
-                                          size="sm" 
-                                          onClick={() => setActiveTab("Orders")}
-                                          className="text-[10px] font-black uppercase tracking-tighter h-auto p-0"
-                                        >
-                                          Review pending orders
-                                        </Button>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                )}
-                              </tbody>
-                            </table>
+                        <CardContent className="p-6">
+                          <div className="h-[300px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={dashboardData?.chartData || []}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border) / 0.3)" />
+                                <XAxis 
+                                  dataKey="date" 
+                                  stroke="hsl(var(--muted-foreground))" 
+                                  fontSize={10}
+                                  tickLine={false}
+                                  axisLine={false}
+                                  tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                />
+                                <YAxis 
+                                  stroke="hsl(var(--muted-foreground))" 
+                                  fontSize={10}
+                                  tickLine={false}
+                                  axisLine={false}
+                                  tickFormatter={(value) => `?${(value / 1000)}k`}
+                                />
+                                <RechartsTooltip 
+                                  contentStyle={{ 
+                                    backgroundColor: 'hsl(var(--card))', 
+                                    border: '1px solid hsl(var(--border) / 0.5)',
+                                    borderRadius: '8px',
+                                    fontSize: '12px'
+                                  }}
+                                />
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="revenue" 
+                                  stroke="hsl(var(--primary))" 
+                                  strokeWidth={3} 
+                                  dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                                  activeDot={{ r: 6, strokeWidth: 0 }}
+                                />
+                                <Line 
+                                  type="monotone" 
+                                  dataKey="orders" 
+                                  stroke="hsl(var(--blue-500))" 
+                                  strokeWidth={2} 
+                                  dot={{ fill: 'hsl(var(--blue-500))', r: 3 }}
+                                />
+                              </LineChart>
+                            </ResponsiveContainer>
                           </div>
                         </CardContent>
                       </Card>
