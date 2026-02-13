@@ -452,11 +452,11 @@ export class DatabaseStorage implements IStorage {
         const date = new Date(o.createdAt);
         const start = filters.startDate ? new Date(filters.startDate) : null;
         const end = filters.endDate ? new Date(filters.endDate) : null;
-        
+
         // Normalize dates to start/end of day to avoid timezone/time issues
         if (start) start.setHours(0, 0, 0, 0);
         if (end) end.setHours(23, 59, 59, 999);
-        
+
         if (start && date < start) return false;
         if (end && date > end) return false;
         return true;
@@ -479,17 +479,12 @@ export class DatabaseStorage implements IStorage {
       });
     }
 
-    const totalOrders = currentPeriodOrders.length;
-    const totalRevenue = currentPeriodOrders
-      .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
-      .reduce((sum, o) => sum + o.totalAmount, 0);
-
-    const previousRevenue = previousPeriodOrders
-      .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
-      .reduce((sum, o) => sum + o.totalAmount, 0);
+    const totalOrders = filteredOrders.length;
+    const paidOrders = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status));
+    const totalRevenue = paidOrders.reduce((sum, o) => sum + o.totalAmount, 0);
 
     const totalProducts = allProducts.length;
-    const pendingOrders = currentPeriodOrders.filter(o => o.status === "pending").length;
+    const pendingOrders = filteredOrders.filter(o => o.status === "pending").length;
 
     const lowStockProducts = allProducts.filter(p => {
       if (!p.variations) return false;
@@ -643,14 +638,15 @@ export class DatabaseStorage implements IStorage {
     }
 
     const totalOrders = filteredOrders.length;
-    const paidOrders = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status)).length;
+    const paidOrdersList = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status));
+    const paidOrders = paidOrdersList.length;
     const pendingOrders = filteredOrders.filter(o => o.status === "pending").length;
 
-    const totalRevenue = filteredOrders
-      .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
-      .reduce((sum, o) => sum + o.totalAmount, 0);
+    const totalRevenue = paidOrdersList.reduce((sum, o) => sum + o.totalAmount, 0);
 
     const chartData = await this.getDailyAnalytics(filters);
+
+    console.log(`[Dashboard] Stats: Total=${totalOrders}, Paid=${paidOrders}, Pending=${pendingOrders}, Revenue=${totalRevenue}`);
 
     return {
       totalOrders,
