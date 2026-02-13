@@ -447,12 +447,21 @@ export class DatabaseStorage implements IStorage {
 
     let currentPeriodOrders = allOrders;
     if (filters?.startDate || filters?.endDate) {
+      console.log(`[Stats] Filtering orders from ${filters.startDate} to ${filters.endDate}`);
       currentPeriodOrders = allOrders.filter(o => {
         const date = new Date(o.createdAt);
-        if (filters.startDate && date < new Date(filters.startDate)) return false;
-        if (filters.endDate && date > new Date(filters.endDate)) return false;
+        const start = filters.startDate ? new Date(filters.startDate) : null;
+        const end = filters.endDate ? new Date(filters.endDate) : null;
+        
+        // Normalize dates to start/end of day to avoid timezone/time issues
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(23, 59, 59, 999);
+        
+        if (start && date < start) return false;
+        if (end && date > end) return false;
         return true;
       });
+      console.log(`[Stats] Found ${currentPeriodOrders.length} orders in current period`);
     }
 
     // Previous period for trends (same duration)
@@ -552,10 +561,12 @@ export class DatabaseStorage implements IStorage {
       }
 
       periodicData[periodKey].orders += 1;
-      if (["paid", "shipped", "completed", "delivered"].includes(order.status)) {
+      if (["paid", "shipped", "completed", "delivered", "confirmed"].includes(order.status)) {
         periodicData[periodKey].revenue += order.totalAmount;
       }
     });
+
+    console.log(`[PeriodicAnalytics] Grouped data for period ${period}:`, JSON.stringify(periodicData));
 
     return Object.entries(periodicData).map(([key, data]) => ({
       period: key,
@@ -567,6 +578,7 @@ export class DatabaseStorage implements IStorage {
 
   async getDailyAnalytics(filters?: { startDate?: string; endDate?: string }): Promise<{ date: string; orders: number; revenue: number }[]>{
     const analytics = await this.getPeriodicAnalytics("day", filters);
+    console.log(`[Analytics] Daily analytics returned ${analytics.length} days of data`);
     return analytics.map(a => ({ date: a.period, orders: a.orders, revenue: a.revenue }));
   }
 
@@ -613,44 +625,39 @@ export class DatabaseStorage implements IStorage {
 
   async getDashboardOverview(filters?: { startDate?: string; endDate?: string }): Promise<any> {
     const allOrders = await db.select().from(orders);
-    
+
     let filteredOrders = allOrders;
     if (filters?.startDate || filters?.endDate) {
+      console.log(`[Dashboard] Filtering orders from ${filters.startDate} to ${filters.endDate}`);
       filteredOrders = allOrders.filter(o => {
         const date = new Date(o.createdAt);
-        if (filters.startDate && date < new Date(filters.startDate)) return false;
-        if (filters.endDate && date > new Date(filters.endDate)) return false;
+        const start = filters.startDate ? new Date(filters.startDate) : null;
+        const end = filters.endDate ? new Date(filters.endDate) : null;
+        if (start) start.setHours(0, 0, 0, 0);
+        if (end) end.setHours(23, 59, 59, 999);
+        if (start && date < start) return false;
+        if (end && date > end) return false;
         return true;
       });
+      console.log(`[Dashboard] Found ${filteredOrders.length} orders in filtered range`);
     }
 
     const totalOrders = filteredOrders.length;
     const paidOrders = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status)).length;
     const pendingOrders = filteredOrders.filter(o => o.status === "pending").length;
-    
+
     const totalRevenue = filteredOrders
       .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
       .reduce((sum, o) => sum + o.totalAmount, 0);
 
-    // Group by date for charts
-    const chartData: Record<string, { date: string; orders: number; revenue: number }> = {};
-    filteredOrders.forEach(order => {
-      const dateKey = new Date(order.createdAt).toISOString().split('T')[0];
-      if (!chartData[dateKey]) {
-        chartData[dateKey] = { date: dateKey, orders: 0, revenue: 0 };
-      }
-      chartData[dateKey].orders += 1;
-      if (["paid", "shipped", "completed", "delivered", "confirmed"].includes(order.status)) {
-        chartData[dateKey].revenue += order.totalAmount;
-      }
-    });
+    const chartData = await this.getDailyAnalytics(filters);
 
     return {
       totalOrders,
       paidOrders,
       pendingOrders,
       totalRevenue,
-      chartData: Object.values(chartData).sort((a, b) => a.date.localeCompare(b.date))
+      chartData
     };
   }
 
