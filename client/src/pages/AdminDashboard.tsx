@@ -479,20 +479,9 @@ export default function AdminDashboard() {
     end: new Date().toISOString().split('T')[0]
   });
 
-  const { data: dashboardData } = useQuery<{ 
+  const { data: stats, isLoading: statsLoading } = useQuery<{ 
     totalOrders: number; 
-    paidOrders: number;
-    pendingOrders: number;
-    totalRevenue: number;
-    chartData: { date: string; orders: number; revenue: number }[];
-  }>({
-    queryKey: ["/api/admin/dashboard", timeRange, customRange.start, customRange.end],
-    queryFn: () => apiRequest("GET", `/api/admin/dashboard?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
-    enabled: activeTab === "Dashboard",
-  });
-
-  const { data: stats } = useQuery<{ 
-    totalOrders: number; 
+    paidOrders?: number;
     totalRevenue: number; 
     totalProducts: number; 
     pendingOrders: number;
@@ -511,6 +500,21 @@ export default function AdminDashboard() {
     queryFn: () => apiRequest("GET", `/api/admin/stats?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
     enabled: activeTab === "Dashboard",
   });
+
+  const { data: dashboardData, isLoading: dashLoading } = useQuery<{ 
+    totalOrders: number; 
+    paidOrders: number;
+    pendingOrders: number;
+    totalRevenue: number;
+    chartData: { date: string; orders: number; revenue: number }[];
+  }>({
+    queryKey: ["/api/admin/dashboard", timeRange, customRange.start, customRange.end],
+    queryFn: () => apiRequest("GET", `/api/admin/dashboard?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
+    enabled: activeTab === "Dashboard",
+  });
+
+  console.log("[Dashboard UI] Stats:", stats);
+  console.log("[Dashboard UI] DashboardData:", dashboardData);
 
   const { data: analytics } = useQuery<{ date: string; orders: number; revenue: number }[]>({
     queryKey: ["/api/admin/analytics", timeRange, customRange.start, customRange.end],
@@ -860,36 +864,38 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <StatsCard 
-                        title="Total Orders" 
-                        value={dashboardData?.totalOrders || 0} 
-                        icon={ShoppingCart} 
-                        color="text-primary" 
-                        trend={stats?.trends?.orders}
-                        onClick={() => setActiveTab("Orders")}
-                      />
-                      <StatsCard 
-                        title="Paid Orders" 
-                        value={dashboardData?.paidOrders || 0} 
-                        icon={CheckCircle2} 
-                        color="text-green-500" 
-                      />
-                      <StatsCard 
-                        title="Total Revenue" 
-                        value={formatCurrency(dashboardData?.totalRevenue || 0)} 
-                        icon={DollarSign} 
-                        color="text-blue-500" 
-                        trend={stats?.trends?.revenue}
-                      />
-                      <StatsCard 
-                        title="Pending Orders" 
-                        value={dashboardData?.pendingOrders || 0} 
-                        icon={Clock} 
-                        color="text-amber-500" 
-                        trend={stats?.trends?.pending}
-                        onClick={() => setActiveTab("Orders")}
-                      />
-                    </div>
+                  <StatsCard 
+                    title="Total Revenue" 
+                    value={formatCurrency(dashboardData?.totalRevenue || 0)} 
+                    icon={DollarSign} 
+                    color="text-primary" 
+                    trend={stats?.trends?.revenue}
+                    onClick={() => setActiveTab("Orders")}
+                  />
+                  <StatsCard 
+                    title="Total Orders" 
+                    value={dashboardData?.totalOrders || 0} 
+                    icon={ShoppingCart} 
+                    color="text-blue-500" 
+                    trend={stats?.trends?.orders}
+                    onClick={() => setActiveTab("Orders")}
+                  />
+                  <StatsCard 
+                    title="Paid Orders" 
+                    value={dashboardData?.paidOrders || 0} 
+                    icon={CheckCircle2} 
+                    color="text-green-500" 
+                    onClick={() => setActiveTab("Orders")}
+                  />
+                  <StatsCard 
+                    title="Pending Orders" 
+                    value={dashboardData?.pendingOrders || 0} 
+                    icon={Clock} 
+                    color="text-amber-500" 
+                    trend={stats?.trends?.pending}
+                    onClick={() => setActiveTab("Orders")}
+                  />
+                </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       <Card className="lg:col-span-2 overflow-hidden border-none shadow-md bg-card">
