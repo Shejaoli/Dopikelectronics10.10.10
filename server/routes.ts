@@ -660,7 +660,7 @@ export async function registerRoutes(
       } else if (timeRange === "30days") {
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
       } else if (timeRange === "custom" && customRange) {
-        const range = JSON.parse(customRange as string);
+        const range = typeof customRange === 'string' ? JSON.parse(customRange) : customRange;
         startDate = range.start;
         endDate = range.end;
       }
@@ -668,6 +668,7 @@ export async function registerRoutes(
       const stats = await storage.getAdminStats({ startDate, endDate });
       res.json(stats);
     } catch (error) {
+      console.error("Stats error:", error);
       res.status(500).json({ message: "Failed to fetch admin stats" });
     }
   });
@@ -687,7 +688,7 @@ export async function registerRoutes(
       } else if (timeRange === "30days") {
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
       } else if (timeRange === "custom" && customRange) {
-        const range = JSON.parse(customRange as string);
+        const range = typeof customRange === 'string' ? JSON.parse(customRange) : customRange;
         startDate = range.start;
         endDate = range.end;
       }
@@ -695,6 +696,7 @@ export async function registerRoutes(
       const analytics = await storage.getDailyAnalytics({ startDate, endDate });
       res.json(analytics);
     } catch (error) {
+      console.error("Analytics error:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
     }
   });
