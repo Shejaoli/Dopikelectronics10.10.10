@@ -28,6 +28,10 @@ import NotFound from "@/pages/not-found";
 
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
+import Smartphones from "@/pages/Shop";
+import Tablets from "@/pages/Shop";
+import Smartwatches from "@/pages/Shop";
+
 function Router() {
   return (
     <Switch>
@@ -40,6 +44,9 @@ function Router() {
       <Route path="/audio" component={Audio} />
       <Route path="/tools-home-improvement" component={ToolsHomeImprovement} />
       <Route path="/gaming" component={Gaming} />
+      <Route path="/smartphones" component={() => <Shop category="Smartphones" />} />
+      <Route path="/tablets" component={() => <Shop category="Tablets" />} />
+      <Route path="/smartwatches" component={() => <Shop category="Smartwatches" />} />
       <Route path="/deals" component={Deals} />
       <Route path="/product/:id" component={ProductDetails} />
       <Route path="/cart" component={Cart} />
