@@ -1,8 +1,10 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { Switch, Route, useLocation } from "wouter";
+import { queryClient, apiRequest } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import Home from "@/pages/Home";
 import Shop from "@/pages/Shop";
@@ -28,41 +30,59 @@ import NotFound from "@/pages/not-found";
 
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
-import Smartphones from "@/pages/Shop";
-import Tablets from "@/pages/Shop";
-import Smartwatches from "@/pages/Shop";
+function VisitorTracker() {
+  const [location] = useLocation();
+
+  useEffect(() => {
+    let visitorId = localStorage.getItem("visitor_id");
+    if (!visitorId) {
+      visitorId = uuidv4();
+      localStorage.setItem("visitor_id", visitorId);
+    }
+
+    apiRequest("POST", "/api/track-visitor", {
+      visitorId,
+      path: location
+    }).catch(err => console.error("Tracking failed", err));
+  }, [location]);
+
+  return null;
+}
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/shop" component={Shop} />
-      <Route path="/iphones" component={Iphones} />
-      <Route path="/laptops" component={Laptops} />
-      <Route path="/electronics" component={Electronics} />
-      <Route path="/home-kitchen" component={HomeKitchen} />
-      <Route path="/audio" component={Audio} />
-      <Route path="/tools-home-improvement" component={ToolsHomeImprovement} />
-      <Route path="/gaming" component={Gaming} />
-      <Route path="/smartphones" component={() => <Shop category="Smartphones" />} />
-      <Route path="/tablets" component={() => <Shop category="Tablets" />} />
-      <Route path="/smartwatches" component={() => <Shop category="Smartwatches" />} />
-      <Route path="/deals" component={Deals} />
-      <Route path="/product/:id" component={ProductDetails} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/checkout/shipping" component={Checkout} />
-      <Route path="/checkout/payment" component={Checkout} />
-      <Route path="/order/success" component={Checkout} />
-      <Route path="/order-success" component={Checkout} />
-      <Route path="/track-order" component={TrackOrder} />
-      <Route path="/my-orders" component={MyOrders} />
-      <Route path="/orders/lookup" component={OrderLookup} />
-      <Route path="/about" component={About} />
-      <Route path="/contact" component={Contact} />
-      <Route path="/admin/login" component={AdminLogin} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <VisitorTracker />
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/shop" component={Shop} />
+        <Route path="/iphones" component={Iphones} />
+        <Route path="/laptops" component={Laptops} />
+        <Route path="/electronics" component={Electronics} />
+        <Route path="/home-kitchen" component={HomeKitchen} />
+        <Route path="/audio" component={Audio} />
+        <Route path="/tools-home-improvement" component={ToolsHomeImprovement} />
+        <Route path="/gaming" component={Gaming} />
+        <Route path="/smartphones" component={() => <Shop category="Smartphones" />} />
+        <Route path="/tablets" component={() => <Shop category="Tablets" />} />
+        <Route path="/smartwatches" component={() => <Shop category="Smartwatches" />} />
+        <Route path="/deals" component={Deals} />
+        <Route path="/product/:id" component={ProductDetails} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/checkout/shipping" component={Checkout} />
+        <Route path="/checkout/payment" component={Checkout} />
+        <Route path="/order/success" component={Checkout} />
+        <Route path="/order-success" component={Checkout} />
+        <Route path="/track-order" component={TrackOrder} />
+        <Route path="/my-orders" component={MyOrders} />
+        <Route path="/orders/lookup" component={OrderLookup} />
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route path="/admin/login" component={AdminLogin} />
+        <Route path="/admin" component={AdminDashboard} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 
