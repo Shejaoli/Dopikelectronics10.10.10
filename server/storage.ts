@@ -60,6 +60,9 @@ export interface IStorage {
   getAuditLogsPaginated(filters?: { page?: number; limit?: number; actionType?: string }): Promise<PaginatedResult<AuditLog>>;
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
 
+  // Dashboard Aggregation
+  getDashboardOverview(filters?: { startDate?: string; endDate?: string }): Promise<any>;
+
   // Video methods
   getVideos(): Promise<Video[]>;
   createVideo(video: InsertVideo): Promise<Video>;
@@ -441,7 +444,7 @@ export class DatabaseStorage implements IStorage {
   async getAdminStats(filters?: { startDate?: string; endDate?: string }): Promise<any> {
     const allOrders = await db.select().from(orders);
     const allProducts = await db.select().from(products);
-    
+
     let currentPeriodOrders = allOrders;
     if (filters?.startDate || filters?.endDate) {
       currentPeriodOrders = allOrders.filter(o => {
@@ -460,7 +463,7 @@ export class DatabaseStorage implements IStorage {
       const duration = end.getTime() - start.getTime();
       const prevStart = new Date(start.getTime() - duration);
       const prevEnd = start;
-      
+
       previousPeriodOrders = allOrders.filter(o => {
         const date = new Date(o.createdAt);
         return date >= prevStart && date < prevEnd;
@@ -471,7 +474,7 @@ export class DatabaseStorage implements IStorage {
     const totalRevenue = currentPeriodOrders
       .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
       .reduce((sum, o) => sum + o.totalAmount, 0);
-    
+
     const previousRevenue = previousPeriodOrders
       .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
       .reduce((sum, o) => sum + o.totalAmount, 0);
@@ -606,6 +609,49 @@ export class DatabaseStorage implements IStorage {
   async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
     const [newLog] = await db.insert(auditLogs).values(log).returning();
     return newLog;
+  }
+
+  async getDashboardOverview(filters?: { startDate?: string; endDate?: string }): Promise<any> {
+    const allOrders = await db.select().from(orders);
+    
+    let filteredOrders = allOrders;
+    if (filters?.startDate || filters?.endDate) {
+      filteredOrders = allOrders.filter(o => {
+        const date = new Date(o.createdAt);
+        if (filters.startDate && date < new Date(filters.startDate)) return false;
+        if (filters.endDate && date > new Date(filters.endDate)) return false;
+        return true;
+      });
+    }
+
+    const totalOrders = filteredOrders.length;
+    const paidOrders = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status)).length;
+    const pendingOrders = filteredOrders.filter(o => o.status === "pending").length;
+    
+    const totalRevenue = filteredOrders
+      .filter(o => ["paid", "shipped", "completed", "delivered", "confirmed"].includes(o.status))
+      .reduce((sum, o) => sum + o.totalAmount, 0);
+
+    // Group by date for charts
+    const chartData: Record<string, { date: string; orders: number; revenue: number }> = {};
+    filteredOrders.forEach(order => {
+      const dateKey = new Date(order.createdAt).toISOString().split('T')[0];
+      if (!chartData[dateKey]) {
+        chartData[dateKey] = { date: dateKey, orders: 0, revenue: 0 };
+      }
+      chartData[dateKey].orders += 1;
+      if (["paid", "shipped", "completed", "delivered", "confirmed"].includes(order.status)) {
+        chartData[dateKey].revenue += order.totalAmount;
+      }
+    });
+
+    return {
+      totalOrders,
+      paidOrders,
+      pendingOrders,
+      totalRevenue,
+      chartData: Object.values(chartData).sort((a, b) => a.date.localeCompare(b.date))
+    };
   }
 
   async getVideos(): Promise<Video[]> {
