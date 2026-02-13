@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { hashPassword, verifyPassword, requireAdminAuth } from "./auth";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 import { insertProductSchema, insertOrderSchema, orders, insertVideoSchema, videos, admins } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -118,6 +118,25 @@ export async function registerRoutes(
 
   // Serve uploaded files
   app.use("/uploads", express.static("public/uploads"));
+
+  // Track visitors
+  app.post("/api/track-visitor", express.json(), async (req, res) => {
+    try {
+      const { visitorId, path } = req.body;
+      if (!visitorId || !path) {
+        return res.status(400).json({ message: "Visitor ID and path are required" });
+      }
+      await storage.trackVisitor({
+        visitorId,
+        path,
+        userAgent: req.get('user-agent') || null
+      });
+      res.sendStatus(204);
+    } catch (error) {
+      console.error("Visitor tracking failed:", error);
+      res.sendStatus(500);
+    }
+  });
 
   app.post("/api/upload", requireAdminAuth, (req, res, next) => {
     upload.array("images", 5)(req, res, (err) => {
@@ -667,7 +686,18 @@ export async function registerRoutes(
 
       console.log(`[API Stats] Range: ${timeRange}, start: ${startDate}, end: ${endDate}`);
       const stats = await storage.getAdminStats({ startDate, endDate });
-      res.json(stats);
+      const visitorStats = await storage.getVisitorStats({ startDate, endDate });
+      const totalAdminsCount = await db.select({ value: count() }).from(admins);
+      
+      const monthlyAnalytics = await storage.getPeriodicAnalytics("month", { startDate, endDate });
+      
+      res.json({ 
+        ...stats,
+        totalVisitors: visitorStats.totalVisitors,
+        uniqueVisitors: visitorStats.uniqueVisitors,
+        totalAdmins: totalAdminsCount[0]?.value || 0,
+        monthlyAnalytics
+      });
     } catch (error) {
       console.error("Stats error:", error);
       res.status(500).json({ message: "Failed to fetch admin stats" });
