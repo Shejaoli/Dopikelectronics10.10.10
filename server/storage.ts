@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { products, admins, orders, auditLogs, videos, type Product, type InsertProduct, type Admin, type InsertAdmin, type Order, type InsertOrder, type AuditLog, type InsertAuditLog, type Video, type InsertVideo } from "@shared/schema";
-import { eq, like, and, desc, gte, lte, or } from "drizzle-orm";
+import { products, admins, orders, auditLogs, videos, siteVisitors, type Product, type InsertProduct, type Admin, type InsertAdmin, type Order, type InsertOrder, type AuditLog, type InsertAuditLog, type Video, type InsertVideo, type SiteVisitor, type InsertSiteVisitor } from "@shared/schema";
+import { eq, like, and, desc, gte, lte, or, count, countDistinct } from "drizzle-orm";
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -29,24 +29,7 @@ export interface IStorage {
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order>;
   getProductByNameAndBrand(name: string, brand: string): Promise<Product | undefined>;
-  getAdminStats(filters?: { startDate?: string; endDate?: string }): Promise<{ 
-    totalOrders: number; 
-    totalRevenue: number; 
-    totalProducts: number; 
-    pendingOrders: number;
-    averageOrderValue: number;
-    conversionRate: number;
-    lowStockCount: number;
-    recentOrders: Order[];
-    pendingOrdersList: Order[];
-    lowStockProducts: Product[];
-    trends: {
-      orders: number;
-      revenue: number;
-      products: number;
-      pending: number;
-    };
-  }>;
+  getAdminStats(filters?: { startDate?: string; endDate?: string }): Promise<any>;
   getPeriodicAnalytics(period: "day" | "week" | "month", filters?: { startDate?: string; endDate?: string }): Promise<{ 
     period: string; 
     orders: number; 
@@ -62,6 +45,10 @@ export interface IStorage {
 
   // Dashboard Aggregation
   getDashboardOverview(filters?: { startDate?: string; endDate?: string }): Promise<any>;
+
+  // Visitor tracking
+  trackVisitor(visitor: InsertSiteVisitor): Promise<SiteVisitor>;
+  getVisitorStats(filters?: { startDate?: string; endDate?: string }): Promise<{ totalVisitors: number; uniqueVisitors: number }>;
 
   // Video methods
   getVideos(): Promise<Video[]>;
@@ -137,26 +124,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrders(filters?: { search?: string; status?: string; startDate?: string; endDate?: string }): Promise<Order[]> {
-    let conditions = [];
-
-    if (filters?.search) {
-      conditions.push(and(
-        like(orders.customerName, `%${filters.search}%`),
-        like(orders.customerPhone, `%${filters.search}%`)
-      ));
-      // Note: In a real app we might want OR, but for simple filtering AND with customer name/phone is often used or we just check both
-      // Re-evaluating: user wants customer name OR customer phone
-    }
-
-    // Correcting search condition for OR
-    let query = db.select().from(orders);
-
-    let searchConditions = [];
-    if (filters?.search) {
-      searchConditions.push(like(orders.customerName, `%${filters.search}%`));
-      searchConditions.push(like(orders.customerPhone, `%${filters.search}%`));
-    }
-
     let finalConditions = [];
     if (filters?.search) {
       finalConditions.push(or(
@@ -258,7 +225,6 @@ export class DatabaseStorage implements IStorage {
               if ((colorOpt.stock ?? 0) < item.quantity) {
                 throw new Error(`Insufficient stock for ${product.name} (${item.color})`);
               }
-              // If already updated storage, we use the current newStock for prevStock or just rely on the final update
               prevStock = prevStock ?? colorOpt.stock; 
               colorOpt.stock = (colorOpt.stock ?? 0) - item.quantity;
               newStock = colorOpt.stock;
@@ -279,10 +245,6 @@ export class DatabaseStorage implements IStorage {
               newValue: newStock?.toString(),
             }).catch(err => console.error("Audit log failed:", err));
           }
-        } else {
-          // If the project doesn't have non-variation stock field yet, we follow the current pattern
-          // but strictly variations are required by the prompt rules
-          console.warn(`Product ${product.name} has no variation stock to deduct.`);
         }
       }
 
@@ -312,17 +274,12 @@ export class DatabaseStorage implements IStorage {
       const oldStatus = order.status;
       const nextStatus = status;
 
-      // Deduct stock when moving to confirmed
       if (nextStatus === "confirmed" && oldStatus !== "confirmed") {
         for (const item of order.items || []) {
           const [product] = await tx.select().from(products).where(eq(products.id, item.productId));
-          if (!product) {
-            console.warn(`Product ${item.productId} not found for stock deduction. Skipping.`);
-            continue;
-          }
+          if (!product) continue;
 
           if (item.storage || item.color) {
-            // Variation stock
             const variations = product.variations || {};
             let updated = false;
             let prevStock: number | undefined;
@@ -356,10 +313,9 @@ export class DatabaseStorage implements IStorage {
 
             if (updated) {
               await tx.update(products).set({ variations }).where(eq(products.id, product.id));
-              // Log stock deduction
               await tx.insert(auditLogs).values({
                 action: `Stock Deducted: ${product.name} (${item.storage || item.color}) x${item.quantity}`,
-                adminEmail: "system", // Admin email will be updated in routes
+                adminEmail: "system",
                 actionType: "stock_deduction",
                 targetType: "Product",
                 targetId: product.id,
@@ -367,13 +323,10 @@ export class DatabaseStorage implements IStorage {
                 newValue: newStock?.toString(),
               }).catch(err => console.error("Audit log failed:", err));
             }
-          } else {
-            console.warn(`Product ${product.name} has no numeric stock field for non-variation items. Skipping deduction.`);
           }
         }
       }
 
-      // Restore stock if cancelled or reverted from confirmed/paid before Delivered
       const isReverting = (oldStatus === "confirmed" || oldStatus === "paid") && (nextStatus === "pending" || nextStatus === "cancelled");
       if (isReverting) {
         for (const item of order.items || []) {
@@ -408,7 +361,6 @@ export class DatabaseStorage implements IStorage {
 
             if (updated) {
               await tx.update(products).set({ variations }).where(eq(products.id, product.id));
-              // Log stock restoration
               await tx.insert(auditLogs).values({
                 action: `Stock Restored (${nextStatus === 'cancelled' ? 'Cancellation' : 'Revert'}): ${product.name} (${item.storage || item.color}) x${item.quantity}`,
                 adminEmail: "system",
@@ -447,35 +399,15 @@ export class DatabaseStorage implements IStorage {
 
     let currentPeriodOrders = allOrders;
     if (filters?.startDate || filters?.endDate) {
-      console.log(`[Stats] Filtering orders from ${filters.startDate} to ${filters.endDate}`);
       currentPeriodOrders = allOrders.filter(o => {
         const date = new Date(o.createdAt);
         const start = filters.startDate ? new Date(filters.startDate) : null;
         const end = filters.endDate ? new Date(filters.endDate) : null;
-
-        // Normalize dates to start/end of day to avoid timezone/time issues
         if (start) start.setHours(0, 0, 0, 0);
         if (end) end.setHours(23, 59, 59, 999);
-
         if (start && date < start) return false;
         if (end && date > end) return false;
         return true;
-      });
-      console.log(`[Stats] Found ${currentPeriodOrders.length} orders in current period`);
-    }
-
-    // Previous period for trends (same duration)
-    let previousPeriodOrders: Order[] = [];
-    if (filters?.startDate) {
-      const start = new Date(filters.startDate);
-      const end = filters.endDate ? new Date(filters.endDate) : new Date();
-      const duration = end.getTime() - start.getTime();
-      const prevStart = new Date(start.getTime() - duration);
-      const prevEnd = start;
-
-      previousPeriodOrders = allOrders.filter(o => {
-        const date = new Date(o.createdAt);
-        return date >= prevStart && date < prevEnd;
       });
     }
 
@@ -484,44 +416,18 @@ export class DatabaseStorage implements IStorage {
     const paidOrders = currentPeriodOrders.filter(o => paidStatuses.includes(o.status));
     const totalRevenue = paidOrders.reduce((sum, o) => sum + o.totalAmount, 0);
 
-    const previousRevenue = previousPeriodOrders
-      .filter(o => paidStatuses.includes(o.status))
-      .reduce((sum, o) => sum + o.totalAmount, 0);
-
-    const totalProducts = allProducts.length;
-    const pendingOrders = currentPeriodOrders.filter(o => o.status === "pending").length;
-
-    const lowStockProducts = allProducts.filter(p => {
-      if (!p.variations) return false;
-      const variations = p.variations as any;
-      const hasLowStockStorage = variations.storage?.some((s: any) => s.stock !== undefined && s.stock < 10);
-      const hasLowStockColor = variations.colors?.some((c: any) => c.stock !== undefined && c.stock < 10);
-      return hasLowStockStorage || hasLowStockColor;
-    });
-
-    const calculateTrend = (curr: number, prev: number) => {
-      if (prev === 0) return curr > 0 ? 100 : 0;
-      return Math.round(((curr - prev) / prev) * 100);
-    };
+    const visitorStats = await this.getVisitorStats(filters);
+    const [totalAdmins] = await db.select({ value: count() }).from(admins);
 
     return {
       totalOrders,
       totalRevenue,
-      totalProducts,
-      pendingOrders,
-      lowStockCount: lowStockProducts.length,
+      totalProducts: allProducts.length,
+      pendingOrders: currentPeriodOrders.filter(o => o.status === "pending").length,
+      totalVisitors: visitorStats.totalVisitors,
+      uniqueVisitors: visitorStats.uniqueVisitors,
+      totalAdmins: totalAdmins?.value || 0,
       recentOrders: [...currentPeriodOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
-      pendingOrdersList: currentPeriodOrders.filter(o => o.status === "pending").slice(0, 5),
-      lowStockProducts: lowStockProducts.slice(0, 5),
-      trends: {
-        orders: calculateTrend(totalOrders, previousPeriodOrders.length),
-        revenue: calculateTrend(totalRevenue, previousRevenue),
-        products: 0,
-        pending: calculateTrend(
-          pendingOrders,
-          previousPeriodOrders.filter(o => o.status === "pending").length
-        )
-      }
     };
   }
 
@@ -566,8 +472,6 @@ export class DatabaseStorage implements IStorage {
       }
     });
 
-    console.log(`[PeriodicAnalytics] Grouped data for period ${period}:`, JSON.stringify(periodicData));
-
     return Object.entries(periodicData).map(([key, data]) => ({
       period: key,
       orders: data.orders,
@@ -578,13 +482,7 @@ export class DatabaseStorage implements IStorage {
 
   async getDailyAnalytics(filters?: { startDate?: string; endDate?: string }): Promise<{ date: string; orders: number; revenue: number }[]>{
     const analytics = await this.getPeriodicAnalytics("day", filters);
-    console.log(`[Analytics] Daily analytics returned ${analytics.length} days of data`);
     return analytics.map(a => ({ date: a.period, orders: a.orders, revenue: a.revenue }));
-  }
-
-  async getOrder(id: number): Promise<Order | undefined> {
-    const [order] = await db.select().from(orders).where(eq(orders.id, id));
-    return order;
   }
 
   async getAuditLogs(): Promise<AuditLog[]> {
@@ -628,7 +526,6 @@ export class DatabaseStorage implements IStorage {
 
     let filteredOrders = allOrders;
     if (filters?.startDate || filters?.endDate) {
-      console.log(`[Dashboard] Filtering orders from ${filters.startDate} to ${filters.endDate}`);
       filteredOrders = allOrders.filter(o => {
         const date = new Date(o.createdAt);
         const start = filters.startDate ? new Date(filters.startDate) : null;
@@ -639,19 +536,14 @@ export class DatabaseStorage implements IStorage {
         if (end && date > end) return false;
         return true;
       });
-      console.log(`[Dashboard] Found ${filteredOrders.length} orders in filtered range`);
     }
 
     const totalOrders = filteredOrders.length;
     const paidOrdersList = filteredOrders.filter(o => ["paid", "shipped", "completed", "delivered", "confirmed", "processing", "pending"].includes(o.status));
     const paidOrders = paidOrdersList.length;
     const pendingOrders = filteredOrders.filter(o => o.status === "pending").length;
-
     const totalRevenue = paidOrdersList.reduce((sum, o) => sum + o.totalAmount, 0);
-
     const chartData = await this.getDailyAnalytics(filters);
-
-    console.log(`[Dashboard] Stats: Total=${totalOrders}, Paid=${paidOrders}, Pending=${pendingOrders}, Revenue=${totalRevenue}`);
 
     return {
       totalOrders,
@@ -659,6 +551,27 @@ export class DatabaseStorage implements IStorage {
       pendingOrders,
       totalRevenue,
       chartData
+    };
+  }
+
+  async trackVisitor(visitor: InsertSiteVisitor): Promise<SiteVisitor> {
+    const [newVisitor] = await db.insert(siteVisitors).values(visitor).returning();
+    return newVisitor;
+  }
+
+  async getVisitorStats(filters?: { startDate?: string; endDate?: string }): Promise<{ totalVisitors: number; uniqueVisitors: number }> {
+    let conditions = [];
+    if (filters?.startDate) conditions.push(gte(siteVisitors.timestamp, new Date(filters.startDate)));
+    if (filters?.endDate) conditions.push(lte(siteVisitors.timestamp, new Date(filters.endDate)));
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const [totalRes] = await db.select({ value: count() }).from(siteVisitors).where(whereClause);
+    const [uniqueRes] = await db.select({ value: countDistinct(siteVisitors.visitorId) }).from(siteVisitors).where(whereClause);
+
+    return {
+      totalVisitors: Number(totalRes?.value || 0),
+      uniqueVisitors: Number(uniqueRes?.value || 0)
     };
   }
 
