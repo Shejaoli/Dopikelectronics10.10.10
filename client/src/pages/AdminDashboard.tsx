@@ -17,7 +17,7 @@ import {
 import { Tooltip as ShadcnTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone, ChevronUp, ChevronDown, Clock, DollarSign, TrendingUp, TrendingDown, AlertTriangle, ArrowRight } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, ChevronLeft, ChevronRight, History, Moon, Sun, Recycle, Trash2 as TrashIcon, CheckCircle2, Circle, Star, RotateCcw, Play, Monitor, Smartphone, ChevronUp, ChevronDown, Clock, DollarSign, TrendingUp, TrendingDown, AlertTriangle, ArrowRight, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -468,16 +468,6 @@ export default function AdminDashboard() {
     return localStorage.getItem("admin-theme") === "dark";
   });
 
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (isAdminDark) {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("admin-theme", isAdminDark ? "dark" : "light");
-  }, [isAdminDark]);
-
   const { data: admin, isLoading, error } = useQuery<Admin>({
     queryKey: ["/api/admin/me"],
     retry: false,
@@ -505,12 +495,14 @@ export default function AdminDashboard() {
       pending: number;
     };
   }>({
-    queryKey: ["/api/admin/stats", { timeRange, customRange }],
+    queryKey: ["/api/admin/stats", timeRange, customRange.start, customRange.end],
+    queryFn: () => apiRequest("GET", `/api/admin/stats?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
     enabled: activeTab === "Dashboard",
   });
 
   const { data: analytics } = useQuery<{ date: string; orders: number; revenue: number }[]>({
-    queryKey: ["/api/admin/analytics", { timeRange, customRange }],
+    queryKey: ["/api/admin/analytics", timeRange, customRange.start, customRange.end],
+    queryFn: () => apiRequest("GET", `/api/admin/analytics?timeRange=${timeRange}&customRange=${encodeURIComponent(JSON.stringify(customRange))}`),
     enabled: activeTab === "Dashboard",
   });
 
@@ -543,132 +535,161 @@ export default function AdminDashboard() {
   if (!admin) return null;
 
   const menuItems = [
-    { title: "Dashboard", icon: LayoutDashboard, description: "Overview of your store performance" },
-    { title: "Products", icon: Package, description: "Manage your electronic inventory" },
-    { title: "Orders", icon: ShoppingCart, description: "Track and update customer orders" },
-    { title: "Circular Economy", icon: Recycle, description: "Manage sustainable promotion videos" },
-    { title: "Audit Log", icon: History, description: "Review administrative actions" },
+    { group: "Overview", items: [
+      { title: "Dashboard", icon: LayoutDashboard, description: "Overview of your store performance" },
+      { title: "Analytics", icon: TrendingUp, description: "Detailed sales and traffic reports" },
+    ]},
+    { group: "Management", items: [
+      { title: "Products", icon: Package, description: "Manage inventory and pricing" },
+      { title: "Orders", icon: ShoppingCart, description: "Process sales and fulfillment" },
+      { title: "Videos", icon: Recycle, description: "Manage circular economy videos" },
+    ]},
+    { group: "System", items: [
+      { title: "Audit Log", icon: History, description: "Track all administrative actions" },
+      { title: "Settings", icon: Settings, description: "Configure store preferences" },
+    ]}
   ];
 
   const style = {
-    "--sidebar-width": "16rem",
+    "--sidebar-width": "18rem",
     "--sidebar-width-icon": "4rem",
   };
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
-      <div className="flex h-screen w-full bg-background">
-        <Sidebar collapsible="icon" className="border-r">
-          <SidebarHeader className="p-4 flex items-center justify-between group-data-[collapsible=icon]:justify-center">
-            <h2 className="text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">DOPIK</h2>
-            <div className="hidden group-data-[collapsible=icon]:block text-xl font-bold text-primary">D</div>
+      <div className="flex h-screen w-full bg-background overflow-hidden">
+        <Sidebar collapsible="icon" className="border-r shadow-xl">
+          <SidebarHeader className="p-6 flex items-center justify-between group-data-[collapsible=icon]:justify-center">
+            <div className="flex items-center gap-3 group-data-[collapsible=icon]:hidden">
+              <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
+                <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <h2 className="text-xl font-black text-foreground tracking-tighter">DOPIK</h2>
+            </div>
+            <div className="hidden group-data-[collapsible=icon]:flex w-10 h-10 bg-primary/10 rounded-xl items-center justify-center">
+              <span className="text-lg font-black text-primary">D</span>
+            </div>
           </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent className="p-2">
-                <SidebarMenu className="space-y-1">
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <TooltipProvider delayDuration={100}>
-                        <ShadcnTooltip>
-                          <TooltipTrigger asChild>
-                            <SidebarMenuButton 
-                              onClick={() => setActiveTab(item.title)}
-                              isActive={activeTab === item.title}
-                              data-testid={`sidebar-menu-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
-                              className={`
-                                w-full transition-all duration-200 ease-out group/item relative rounded-lg
-                                ${activeTab === item.title 
-                                  ? "bg-primary/15 text-primary font-semibold ring-1 ring-primary/20 shadow-sm" 
-                                  : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-                                }
-                              `}
-                            >
-                              <motion.div
-                                className="flex items-center w-full"
-                                whileHover={{ x: 2 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          <SidebarContent className="p-3 gap-6">
+            {menuItems.map((group) => (
+              <SidebarGroup key={group.group} className="p-0">
+                <div className="px-3 mb-2 flex items-center justify-between group-data-[collapsible=icon]:hidden">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+                    {group.group}
+                  </span>
+                </div>
+                <SidebarGroupContent>
+                  <SidebarMenu className="gap-1">
+                    {group.items.map((item) => {
+                      const isActive = activeTab === item.title;
+                      return (
+                        <SidebarMenuItem key={item.title}>
+                          <TooltipProvider delayDuration={100}>
+                            <ShadcnTooltip>
+                              <TooltipTrigger asChild>
+                                <SidebarMenuButton 
+                                  onClick={() => setActiveTab(item.title)}
+                                  isActive={isActive}
+                                  data-testid={`sidebar-menu-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
+                                  className={cn(
+                                    "relative group/btn h-11 px-3 transition-all duration-300 rounded-xl overflow-visible",
+                                    isActive 
+                                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 ring-1 ring-primary/20" 
+                                      : "hover:bg-primary/5 text-muted-foreground hover:text-primary"
+                                  )}
+                                >
+                                  <div className="flex items-center w-full">
+                                    <item.icon className={cn(
+                                      "w-4 h-4 mr-3 transition-all duration-300",
+                                      isActive 
+                                        ? "text-primary-foreground scale-110" 
+                                        : "text-muted-foreground group-hover/btn:text-primary group-hover/btn:scale-110"
+                                    )} />
+                                    <span className="text-xs font-bold tracking-tight group-data-[collapsible=icon]:hidden">
+                                      {item.title}
+                                    </span>
+                                  </div>
+                                </SidebarMenuButton>
+                              </TooltipTrigger>
+                              <TooltipContent 
+                                side="right" 
+                                sideOffset={8}
+                                className="bg-slate-900 text-white border-slate-700 font-medium text-xs px-3 py-2 shadow-xl"
                               >
-                                <item.icon className={`w-4 h-4 mr-3 transition-all duration-200 ${activeTab === item.title ? "text-primary" : "text-muted-foreground group-hover/item:text-primary"}`} />
-                                <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
-                              </motion.div>
-                              {activeTab === item.title && (
-                                <motion.div 
-                                  layoutId="active-indicator"
-                                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" 
-                                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                />
-                              )}
-                            </SidebarMenuButton>
-                          </TooltipTrigger>
-                          <TooltipContent 
-                            side="right" 
-                            sideOffset={8}
-                            className="bg-slate-900 text-white border-slate-700 font-medium text-xs px-3 py-2 shadow-xl"
-                          >
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-semibold">{item.title}</span>
-                              <span className="text-slate-400 text-[10px]">{item.description}</span>
-                            </div>
-                          </TooltipContent>
-                        </ShadcnTooltip>
-                      </TooltipProvider>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="font-semibold">{item.title}</span>
+                                  <span className="text-slate-400 text-[10px]">{item.description}</span>
+                                </div>
+                              </TooltipContent>
+                            </ShadcnTooltip>
+                          </TooltipProvider>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ))}
           </SidebarContent>
           <SidebarFooter className="p-4 border-t group-data-[collapsible=icon]:p-2">
-            <TooltipProvider delayDuration={100}>
-              <ShadcnTooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => logoutMutation.mutate()}
-                    disabled={logoutMutation.isPending}
-                    data-testid="button-logout"
-                    className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-                  >
-                    <LogOut className="w-4 h-4 mr-2 group-data-[collapsible=icon]:mr-0 transition-transform duration-200 group-hover:scale-110" />
-                    <span className="group-data-[collapsible=icon]:hidden">Logout</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent 
-                  side="right" 
-                  sideOffset={8}
-                  className="bg-slate-900 text-white border-slate-700 font-medium text-xs px-3 py-2 shadow-xl"
-                >
-                  Sign out of admin panel
-                </TooltipContent>
-              </ShadcnTooltip>
-            </TooltipProvider>
+            <div className="flex flex-col gap-2 group-data-[collapsible=icon]:hidden">
+              <div className="p-3 bg-muted/50 rounded-xl border border-border/50">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-foreground">System Ready</span>
+                </div>
+                <p className="text-[9px] text-muted-foreground font-medium">All services operational</p>
+              </div>
+            </div>
           </SidebarFooter>
         </Sidebar>
 
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="h-16 border-b flex items-center justify-between px-6 bg-card">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="hover-elevate" />
-              <h1 className="text-lg font-semibold">DOPIK ELECTRONICS – Admin</h1>
+        <div className="flex flex-col flex-1 min-w-0">
+          <header className="flex items-center justify-between px-6 py-4 border-b bg-background/50 backdrop-blur-md sticky top-0 z-50">
+            <div className="flex items-center gap-6">
+              <SidebarTrigger data-testid="button-sidebar-toggle" className="h-10 w-10 rounded-xl hover:bg-primary/10 text-primary transition-all duration-300" />
+              <div className="h-6 w-[1px] bg-border/60 hidden md:block" />
+              <div className="hidden md:flex flex-col">
+                <h1 className="text-sm font-black tracking-tight leading-none mb-1">
+                  Welcome back, <span className="text-primary">{admin.email.split('@')[0]}</span>
+                </h1>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground hidden sm:inline-block">
-                {admin.email} ({admin.role})
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsAdminDark(!isAdminDark)}
-                className="rounded-full"
-              >
-                {isAdminDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
+            
+            <div className="flex items-center gap-3">
+              <div className="hidden lg:flex flex-col items-end mr-4">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="text-[10px] font-black uppercase tracking-tighter text-foreground">Active Session</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                </div>
+                <p className="text-[9px] text-muted-foreground/60 uppercase font-bold tracking-tighter">Last Login: {new Date(admin.createdAt).toLocaleTimeString()}</p>
+              </div>
+              
+              <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-2xl border border-border/50">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setIsAdminDark(!isAdminDark)}
+                  className="h-9 w-9 rounded-xl hover:bg-background transition-all duration-300"
+                >
+                  {isAdminDark ? <Sun className="h-4 w-4 text-amber-500" /> : <Moon className="h-4 w-4 text-blue-500" />}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => logoutMutation.mutate()}
+                  className="h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all duration-300"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </header>
 
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden p-6 lg:p-8 bg-muted/10">
             {activeTab === "Products" ? (
               editingProductId ? (
                 <AdminEditProduct 
