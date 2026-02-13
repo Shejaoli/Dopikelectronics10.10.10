@@ -665,6 +665,7 @@ export async function registerRoutes(
         endDate = range.end;
       }
 
+      console.log(`[API Stats] Range: ${timeRange}, start: ${startDate}, end: ${endDate}`);
       const stats = await storage.getAdminStats({ startDate, endDate });
       res.json(stats);
     } catch (error) {
@@ -693,11 +694,41 @@ export async function registerRoutes(
         endDate = range.end;
       }
 
+      console.log(`[API Analytics] Range: ${timeRange}, start: ${startDate}, end: ${endDate}`);
       const analytics = await storage.getDailyAnalytics({ startDate, endDate });
       res.json(analytics);
     } catch (error) {
       console.error("Analytics error:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  app.get("/api/admin/dashboard", requireAdminAuth, async (req, res) => {
+    try {
+      const { timeRange, customRange } = req.query;
+      let startDate: string | undefined;
+      let endDate: string | undefined;
+
+      const now = new Date();
+      if (timeRange === "today") {
+        startDate = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+        endDate = new Date(now.setHours(23, 59, 59, 999)).toISOString();
+      } else if (timeRange === "7days") {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (timeRange === "30days") {
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      } else if (timeRange === "custom" && customRange) {
+        const range = typeof customRange === 'string' ? JSON.parse(customRange) : customRange;
+        startDate = range.start;
+        endDate = range.end;
+      }
+
+      console.log(`[API Dashboard] Range: ${timeRange}, start: ${startDate}, end: ${endDate}`);
+      const overview = await storage.getDashboardOverview({ startDate, endDate });
+      res.json(overview);
+    } catch (error) {
+      console.error("Dashboard error:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard" });
     }
   });
 
